@@ -198,6 +198,16 @@
       color: white;
       font-size: 14px;
     }
+
+    .login-hint {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #92400e;
+      margin-top: 12px;
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -229,7 +239,13 @@
        <div><label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้งาน</label> <input type="text" id="loginUsername" placeholder="กรอกชื่อผู้ใช้งาน" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
        </div>
        <div><label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label> <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
-       </div><!-- Remember Me Checkbox --> <label class="flex items-center gap-3 cursor-pointer"> <input type="checkbox" id="rememberMe" class="checkbox-custom"> <span class="text-sm text-gray-600">จำรู้ข้อมูลการเข้าสู่ระบบ</span> </label> <button onclick="handleLogin()" class="w-full btn-primary text-white py-3 rounded-xl font-semibold">🔓 เข้าสู่ระบบ</button>
+       </div><!-- Remember Me Checkbox --> <label class="flex items-center gap-3 cursor-pointer"> <input type="checkbox" id="rememberMe" class="checkbox-custom"> <span class="text-sm text-gray-600">จำรู้ข้อมูลการเข้าสู่ระบบ</span> </label> <button onclick="handleLogin()" class="w-full btn-primary text-white py-3 rounded-xl font-semibold">🔓 เข้าสู่ระบบ</button> <!-- Login Hint -->
+       <div class="login-hint">
+        <p class="font-semibold mb-2">📌 ตัวอย่างข้อมูล Login:</p>
+        <p>👤 <strong>k7</strong> / <strong>212224</strong></p>
+        <p>👤 <strong>admin</strong> / <strong>1234</strong></p>
+        <p>👤 <strong>boss</strong> / <strong>1234</strong></p>
+       </div>
        <div class="flex gap-3 pt-2"><button onclick="showFirstTimeLogin()" class="flex-1 text-sm text-pink-500 hover:text-pink-600 font-medium transition">🆕 เข้าใช้งานครั้งแรก</button> <button onclick="showPasswordReset()" class="flex-1 text-sm text-pink-500 hover:text-pink-600 font-medium transition">🔑 ลืมรหัสผ่าน</button>
        </div>
       </div>
@@ -237,18 +253,22 @@
      <div id="firstTimeForm" class="hidden">
       <div class="space-y-4"><button onclick="backToLogin()" class="text-pink-500 hover:text-pink-600 font-medium mb-4 flex items-center gap-2">← กลับ</button>
        <h2 class="text-lg font-bold text-gray-800">📝 เข้าใช้งานครั้งแรก</h2>
-       <div><label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label> <input type="email" id="firstTimeEmail" placeholder="กรอกอีเมล" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+        <div class="flex gap-2"><input type="email" id="firstTimeEmail" placeholder="กรอกอีเมล" class="flex-1 px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition"> <button onclick="handleSendVerificationCode()" id="sendCodeBtn" class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap">📧 ส่งรหัส</button>
+        </div>
+        <p id="codeStatus" class="text-xs text-gray-500 mt-2"></p>
        </div>
        <div><label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้งาน</label> <input type="text" id="firstTimeUsername" placeholder="กรอกชื่อผู้ใช้งาน" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
        </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-2">รหัส Verification</label> <input type="text" id="verificationCode" placeholder="กรอกรหัสยืนยัน" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">รหัส Verification</label> <input type="text" id="verificationCode" placeholder="กรอกรหัสที่ได้รับจากอีเมล" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
+        <p class="text-xs text-gray-500 mt-2">💡 รหัส verification จะถูกส่งไปยังอีเมลของคุณ</p>
        </div><button onclick="handleFirstTimeVerify()" class="w-full btn-secondary text-white py-3 rounded-xl font-semibold">✓ ยืนยันตัวตน</button>
       </div>
      </div><!-- Set Password Form -->
      <div id="setPasswordForm" class="hidden">
       <div class="space-y-4"><button onclick="backToLogin()" class="text-pink-500 hover:text-pink-600 font-medium mb-4 flex items-center gap-2">← กลับ</button>
        <h2 class="text-lg font-bold text-gray-800">🔐 ตั้งรหัสผ่านใหม่</h2>
-       <div><label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่านใหม่</label> <input type="password" id="newPassword" placeholder="กรอกรหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">รห���สผ่านใหม่</label> <input type="password" id="newPassword" placeholder="กรอกรหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
        </div>
        <div><label class="block text-sm font-medium text-gray-700 mb-2">ยืนยันรหัสผ่าน</label> <input type="password" id="confirmPassword" placeholder="ยืนยันรหัสผ่าน" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
        </div><button onclick="handleSetPassword()" class="w-full btn-success text-white py-3 rounded-xl font-semibold">💾 บันทึกรหัสผ่าน</button>
@@ -256,7 +276,7 @@
      </div><!-- Password Reset Form -->
      <div id="resetPasswordForm" class="hidden">
       <div class="space-y-4"><button onclick="backToLogin()" class="text-pink-500 hover:text-pink-600 font-medium mb-4 flex items-center gap-2">← กลับ</button>
-       <h2 class="text-lg font-bold text-gray-800">🔑 รีเซ็ตรหัสผ่าน</h2>
+       <h2 class="text-lg font-bold text-gray-800">🔑 รีเซ็ต��หัสผ่าน</h2>
        <div><label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label> <input type="email" id="resetEmail" placeholder="กรอกอีเมลที่ลงทะเบียน" class="w-full px-4 py-3 rounded-xl border-2 border-pink-100 focus:border-pink-400 transition">
        </div>
        <p class="text-sm text-gray-600">ระบบจะส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณ</p><button onclick="handlePasswordReset()" class="w-full btn-warning text-white py-3 rounded-xl font-semibold">📧 ส่งลิงก์รีเซ็ต</button>
@@ -291,7 +311,7 @@
     </div>
    </header><!-- Tab Navigation -->
    <nav class="max-w-7xl mx-auto px-4 py-4 no-print">
-    <div class="flex gap-2 overflow-x-auto pb-2"><button onclick="switchTab(1)" id="tab1Btn" class="tab-active px-6 py-3 rounded-xl font-semibold whitespace-nowrap transition flex items-center gap-2">📊 Dashboard</button> <button onclick="switchTab(2)" id="tab2Btn" class="bg-white text-gray-600 px-6 py-3 rounded-xl font-semibold whitespace-nowrap card-shadow transition flex items-center gap-2">💾 Backup Data</button> <button onclick="switchTab(3)" id="tab3Btn" class="bg-white text-gray-600 px-6 py-3 rounded-xl font-semibold whitespace-nowrap card-shadow transition flex items-center gap-2">🔗 ระบบภายนอก</button>
+    <div class="flex gap-2 overflow-x-auto pb-2"><button onclick="switchTab(1)" id="tab1Btn" class="tab-active px-6 py-3 rounded-xl font-semibold whitespace-nowrap transition flex items-center gap-2">��� Dashboard</button> <button onclick="switchTab(2)" id="tab2Btn" class="bg-white text-gray-600 px-6 py-3 rounded-xl font-semibold whitespace-nowrap card-shadow transition flex items-center gap-2">💾 Backup Data</button> <button onclick="switchTab(3)" id="tab3Btn" class="bg-white text-gray-600 px-6 py-3 rounded-xl font-semibold whitespace-nowrap card-shadow transition flex items-center gap-2">🔗 ระบบภายนอก</button>
     </div>
    </nav><!-- Tab Content -->
    <main class="max-w-7xl mx-auto px-4 pb-8"><!-- Tab 1: Dashboard -->
@@ -302,7 +322,7 @@
         📋
        </div>
        <p id="statTotal" class="text-2xl font-bold text-gray-800">0</p>
-       <p class="text-sm text-gray-500">งานทั้งหมด</p>
+       <p class="text-sm text-gray-500">ง���นทั้งหมด</p>
       </div>
       <div class="bg-white rounded-2xl card-shadow p-4 text-center border-l-4 border-red-400">
        <div class="text-3xl mb-2">
@@ -390,17 +410,17 @@
       itUsers: [
         { ITUSERNO: '1', UserName: 'ผู้ดูแลระบบ', UserPN: 'admin', UserTypeID: 'IT' },
         { ITUSERNO: '2', UserName: 'หัวหน้ากลุ่มงาน IT', UserPN: 'boss', UserTypeID: 'Boss' },
-        { ITUSERNO: '3', UserName: 'ช่างเทคนิค 1', UserPN: 'tech1', UserTypeID: 'IT' },
+        { ITUSERNO: '3', UserName: 'ช่างเทคนิค 1', UserPN: 'k7', UserTypeID: 'IT' },
         { ITUSERNO: '4', UserName: 'ช่างเทคนิค 2', UserPN: 'tech2', UserTypeID: 'IT' },
         { ITUSERNO: '5', UserName: 'ช่างเทคนิค 3', UserPN: 'tech3', UserTypeID: 'IT' }
       ],
       departments: [
         { DeptID: '1', Note3: 'ห้องตรวจ 1' },
-        { DeptID: '2', Note3: 'ห้องตรวจ 2' },
+        { DeptID: '2', Note3: 'ห้อ���ตรวจ 2' },
         { DeptID: '3', Note3: 'ฝ่ายการเงิน' },
         { DeptID: '4', Note3: 'ห้องยา' },
         { DeptID: '5', Note3: 'ห้องผ่าตัด' },
-        { DeptID: '6', Note3: 'หอผู้ป่วยใน 1' },
+        { DeptID: '6', Note3: 'หอผู้ป่วย���น 1' },
         { DeptID: '7', Note3: 'หอผู้ป่วยใน 2' },
         { DeptID: '8', Note3: 'ห้องฉุกเฉิน' },
         { DeptID: '9', Note3: 'แผนกทันตกรรม' },
@@ -422,7 +442,7 @@
         { LinkID: '3', Name: 'MOPH IC', URL: 'http://mophic.moph.go.th', RoleAllow: 'ALL', Active: 'Y', Linkicon: '📊' },
         { LinkID: '4', Name: 'ระบบบุคลากร', URL: 'http://hr.hospital.go.th', RoleAllow: 'IT,Boss', Active: 'Y', Linkicon: '👥' },
         { LinkID: '5', Name: 'ระบบพัสดุ', URL: 'http://supply.hospital.go.th', RoleAllow: 'ALL', Active: 'Y', Linkicon: '📦' },
-        { LinkID: '6', Name: 'ระบบการเงิน', URL: 'http://finance.hospital.go.th', RoleAllow: 'Boss', Active: 'Y', Linkicon: '💰' },
+        { LinkID: '6', Name: 'ระบบ��ารเงิน', URL: 'http://finance.hospital.go.th', RoleAllow: 'Boss', Active: 'Y', Linkicon: '💰' },
         { LinkID: '7', Name: 'Gmail', URL: 'https://mail.google.com', RoleAllow: 'ALL', Active: 'Y', Linkicon: '✉️' },
         { LinkID: '8', Name: 'Google Drive', URL: 'https://drive.google.com', RoleAllow: 'ALL', Active: 'Y', Linkicon: '☁️' }
       ]
@@ -434,11 +454,20 @@
     let backupData = REAL_MAP_DATA.backupData;
     let systemLinks = REAL_MAP_DATA.systemLinks;
 
+    // ============ Login Users Database ============
+    const VALID_USERS = {
+      'admin': { password: '1234', name: 'ผู้ดูแลระบบ', role: 'IT' },
+      'boss': { password: '1234', name: 'หัวหน้ากลุ่มงาน IT', role: 'Boss' },
+      'k7': { password: '212224', name: 'ช่างเทคนิค 1', role: 'IT' },
+      'tech2': { password: '1234', name: 'ช่างเทคนิค 2', role: 'IT' },
+      'tech3': { password: '1234', name: 'ช่างเทคนิค 3', role: 'IT' }
+    };
+
     // ============ Storage Functions ============
     function saveLoginCredentials(username, password, rememberMe) {
       if (rememberMe) {
         localStorage.setItem('savedUsername', username);
-        localStorage.setItem('savedPassword', btoa(password)); // Simple encoding
+        localStorage.setItem('savedPassword', btoa(password));
         localStorage.setItem('rememberMe', 'true');
       } else {
         localStorage.removeItem('savedUsername');
@@ -515,15 +544,16 @@
         return;
       }
 
-      showLoading('กำลังเข้าสู่ระบบ...');
+      showLoading('กำลั������ข้าสู่ระบบ...');
 
       setTimeout(() => {
-        if ((username === 'admin' || username === 'boss') && password === '1234') {
-          currentUser = username === 'admin' 
-            ? { UserName: 'ผู้ดูแลระบบ', UserPN: 'admin', UserTypeID: 'IT' }
-            : { UserName: 'หัวหน้ากลุ่มงาน IT', UserPN: 'boss', UserTypeID: 'Boss' };
+        if (VALID_USERS[username] && VALID_USERS[username].password === password) {
+          currentUser = {
+            UserName: VALID_USERS[username].name,
+            UserPN: username,
+            UserTypeID: VALID_USERS[username].role
+          };
           
-          // Save credentials if remember me is checked
           saveLoginCredentials(username, password, rememberMe);
           
           hideLoading();
@@ -534,6 +564,24 @@
           showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
         }
       }, 800);
+    }
+
+    // ============ Email Verification ============
+    function generateVerificationCode() {
+      return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    function simulateSendEmail(email, code) {
+      // เก็บรหัส verification ไว้ในที่ชั่วคราว
+      sessionStorage.setItem('verificationCode', code);
+      sessionStorage.setItem('verificationEmail', email);
+      
+      // แสดง modal แจ้งว่าส่ง email สำเร็จ
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true);
+        }, 1500);
+      });
     }
 
     function showFirstTimeLogin() {
@@ -552,7 +600,6 @@
       document.getElementById('resetPasswordForm').classList.add('hidden');
       document.getElementById('setPasswordForm').classList.add('hidden');
       
-      // Clear inputs
       document.getElementById('firstTimeEmail').value = '';
       document.getElementById('firstTimeUsername').value = '';
       document.getElementById('verificationCode').value = '';
@@ -561,10 +608,48 @@
       document.getElementById('confirmPassword').value = '';
     }
 
+    function handleSendVerificationCode() {
+      const email = document.getElementById('firstTimeEmail').value.trim();
+      const sendBtn = document.getElementById('sendCodeBtn');
+      const codeStatus = document.getElementById('codeStatus');
+
+      if (!email) {
+        showToast('กรุณากรอกอีเมล', 'warning');
+        return;
+      }
+
+      if (!email.includes('@')) {
+        showToast('กรุณากรอกอีเมลให้ถูกต้อง', 'warning');
+        return;
+      }
+
+      // Disable button and show loading
+      sendBtn.disabled = true;
+      sendBtn.textContent = '⏳ กำลังส่ง...';
+      codeStatus.textContent = '';
+
+      const verificationCode = generateVerificationCode();
+
+      simulateSendEmail(email, verificationCode).then(() => {
+        showToast(`ส่งรหัส Verification ไปยัง ${email} สำเร็จ ✅`, 'success');
+        codeStatus.textContent = `✅ ส่งรหัสไปยัง ${email} แล้ว`;
+        codeStatus.className = 'text-xs text-green-600 mt-2 font-medium';
+        
+        // Re-enable button
+        sendBtn.disabled = false;
+        sendBtn.textContent = '📧 ส่งรหัสใหม่';
+        
+        // Show the verification code in console for testing (ไม่ใช่การใช้งานจริง)
+        console.log(`🔐 Verification Code for testing: ${verificationCode}`);
+      });
+    }
+
     function handleFirstTimeVerify() {
       const email = document.getElementById('firstTimeEmail').value.trim();
       const username = document.getElementById('firstTimeUsername').value.trim();
       const code = document.getElementById('verificationCode').value.trim();
+      const storedCode = sessionStorage.getItem('verificationCode');
+      const storedEmail = sessionStorage.getItem('verificationEmail');
 
       if (!email || !username || !code) {
         showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
@@ -576,12 +661,26 @@
         return;
       }
 
+      // ตรวจสอบรหัส verification
+      if (!storedCode || storedCode !== code) {
+        showToast('รหัส Verification ไม่ถูกต้อง', 'error');
+        return;
+      }
+
+      if (storedEmail !== email) {
+        showToast('อีเมลไม่ตรงกับที่ส่งรหัสไป', 'error');
+        return;
+      }
+
       showLoading('กำลังยืนยันตัวตน...');
 
       setTimeout(() => {
         showToast('ยืนยันตัวตนสำเร็จ', 'success');
         
-        // Show set password form
+        // Clear session storage
+        sessionStorage.removeItem('verificationCode');
+        sessionStorage.removeItem('verificationEmail');
+        
         document.getElementById('firstTimeForm').classList.add('hidden');
         document.getElementById('setPasswordForm').classList.remove('hidden');
         
@@ -740,5 +839,5 @@
       loadSavedCredentials();
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb690f98297a18c',t:'MTc3MDY3MzY1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb6a7603404a18c',t:'MTc3MDY3NDU3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
