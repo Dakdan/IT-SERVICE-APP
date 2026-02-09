@@ -1,140 +1,196 @@
-<!doctype html>
-<html lang="th" class="h-full">
+<!DOCTYPE html>
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IT Service Dashboard - GitHub Version</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
-    .pink-gradient { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-    .status-waiting { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
-    .status-done { background: #d1fae5; color: #059669; border: 1px solid #6ee7b7; }
-    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ec4899; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT UDON HOSP - Service System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: linear-gradient(180deg, #FFF5F7 0%, #FFFFFF 100%); min-height: 100vh; }
+        .pink-grad { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .watermark { position: fixed; bottom: 20px; right: 20px; opacity: 0.05; font-size: 5rem; font-weight: bold; pointer-events: none; z-index: 0; }
+    </style>
 </head>
-<body class="h-full">
+<body>
+    <div class="watermark">IT UDON HOSP</div>
 
-  <header class="pink-gradient text-white p-4 shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="bg-white p-1 rounded-full text-2xl">🏥</div>
-        <div>
-          <h1 class="font-bold text-lg leading-none">ระบบติดตามงาน IT</h1>
-          <p class="text-[10px] opacity-80 uppercase">Udon Thani Hospital (GitHub Live)</p>
+    <div id="loader" class="overlay">
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent mb-4"></div>
+            <p class="text-pink-600 font-medium">กำลังดำเนินการ...</p>
         </div>
-      </div>
-      <button onclick="fetchData()" class="bg-white/20 hover:bg-white/40 px-4 py-2 rounded-xl text-xs transition">🔄 อัปเดตข้อมูล</button>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto p-4 space-y-6">
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-blue-500">
-        <p class="text-xs text-gray-400 uppercase font-bold">งานทั้งหมด</p>
-        <p id="statTotal" class="text-3xl font-bold text-gray-800">-</p>
-      </div>
-      <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-red-500">
-        <p class="text-xs text-gray-400 uppercase font-bold">รอดำเนินการ</p>
-        <p id="statWaiting" class="text-3xl font-bold text-red-500">-</p>
-      </div>
-      <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-green-500">
-        <p class="text-xs text-gray-400 uppercase font-bold">เสร็จสิ้น</p>
-        <p id="statDone" class="text-3xl font-bold text-green-500">-</p>
-      </div>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 text-gray-500 font-bold uppercase text-[10px]">
-            <tr>
-              <th class="px-6 py-4">ID</th>
-              <th class="px-6 py-4">ประเภทงาน</th>
-              <th class="px-6 py-4">รายละเอียด</th>
-              <th class="px-6 py-4">หน่วยงาน</th>
-              <th class="px-6 py-4">สถานะ</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody" class="divide-y divide-gray-50">
-            <tr>
-              <td colspan="5" class="px-6 py-10 text-center">
-                <div class="loader mx-auto mb-2"></div>
-                <p class="text-gray-400">กำลังเชื่อมต่อฐานข้อมูล Google Sheets...</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div id="login-screen" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-8 card-shadow border border-pink-100">
+            <div class="text-center mb-8">
+                <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-24 h-24 mx-auto mb-4 drop-shadow-md">
+                <h1 class="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h1>
+                <p class="text-pink-400 text-sm font-light">IT Service Management</p>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="userpn" placeholder="ชื่อผู้ใช้งาน (UserPN)" class="w-full px-5 py-3 rounded-xl border border-pink-100 focus:ring-2 focus:ring-pink-400 outline-none">
+                <input type="password" id="userpw" placeholder="รหัสผ่าน" class="w-full px-5 py-3 rounded-xl border border-pink-100 focus:ring-2 focus:ring-pink-400 outline-none">
+                <button onclick="handleLogin()" class="w-full pink-grad text-white py-3 rounded-xl font-bold shadow-lg hover:opacity-90 transition">Login</button>
+                <div class="text-center">
+                    <button onclick="showFirstTime()" class="text-xs text-pink-500 hover:underline">ลงทะเบียนครั้งแรก / ลืมรหัสผ่าน</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </main>
 
-  <script>
-    // URL ที่คุณให้มา (Publish to web แบบ HTML)
-    const GOOGLE_SHEET_HTML_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLHQjpz3BkBPHOXc2r6heX6k-AZhFAij3zYg66tRvL2F1Tpq54EqdsUZuCnVoLbhh-Pf_BkvCHengV/pubhtml";
+    <div id="main-app" class="hidden">
+        <header class="pink-grad text-white p-4 sticky top-0 z-50 shadow-md">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-10 h-10 bg-white rounded-full p-1">
+                    <div>
+                        <h2 class="font-bold leading-none text-sm">โรงพยาบาลอุดรธานี</h2>
+                        <p class="text-[10px] opacity-90">IT Service & Asset Management</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p id="u-name" class="text-xs font-bold"></p>
+                        <p id="u-role" class="text-[9px] bg-white/20 px-2 rounded"></p>
+                    </div>
+                    <button onclick="logout()" class="bg-white/20 p-2 rounded-full hover:bg-white/40">🚪</button>
+                </div>
+            </div>
+        </header>
 
-    async function fetchData() {
-      try {
-        // ใช้ Proxy เพื่อเลี่ยงปัญหา CORS (เนื่องจากเรียกตรงๆ จาก Browser เข้า Google PubHTML มักติด CORS)
-        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(GOOGLE_SHEET_HTML_URL);
-        const response = await fetch(proxyUrl);
-        const json = await response.json();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(json.contents, 'text/html');
-        
-        // ดึงแถวทั้งหมดในตาราง (ข้ามแถวหัวตาราง)
-        const rows = Array.from(doc.querySelectorAll('table tbody tr')).slice(1);
-        
-        const data = rows.map(row => {
-          const cols = row.querySelectorAll('td');
-          return {
-            jobId: cols[0]?.innerText || '',
-            type: cols[2]?.innerText || '',
-            problem: cols[3]?.innerText || '',
-            dept: cols[4]?.innerText || '',
-            status: cols[10]?.innerText || 'รอรับงาน' // อ้างอิงจากลำดับ Column ใน Sheet
-          };
-        }).filter(item => item.jobId !== ""); // กรองแถวว่างออก
+        <nav class="bg-white border-b sticky top-[68px] z-40">
+            <div class="max-w-7xl mx-auto flex">
+                <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-sm font-bold border-b-2 border-pink-500 text-pink-500">Dashboard</button>
+                <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-sm font-medium text-gray-500">งานของฉัน</button>
+                <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-sm font-medium text-gray-500">ระบบภายนอก</button>
+            </div>
+        </nav>
 
-        renderTable(data);
-        updateStats(data);
+        <main class="max-w-7xl mx-auto p-4">
+            <div id="tab1" class="tab-content active space-y-6">
+                <div id="stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <div class="p-4 border-b bg-pink-50 flex justify-between">
+                        <h3 class="font-bold text-pink-700">รายการแจ้งซ่อมทั้งหมด</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-50 uppercase font-bold text-gray-400">
+                                <tr>
+                                    <th class="p-4">JobID</th>
+                                    <th class="p-4">ประเภท</th>
+                                    <th class="p-4">ปัญหา</th>
+                                    <th class="p-4 text-center">สถานะ</th>
+                                    <th class="p-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="job-table" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-      } catch (error) {
-        console.error("Fetch Error:", error);
-        document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-500">ไม่สามารถดึงข้อมูลได้ (ติด CORS หรือ URL ผิด)</td></tr>`;
-      }
-    }
+            <div id="tab2" class="tab-content"></div>
+            <div id="tab3" class="tab-content grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </main>
+    </div>
 
-    function renderTable(data) {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = data.map(item => `
-        <tr class="hover:bg-slate-50 transition">
-          <td class="px-6 py-4 font-bold text-pink-600">${item.jobId}</td>
-          <td class="px-6 py-4 font-medium text-gray-700">${item.type}</td>
-          <td class="px-6 py-4 text-gray-500">${item.problem}</td>
-          <td class="px-6 py-4 text-gray-500">${item.dept}</td>
-          <td class="px-6 py-4">
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold ${item.status === 'เสร็จสิ้น' ? 'status-done' : 'status-waiting'}">
-              ${item.status}
-            </span>
-          </td>
-        </tr>
-      `).join('');
-    }
+    <script>
+        const API_URL = 'YOUR_GAS_WEBAPP_URL_HERE'; // *** ใส่ URL จากการ Deploy GAS ***
+        let currentUser = null;
+        let masterData = {};
 
-    function updateStats(data) {
-      document.getElementById('statTotal').innerText = data.length;
-      document.getElementById('statWaiting').innerText = data.filter(i => i.status !== 'เสร็จสิ้น').length;
-      document.getElementById('statDone').innerText = data.filter(i => i.status === 'เสร็จสิ้น').length;
-    }
+        function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
-    // เริ่มทำงานทันทีที่โหลดหน้าเว็บ
-    fetchData();
-    // อัปเดตอัตโนมัติทุกๆ 1 นาที
-    setInterval(fetchData, 60000);
-  </script>
+        async function callAPI(action, data) {
+            showLoading(true);
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, data })
+                });
+                const json = await res.json();
+                showLoading(false);
+                return json;
+            } catch (e) {
+                showLoading(false);
+                alert('Connection Error: ' + e.message);
+            }
+        }
+
+        async function handleLogin() {
+            const user = document.getElementById('userpn').value;
+            const pass = document.getElementById('userpw').value;
+            const res = await callAPI('checkLogin', { user, pass });
+            if(res && res.success) {
+                currentUser = res.user;
+                initApp();
+            } else {
+                alert(res.message);
+            }
+        }
+
+        async function initApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('u-name').innerText = currentUser.UserName;
+            document.getElementById('u-role').innerText = currentUser.UserTypeName;
+            
+            const res = await callAPI('getInitialData', {});
+            masterData = res;
+            renderDashboard();
+            renderLinks();
+        }
+
+        function switchTab(idx) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab' + idx).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('text-pink-500', 'border-pink-500', 'font-bold');
+                b.classList.add('text-gray-500');
+            });
+            document.getElementById('t' + idx).classList.add('text-pink-500', 'border-pink-500', 'font-bold');
+            if(idx === 2) renderMyWorks();
+        }
+
+        function renderDashboard() {
+            const list = document.getElementById('job-table');
+            const jobs = masterData.jobs.sort((a,b) => (a.Status === 'รอรับงาน' ? -1 : 1));
+            list.innerHTML = jobs.map(j => `
+                <tr class="hover:bg-pink-50/50 transition">
+                    <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
+                    <td class="p-4">${j.JobType}</td>
+                    <td class="p-4 text-gray-500 truncate max-w-[200px]">${j.Problem}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 rounded-full text-[9px] font-bold ${j.Status === 'รอรับงาน' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
+                            ${j.Status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right">
+                        ${(currentUser.UserTypeID == 'IT' && j.Status === 'รอรับงาน') ? 
+                            `<button onclick="acceptWork('${j.JobID}')" class="bg-pink-500 text-white px-3 py-1 rounded-lg text-[10px]">รับงาน</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderLinks() {
+            const container = document.getElementById('tab3');
+            container.innerHTML = masterData.links.map(l => `
+                <a href="${l.URL}" target="_blank" class="bg-white p-6 rounded-3xl shadow-sm border border-pink-50 flex flex-col items-center hover:scale-105 transition">
+                    <div class="text-3xl mb-2">${l.Linkicon || '🔗'}</div>
+                    <span class="text-[10px] font-bold text-gray-600 text-center">${l.Name}</span>
+                </a>
+            `).join('');
+        }
+
+        function logout() { location.reload(); }
+    </script>
 </body>
 </html>
