@@ -1,8 +1,8 @@
 ## 📡 Base Configuration
 
-```javascript
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec';
 const SHEET_ID = '1TUcThdPyAqFRwkFg1NTMtwqbFVjrkJXWqYw0AlwwriI';
+
 🔄 HTTP Methods
 ทั้งหมดใช้ POST method
 
@@ -16,27 +16,29 @@ fetch(APPS_SCRIPT_URL, {
 .then(data => console.log(data));
 
 📋 API Endpoints
+
 1. Authentication
+
 Login
 
 // Request
 {
   action: 'login',
-  username: 'admin',
-  password: '1234'
+  username: 'string (required)',
+  password: 'string (required)'
 }
 
 // Response
 {
   success: true,
   user: {
-    ITUSERNO: '1',
-    USERID: 'admin',
-    UserTypeID: 'IT',
-    UserTypeName: 'เจ้าหน้าที่ IT',
-    UserName: 'ผู้ดูแลระบบ',
-    UserPN: 'admin',
-    UserMail: 'admin@hospital.go.th'
+    ITUSERNO: 'string',
+    USERID: 'string',
+    UserTypeID: 'string',
+    UserTypeName: 'string',
+    UserName: 'string',
+    UserPN: 'string',
+    UserMail: 'string'
   }
 }
 
@@ -45,7 +47,7 @@ Logout
 // Request
 {
   action: 'logout',
-  email: 'admin@hospital.go.th'
+  email: 'string (required)'
 }
 
 // Response
@@ -54,14 +56,14 @@ Logout
   message: 'ออกจากระบบสำเร็จ'
 }
 
-Verify First Time (ครั้งแรก)
+Verify First Time
 
 // Request
 {
   action: 'verifyFirstTime',
-  email: 'user@hospital.go.th',
-  username: 'newuser',
-  code: '123456'
+  email: 'string (required)',
+  username: 'string (required)',
+  code: 'string (required)'
 }
 
 // Response
@@ -75,9 +77,9 @@ Set Password
 // Request
 {
   action: 'setPassword',
-  email: 'user@hospital.go.th',
-  username: 'newuser',
-  password: 'newpassword123'
+  email: 'string (required)',
+  username: 'string (required)',
+  password: 'string (required, min 8 characters)'
 }
 
 // Response
@@ -91,7 +93,7 @@ Request Password Reset
 // Request
 {
   action: 'requestPasswordReset',
-  email: 'admin@hospital.go.th'
+  email: 'string (required)'
 }
 
 // Response
@@ -101,6 +103,7 @@ Request Password Reset
 }
 
 2. Job Tickets Management
+
 Get All Job Tickets
 
 // Request
@@ -113,20 +116,20 @@ Get All Job Tickets
   success: true,
   data: [
     {
-      JobID: 'JOB-2024-001',
-      CreateDate: '2024-01-15T10:30:00Z',
-      CreateBy: 'user001',
-      Source: 'แจ้งออนไลน์',
-      JobType: 'ซ่อมคอมพิวเตอร์',
-      AssetCode: 'PC-001',
-      AssetName: 'คอมพิวเตอร์ตั้งโต๊ะ',
-      Department: 'ห้องตรวจ 1',
-      Problem: 'เครื่องเปิดไม่ติด',
-      Priority: 'สูง',
-      Status: 'รอรับงาน',
-      Owner: '',
-      StartTime: '',
-      CloseTime: ''
+      JobID: 'string',
+      CreateDate: 'ISO 8601 datetime',
+      CreateBy: 'string',
+      Source: 'string',
+      JobType: 'string',
+      AssetCode: 'string',
+      AssetName: 'string',
+      Department: 'string',
+      Problem: 'string',
+      Priority: 'string (สูง, ปานกลาง, ต่ำ)',
+      Status: 'string (รอรับงาน, กำลังดำเนินการ, เสร็จสิ้น)',
+      Owner: 'string',
+      StartTime: 'ISO 8601 datetime',
+      CloseTime: 'ISO 8601 datetime'
     }
   ]
 }
@@ -136,12 +139,12 @@ Update Job Ticket
 // Request
 {
   action: 'updateJobTicket',
-  jobId: 'JOB-2024-001',
+  jobId: 'string (required)',
   updates: {
-    Status: 'กำลังดำเนินการ',
-    Owner: 'admin',
-    StartTime: '2024-01-15T11:00:00Z',
-    RiskNote: 'หมายเหตุเพิ่มเติม'
+    Status: 'string (optional)',
+    Owner: 'string (optional)',
+    StartTime: 'ISO 8601 datetime (optional)',
+    RiskNote: 'string (optional)'
   }
 }
 
@@ -156,19 +159,22 @@ Get Job Ticket Detail
 // Request
 {
   action: 'getJobDetail',
-  jobId: 'JOB-2024-001'
+  jobId: 'string (required)'
 }
 
 // Response
 {
   success: true,
   data: {
-    JobID: 'JOB-2024-001',
+    JobID: 'string',
+    CreateDate: 'ISO 8601 datetime',
+    CreateBy: 'string',
     // ... full job details
   }
 }
 
 3. IT Tickets (Activity Logging)
+
 Get IT Tickets
 
 // Request
@@ -181,42 +187,43 @@ Get IT Tickets
   success: true,
   data: [
     {
-      TicketID: 'IT-2024-001',
-      JobType: 'ซ่อมคอมพิวเตอร์',
-      SubType: 'เปลี่ยนอุปกรณ์',
-      Department: 'ห้องตรวจ 1',
-      Asset: 'PC-001',
-      Description: 'เปลี่ยน RAM 8GB',
-      Status: 'เสร็จสิ้น',
-      CreatedBy: 'admin',
-      CreatedDate: '2024-01-15T12:00:00Z'
+      TicketID: 'string',
+      JobType: 'string',
+      SubType: 'string',
+      Department: 'string',
+      Asset: 'string',
+      Description: 'string',
+      Status: 'string',
+      CreatedBy: 'string',
+      CreatedDate: 'ISO 8601 datetime'
     }
   ]
 }
 
-Add IT Ticket (บันทึกกิจกรรม)
+Add IT Ticket
 
 // Request
 {
   action: 'addITTicket',
   ticket: {
-    JobType: 'ซ่อมคอมพิวเตอร์',
-    SubType: 'เปลี่ยนอุปกรณ์',
-    Department: 'ห้องตรวจ 1',
-    Asset: 'PC-001',
-    Description: 'เปลี่ยน RAM 8GB',
-    Status: 'เสร็จสิ้น'
+    JobType: 'string (required)',
+    SubType: 'string (required)',
+    Department: 'string (required)',
+    Asset: 'string (required)',
+    Description: 'string (required)',
+    Status: 'string (required)'
   }
 }
 
 // Response
 {
   success: true,
-  ticketId: 'IT-2024-001',
+  ticketId: 'string',
   message: 'บันทึกกิจกรรมสำเร็จ'
 }
 
 4. Master Data
+
 Get IT Users
 
 // Request
@@ -229,10 +236,10 @@ Get IT Users
   success: true,
   data: [
     {
-      ITUSERNO: '1',
-      UserName: 'ผู้ดูแลระบบ',
-      UserPN: 'admin',
-      UserTypeID: 'IT'
+      ITUSERNO: 'string',
+      UserName: 'string',
+      UserPN: 'string',
+      UserTypeID: 'string'
     }
   ]
 }
@@ -249,8 +256,8 @@ Get Departments
   success: true,
   data: [
     {
-      DeptID: '1',
-      Note3: 'ห้องตรวจ 1'
+      DeptID: 'string',
+      Note3: 'string'
     }
   ]
 }
@@ -267,8 +274,8 @@ Get Assets
   success: true,
   data: [
     {
-      AssetID: 'PC-001',
-      AssetName: 'คอมพิวเตอร์ตั้งโต๊ะ Dell'
+      AssetID: 'string',
+      AssetName: 'string'
     }
   ]
 }
@@ -285,8 +292,8 @@ Get Job Types
   success: true,
   data: [
     {
-      TypeID: '1',
-      TypeName: 'ซ่อมคอมพิวเตอร์'
+      TypeID: 'string',
+      TypeName: 'string'
     }
   ]
 }
@@ -303,9 +310,9 @@ Get Job Sub Types
   success: true,
   data: [
     {
-      SubTypeID: '1',
-      TypeID: '1',
-      SubTypeName: 'เปลี่ยนอุปกรณ์'
+      SubTypeID: 'string',
+      TypeID: 'string',
+      SubTypeName: 'string'
     }
   ]
 }
@@ -322,33 +329,34 @@ Get System Links
   success: true,
   data: [
     {
-      LinkID: '1',
-      Name: 'HOSxP',
-      URL: 'http://hosxp.hospital.go.th',
-      RoleAllow: 'ALL',
-      Active: 'Y',
-      Linkicon: '🏥'
+      LinkID: 'string',
+      Name: 'string',
+      URL: 'string',
+      RoleAllow: 'string',
+      Active: 'string (Y/N)',
+      Linkicon: 'string'
     }
   ]
 }
 
 5. Logging & Audit
-Add Log (บันทึกการทำกิจกรรม)
+
+Add Log
 
 // Request
 {
   action: 'addLog',
-  email: 'admin@hospital.go.th',
-  action: 'LOGIN',
-  status: 'SUCCESS',
-  message: 'เข้าสู่ระบบสำเร็จ',
-  timestamp: '2024-01-15T10:30:00Z'
+  email: 'string (required)',
+  activityType: 'string (required)',
+  status: 'string (SUCCESS, ERROR, WARNING)',
+  message: 'string (optional)',
+  timestamp: 'ISO 8601 datetime (optional)'
 }
 
 // Response
 {
   success: true,
-  logId: 'LOG-2024-001',
+  logId: 'string',
   message: 'บันทึกสำเร็จ'
 }
 
@@ -357,8 +365,8 @@ Get Logs
 // Request
 {
   action: 'getLogs',
-  email: 'admin@hospital.go.th',
-  limit: 100
+  email: 'string (required)',
+  limit: 'number (optional, default: 100)'
 }
 
 // Response
@@ -366,17 +374,18 @@ Get Logs
   success: true,
   data: [
     {
-      logId: 'LOG-2024-001',
-      email: 'admin@hospital.go.th',
-      action: 'LOGIN',
-      status: 'SUCCESS',
-      message: 'เข้าสู่ระบบสำเร็จ',
-      timestamp: '2024-01-15T10:30:00Z'
+      logId: 'string',
+      email: 'string',
+      activityType: 'string',
+      status: 'string',
+      message: 'string',
+      timestamp: 'ISO 8601 datetime'
     }
   ]
 }
 
 🎯 Response Format
+
 Success Response
 {
   success: true,
@@ -392,7 +401,16 @@ Error Response
 }
 
 ⏱️ Status Codes & Messages
+
+✅ 200 - Success
+❌ 400 - Bad Request
+🔒 401 - Unauthorized
+⛔ 403 - Forbidden
+🔍 404 - Not Found
+⚠️ 500 - Server Error
+
 🔒 Security Headers
+
 // ต้องเพิ่มใน Google Apps Script
 function doPost(e) {
   const response = HtmlService.createHtmlOutput('...');
@@ -403,15 +421,17 @@ function doPost(e) {
 }
 
 📊 Rate Limiting
+
 - 60 requests per minute per user
 - 1000 requests per hour per sheet
 - 10MB payload limit
 
 🔄 Example: Complete Flow
+
 // 1. Login
 const loginResult = await callApi('login', {
-  username: 'admin',
-  password: '1234'
+  username: 'USERNAME',
+  password: 'PASSWORD'
 });
 
 if (!loginResult.success) throw new Error('Login failed');
@@ -429,10 +449,10 @@ const departments = deptsResult.data;
 
 // 4. Update a ticket
 const updateResult = await callApi('updateJobTicket', {
-  jobId: 'JOB-2024-001',
+  jobId: 'JOB_ID',
   updates: {
     Status: 'กำลังดำเนินการ',
-    Owner: 'admin',
+    Owner: 'OWNER_NAME',
     StartTime: new Date().toISOString()
   }
 });
@@ -440,9 +460,9 @@ const updateResult = await callApi('updateJobTicket', {
 // 5. Log the action
 await callApi('addLog', {
   email: user.UserMail,
-  action: 'UPDATE_JOB',
+  activityType: 'UPDATE_JOB',
   status: 'SUCCESS',
-  message: 'อัปเดตงาน JOB-2024-001'
+  message: 'อัปเดตงาน'
 });
 
 // 6. Logout
@@ -451,6 +471,7 @@ await callApi('logout', {
 });
 
 🛠️ Helper Functions
+
 // Call API
 async function callApi(action, data = {}) {
   try {
@@ -487,8 +508,10 @@ function generateId(prefix = 'ID') {
 }
 
 📚 References
+
 https://developers.google.com/apps-script/reference
 https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
 https://www.json.org/
+
 Last Updated: 2024
 API Version: 1.0.0
