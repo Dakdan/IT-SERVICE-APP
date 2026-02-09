@@ -1,7 +1,7 @@
 ## 📡 Base Configuration
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec';
-const SHEET_ID = '1TUcThdPyAqFRwkFg1NTMtwqbFVjrkJXWqYw0AlwwriI';
+const SHEET_ID = 
 
 🔄 HTTP Methods
 ทั้งหมดใช้ POST method
