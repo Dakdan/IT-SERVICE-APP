@@ -3,254 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IT Service Management - โรงพยาบาลอุดรธานี</title>
+  <title>IT Service Dashboard - GitHub Version</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Kanit', sans-serif; }
+    body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     .pink-gradient { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-    .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
     .status-waiting { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
-    .status-progress { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
     .status-done { background: #d1fae5; color: #059669; border: 1px solid #6ee7b7; }
-    .tab-active { border-bottom: 4px solid #ec4899; color: #ec4899; font-weight: 700; }
     .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ec4899; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
   </style>
 </head>
-<body class="h-full bg-slate-50">
+<body class="h-full">
 
-  <div id="loader" class="overlay">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center">
-      <div class="loader mb-4"></div>
-      <p class="text-pink-600 font-medium">กำลังประมวลผล...</p>
+  <header class="pink-gradient text-white p-4 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="bg-white p-1 rounded-full text-2xl">🏥</div>
+        <div>
+          <h1 class="font-bold text-lg leading-none">ระบบติดตามงาน IT</h1>
+          <p class="text-[10px] opacity-80 uppercase">Udon Thani Hospital (GitHub Live)</p>
+        </div>
+      </div>
+      <button onclick="fetchData()" class="bg-white/20 hover:bg-white/40 px-4 py-2 rounded-xl text-xs transition">🔄 อัปเดตข้อมูล</button>
     </div>
-  </div>
+  </header>
 
-  <div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
-    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border-t-8 border-pink-500">
-      <div class="text-center mb-8">
-        <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg">
-        <h1 class="text-2xl font-bold text-gray-800">IT UDON HOSPITAL</h1>
-        <p class="text-gray-500">ระบบจัดการงานบริการคอมพิวเตอร์</p>
+  <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-blue-500">
+        <p class="text-xs text-gray-400 uppercase font-bold">งานทั้งหมด</p>
+        <p id="statTotal" class="text-3xl font-bold text-gray-800">-</p>
       </div>
-      <div class="space-y-4">
-        <input type="text" id="username" placeholder="ชื่อผู้ใช้งาน (UserPN)" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-400 outline-none transition">
-        <input type="password" id="password" placeholder="รหัสผ่าน" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-400 outline-none transition">
-        <button onclick="doLogin()" class="w-full pink-gradient text-white py-3 rounded-xl font-bold shadow-lg transform active:scale-95 transition">เข้าสู่ระบบ</button>
+      <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-red-500">
+        <p class="text-xs text-gray-400 uppercase font-bold">รอดำเนินการ</p>
+        <p id="statWaiting" class="text-3xl font-bold text-red-500">-</p>
+      </div>
+      <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-green-500">
+        <p class="text-xs text-gray-400 uppercase font-bold">เสร็จสิ้น</p>
+        <p id="statDone" class="text-3xl font-bold text-green-500">-</p>
       </div>
     </div>
-  </div>
 
-  <div id="mainApp" class="hidden min-h-screen flex flex-col">
-    <header class="pink-gradient text-white p-4 shadow-lg sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-10 h-10 bg-white rounded-full p-1">
-          <div>
-            <h2 class="font-bold leading-none">โรงพยาบาลอุดรธานี</h2>
-            <p class="text-xs opacity-80">IT Service System</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="text-right hidden sm:block">
-            <p id="displayUserName" class="text-sm font-bold leading-none"></p>
-            <p id="displayUserRole" class="text-[10px] opacity-80 uppercase"></p>
-          </div>
-          <button onclick="location.reload()" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition">🚪</button>
-        </div>
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-gray-500 font-bold uppercase text-[10px]">
+            <tr>
+              <th class="px-6 py-4">ID</th>
+              <th class="px-6 py-4">ประเภทงาน</th>
+              <th class="px-6 py-4">รายละเอียด</th>
+              <th class="px-6 py-4">หน่วยงาน</th>
+              <th class="px-6 py-4">สถานะ</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-gray-50">
+            <tr>
+              <td colspan="5" class="px-6 py-10 text-center">
+                <div class="loader mx-auto mb-2"></div>
+                <p class="text-gray-400">กำลังเชื่อมต่อฐานข้อมูล Google Sheets...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </header>
-
-    <nav class="bg-white shadow-sm sticky top-[72px] z-40">
-      <div class="max-w-7xl mx-auto flex">
-        <button onclick="switchTab(1)" id="tabBtn1" class="flex-1 py-4 text-sm font-medium tab-active">Dashboard</button>
-        <button onclick="switchTab(2)" id="tabBtn2" class="flex-1 py-4 text-sm font-medium text-gray-500">งานของฉัน</button>
-        <button onclick="switchTab(3)" id="tabBtn3" class="flex-1 py-4 text-sm font-medium text-gray-500">ระบบงานอื่นๆ</button>
-      </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto w-full p-4 flex-grow">
-      
-      <div id="tab1" class="space-y-6">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-pink-500 text-center">
-            <p class="text-xs text-gray-500 uppercase">งานวันนี้</p>
-            <p id="countTotal" class="text-2xl font-bold text-gray-800">0</p>
-          </div>
-          <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-red-500 text-center">
-            <p class="text-xs text-gray-500 uppercase">รอรับงาน</p>
-            <p id="countWaiting" class="text-2xl font-bold text-red-500">0</p>
-          </div>
-          <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-yellow-500 text-center">
-            <p class="text-xs text-gray-500 uppercase">กำลังทำ</p>
-            <p id="countPending" class="text-2xl font-bold text-yellow-500">0</p>
-          </div>
-          <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-green-500 text-center">
-            <p class="text-xs text-gray-500 uppercase">สำเร็จ</p>
-            <p id="countDone" class="text-2xl font-bold text-green-500">0</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-            <h3 class="font-bold text-gray-700">รายการแจ้งซ่อมล่าสุด</h3>
-            <button onclick="loadData()" class="text-xs text-pink-500 font-bold">🔄 รีเฟรช</button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50 text-gray-400 uppercase text-[10px]">
-                <tr>
-                  <th class="px-4 py-3">JobID</th>
-                  <th class="px-4 py-3">ปัญหา</th>
-                  <th class="px-4 py-3">หน่วยงาน</th>
-                  <th class="px-4 py-3">สถานะ</th>
-                  <th class="px-4 py-3 text-center">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="jobListTable" class="divide-y divide-gray-100">
-                </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab2" class="hidden space-y-4">
-        <h3 class="font-bold text-gray-700 text-lg">ข้อมูลครุภัณฑ์ / Backup</h3>
-        <div id="backupGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          </div>
-      </div>
-
-      <div id="tab3" class="hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 p-4">
-        </div>
-
-    </main>
-  </div>
+    </div>
+  </main>
 
   <script>
-    // *** สำคัญ: นำ URL ที่ได้จาก 'Deploy as Web App' ของ Apps Script มาใส่ที่นี่ ***
-    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec";
-    
-    let currentUser = null;
+    // URL ที่คุณให้มา (Publish to web แบบ HTML)
+    const GOOGLE_SHEET_HTML_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLHQjpz3BkBPHOXc2r6heX6k-AZhFAij3zYg66tRvL2F1Tpq54EqdsUZuCnVoLbhh-Pf_BkvCHengV/pubhtml";
 
-    function showLoading(show) {
-      document.getElementById('loader').style.display = show ? 'flex' : 'none';
-    }
-
-    // ฟังก์ชันสื่อสารกับ Google Apps Script (Black)
-    async function api(action, data = {}) {
+    async function fetchData() {
       try {
-        const response = await fetch(BACKEND_URL, {
-          method: "POST",
-          body: JSON.stringify({ action, ...data })
-        });
-        return await response.json();
-      } catch (e) {
-        alert("การเชื่อมต่อ Backend ผิดพลาด: " + e.message);
-        return { success: false };
+        // ใช้ Proxy เพื่อเลี่ยงปัญหา CORS (เนื่องจากเรียกตรงๆ จาก Browser เข้า Google PubHTML มักติด CORS)
+        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(GOOGLE_SHEET_HTML_URL);
+        const response = await fetch(proxyUrl);
+        const json = await response.json();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(json.contents, 'text/html');
+        
+        // ดึงแถวทั้งหมดในตาราง (ข้ามแถวหัวตาราง)
+        const rows = Array.from(doc.querySelectorAll('table tbody tr')).slice(1);
+        
+        const data = rows.map(row => {
+          const cols = row.querySelectorAll('td');
+          return {
+            jobId: cols[0]?.innerText || '',
+            type: cols[2]?.innerText || '',
+            problem: cols[3]?.innerText || '',
+            dept: cols[4]?.innerText || '',
+            status: cols[10]?.innerText || 'รอรับงาน' // อ้างอิงจากลำดับ Column ใน Sheet
+          };
+        }).filter(item => item.jobId !== ""); // กรองแถวว่างออก
+
+        renderTable(data);
+        updateStats(data);
+
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-500">ไม่สามารถดึงข้อมูลได้ (ติด CORS หรือ URL ผิด)</td></tr>`;
       }
     }
 
-    async function doLogin() {
-      const u = document.getElementById('username').value;
-      const p = document.getElementById('password').value;
-      if(!u || !p) return alert("กรุณากรอกข้อมูลให้ครบ");
-
-      showLoading(true);
-      const res = await api('login', { user: u, pass: p });
-      showLoading(false);
-
-      if(res.success) {
-        currentUser = res.user;
-        document.getElementById('loginPage').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('displayUserName').innerText = res.user.name;
-        document.getElementById('displayUserRole').innerText = res.user.role;
-        loadData();
-      } else {
-        alert("Username หรือ Password ไม่ถูกต้อง");
-      }
-    }
-
-    async function loadData() {
-      showLoading(true);
-      const res = await api('getInitialData');
-      showLoading(false);
-      
-      if(res.success) {
-        renderDashboard(res.jobs);
-        renderBackup(res.backup);
-        renderLinks(res.links);
-      }
-    }
-
-    function renderDashboard(jobs) {
-      const tbody = document.getElementById('jobListTable');
-      tbody.innerHTML = jobs.map(j => `
-        <tr class="hover:bg-gray-50 transition">
-          <td class="px-4 py-4 font-bold text-pink-600">${j.JobID}</td>
-          <td class="px-4 py-4">
-            <div class="font-medium text-gray-800">${j.Problem}</div>
-            <div class="text-[10px] text-gray-400">${j.JobType}</div>
-          </td>
-          <td class="px-4 py-4 text-gray-500">${j.Department}</td>
-          <td class="px-4 py-4">
-            <span class="px-2 py-1 rounded-full text-[10px] font-bold ${getStatusClass(j.Status)}">${j.Status}</span>
-          </td>
-          <td class="px-4 py-4 text-center">
-            <button class="bg-slate-100 hover:bg-pink-100 p-2 rounded-lg text-pink-600 transition">⚙️</button>
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-6 py-4 font-bold text-pink-600">${item.jobId}</td>
+          <td class="px-6 py-4 font-medium text-gray-700">${item.type}</td>
+          <td class="px-6 py-4 text-gray-500">${item.problem}</td>
+          <td class="px-6 py-4 text-gray-500">${item.dept}</td>
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold ${item.status === 'เสร็จสิ้น' ? 'status-done' : 'status-waiting'}">
+              ${item.status}
+            </span>
           </td>
         </tr>
       `).join('');
-
-      // Update Stats
-      document.getElementById('countTotal').innerText = jobs.length;
-      document.getElementById('countWaiting').innerText = jobs.filter(x => x.Status === 'รอรับงาน').length;
-      document.getElementById('countPending').innerText = jobs.filter(x => x.Status === 'กำลังดำเนินการ').length;
-      document.getElementById('countDone').innerText = jobs.filter(x => x.Status === 'เสร็จสิ้น').length;
     }
 
-    function renderBackup(data) {
-      const grid = document.getElementById('backupGrid');
-      grid.innerHTML = data.map(b => `
-        <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex gap-4 items-center">
-          <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl">📦</div>
-          <div>
-            <p class="font-bold text-gray-800 text-sm">${b.AssetID || 'N/A'}</p>
-            <p class="text-xs text-gray-500">${b.ชื่อรายการครุภัณฑ์ || 'ไม่ระบุชื่อ'}</p>
-            <p class="text-[10px] text-indigo-400 font-bold mt-1 uppercase">${b.MaStatus || 'ปกติ'}</p>
-          </div>
-        </div>
-      `).join('');
+    function updateStats(data) {
+      document.getElementById('statTotal').innerText = data.length;
+      document.getElementById('statWaiting').innerText = data.filter(i => i.status !== 'เสร็จสิ้น').length;
+      document.getElementById('statDone').innerText = data.filter(i => i.status === 'เสร็จสิ้น').length;
     }
 
-    function renderLinks(links) {
-      const grid = document.getElementById('tab3');
-      grid.innerHTML = links.map(l => `
-        <a href="${l.URL}" target="_blank" class="bg-white p-6 rounded-3xl shadow-sm border border-gray-50 flex flex-col items-center hover:shadow-md transition transform hover:-translate-y-1">
-          <div class="text-4xl mb-3">${l.Linkicon || '🔗'}</div>
-          <span class="text-xs font-bold text-gray-700 text-center">${l.Name}</span>
-        </a>
-      `).join('');
-    }
-
-    function getStatusClass(s) {
-      if(s === 'รอรับงาน') return 'status-waiting';
-      if(s === 'กำลังดำเนินการ') return 'status-progress';
-      return 'status-done';
-    }
-
-    function switchTab(n) {
-      [1,2,3].forEach(i => {
-        document.getElementById('tab'+i).classList.add('hidden');
-        document.getElementById('tabBtn'+i).classList.remove('tab-active');
-        document.getElementById('tabBtn'+i).classList.add('text-gray-500');
-      });
-      document.getElementById('tab'+n).classList.remove('hidden');
-      document.getElementById('tabBtn'+n).classList.add('tab-active');
-    }
-
+    // เริ่มทำงานทันทีที่โหลดหน้าเว็บ
+    fetchData();
+    // อัปเดตอัตโนมัติทุกๆ 1 นาที
+    setInterval(fetchData, 60000);
   </script>
 </body>
 </html>
