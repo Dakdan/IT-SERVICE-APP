@@ -12,8 +12,7 @@
         .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:9999; justify-content:center; align-items:center; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .card-pro { background: white; border-radius: 1.5rem; border: 2px solid #2563eb; transition: 0.3s; cursor: pointer; }
-        .card-pro:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card-pro { background: white; border-radius: 1.2rem; border: 2px solid #2563eb; transition: 0.3s; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -28,59 +27,47 @@
             <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-10 bg-white p-1 rounded-lg">
             <div>
                 <h1 class="font-bold text-lg leading-none" id="u-name"></h1>
-                <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded font-bold" id="u-role"></span>
+                <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded font-bold uppercase" id="u-role"></span>
             </div>
         </div>
-        <button onclick="logout()" class="bg-white/20 p-2 rounded-xl">🚪</button>
+        <button onclick="logout()" class="bg-white/20 p-2 rounded-xl text-lg">🚪</button>
     </header>
 
     <nav class="bg-white border-b flex text-center">
         <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-[11px] font-bold border-b-4 border-[#d32f63] text-[#d32f63]">DASHBOARD</button>
         <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-[11px] font-bold border-b-4 border-transparent text-slate-400">MY JOBS</button>
+        <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-[11px] font-bold border-b-4 border-transparent text-slate-400">SYSTEMLINK</button>
     </nav>
 
     <main class="max-w-5xl mx-auto p-4 space-y-4">
-        <div id="tab1" class="tab-content active">
-            <div id="job-list-dashboard" class="space-y-4"></div>
-        </div>
-
+        <div id="tab1" class="tab-content active"><div id="job-list-dashboard" class="space-y-4"></div></div>
+        
         <div id="tab2" class="tab-content">
-            <div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm">
+            <div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm mb-6">
                 <div>
                     <h2 class="text-[#d32f63] font-black text-sm uppercase">My Active Tickets</h2>
                     <p class="text-[10px] text-slate-400">รายการงานที่คุณกำลังดำเนินการ</p>
                 </div>
-                <button class="bg-[#d32f63] text-white px-6 py-2 rounded-full font-bold text-xs flex items-center gap-2">
-                    <span class="text-lg">+</span> เพิ่มงานใหม่
-                </button>
+                <button class="bg-[#d32f63] text-white px-6 py-2 rounded-full font-bold text-xs flex items-center gap-2">+ เพิ่มงานใหม่</button>
             </div>
-            <div id="job-list-myjob" class="mt-6 space-y-4"></div>
+            <div id="job-list-myjob" class="space-y-4 text-center"></div>
         </div>
     </main>
 
     <div id="modal-detail" class="overlay">
         <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl m-4">
             <div class="bg-[#d32f63] p-8 text-white flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-2xl tracking-tight" id="md-id"></h3>
-                    <p class="text-[10px] opacity-80 font-bold uppercase">แจ้งปัญหาการใช้งาน</p>
-                </div>
+                <div><h3 class="font-bold text-2xl tracking-tight" id="md-id"></h3><p class="text-[10px] opacity-80 font-bold uppercase">แจ้งปัญหาการใช้งาน</p></div>
                 <button onclick="closeModal()" class="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center font-bold">✕</button>
             </div>
             <div class="p-8 space-y-6">
                 <div class="bg-blue-50 p-6 rounded-[2rem] border border-blue-100">
-                    <p class="text-blue-600 font-bold text-xs mb-2">ข้อมูลครุภัณฑ์</p>
+                    <p class="text-blue-600 font-bold text-xs mb-2 uppercase">ข้อมูลครุภัณฑ์</p>
                     <p class="font-bold text-slate-800" id="md-asset">ครุภัณฑ์ไม่ได้ลงทะเบียน</p>
-                    <p class="text-xs text-blue-900 mt-1">AssetID: -</p>
+                    <p class="text-xs text-blue-900 mt-1">AssetID: <span id="md-asset-id">-</span></p>
                 </div>
-                <div>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">หน่วยงานที่แจ้ง</p>
-                    <p id="md-dept" class="font-bold text-slate-800 text-lg"></p>
-                </div>
-                <div>
-                    <p class="text-[10px] text-[#d32f63] font-bold uppercase mb-1">ปัญหา/อาการ</p>
-                    <div id="md-prob" class="bg-slate-50 p-4 rounded-2xl text-slate-600 text-sm italic border"></div>
-                </div>
+                <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">หน่วยงานที่แจ้ง</p><p id="md-dept" class="font-bold text-slate-800 text-lg"></p></div>
+                <div><p class="text-[10px] text-[#d32f63] font-bold uppercase mb-1">ปัญหา/อาการ</p><div id="md-prob" class="bg-slate-50 p-4 rounded-2xl text-slate-600 text-sm italic border"></div></div>
             </div>
             <div id="md-actions" class="p-8 bg-slate-50 border-t"></div>
         </div>
@@ -103,32 +90,28 @@
         async function init() {
             document.getElementById('u-name').innerText = currentUser.UserName;
             document.getElementById('u-role').innerText = currentUser.UserTypeID;
-            try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getInitialData' }) });
-                const result = await res.json();
-                store.AllJobs = result.AllJobs || [];
-                render();
-            } catch (e) { console.error(e); }
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getInitialData' }) });
+            const result = await res.json();
+            store.AllJobs = result.AllJobs || [];
+            render();
         }
 
         function render() {
-            // Dashboard
             document.getElementById('job-list-dashboard').innerHTML = store.AllJobs.map(j => `
                 <div onclick="showDetail('${j.JobID}')" class="card-pro p-6 mb-4">
                     <p class="font-bold text-slate-800 text-sm">${j.JobID}</p>
                     <p class="font-bold text-slate-700 text-base mt-1">${j.Problem}</p>
-                    <p class="text-[10px] text-blue-600 mt-3 font-bold">🏢 ${j.Department || '-'}</p>
+                    <p class="text-[11px] text-slate-500 mt-3 font-bold">🏢 ${j.Department || '-'}</p>
                 </div>
             `).join('');
 
-            // My Jobs
             const my = store.AllJobs.filter(j => j.Owner === currentUser.UserName);
             document.getElementById('job-list-myjob').innerHTML = my.length ? my.map(j => `
-                <div onclick="showDetail('${j.JobID}')" class="card-pro p-6 border-orange-500">
+                <div onclick="showDetail('${j.JobID}')" class="card-pro p-6 border-orange-500 mb-4 text-left">
                     <p class="font-bold text-orange-600 text-sm">${j.JobID}</p>
                     <p class="font-bold text-slate-800 text-base mt-1">${j.Problem}</p>
                 </div>
-            `).join('') : '<div class="text-center py-20 text-slate-300 font-bold uppercase text-[10px]">No Assigned Tasks</div>';
+            `).join('') : '<p class="text-slate-300 font-bold uppercase text-[12px] py-20 italic">No Assigned Tasks</p>';
         }
 
         function showDetail(id) {
@@ -138,14 +121,14 @@
             document.getElementById('md-dept').innerText = j.Department || '-';
             document.getElementById('md-prob').innerText = j.Problem || '-';
 
-            // จัดการปุ่มตามสถานะ (แก้จุดที่ปุ่มหาย)
             let btn = '';
-            if (j.Status === 'รอรับงาน' || !j.Status) {
-                btn = `<button onclick="update('${j.JobID}', 'กำลังดำเนินการ')" class="w-full bg-blue-600 text-white py-4 rounded-full font-bold shadow-lg">🛠️ ACCEPT & START WORK</button>`;
+            // เงื่อนไข: ถ้าสถานะคือ "รอรับงาน" หรือยังไม่มีสถานะ ให้โชว์ปุ่มรับงาน
+            if (j.Status === 'รอรับงาน' || !j.Status || j.Status === '') {
+                btn = `<button onclick="update('${j.JobID}', 'กำลังดำเนินการ')" class="w-full bg-blue-600 text-white py-4 rounded-full font-bold shadow-lg uppercase">🛠️ Accept Work</button>`;
             } else if (j.Status === 'กำลังดำเนินการ') {
-                btn = `<button onclick="update('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-4 rounded-full font-bold shadow-lg">✅ MARK AS DONE</button>`;
+                btn = `<button onclick="update('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-4 rounded-full font-bold shadow-lg uppercase">✅ Mark as Done</button>`;
             } else {
-                btn = `<div class="text-center font-bold text-slate-400 italic">Job Status: ${j.Status}</div>`;
+                btn = `<div class="text-center font-bold text-slate-400 italic">Status: ${j.Status}</div>`;
             }
             document.getElementById('md-actions').innerHTML = btn;
             document.getElementById('modal-detail').style.display = 'flex';
@@ -153,10 +136,7 @@
 
         async function update(id, stat) {
             closeModal();
-            await fetch(API_URL, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'updateJobStatus', data: { JobID: id, Status: stat, Owner: currentUser.UserName } }) 
-            });
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJobStatus', data: { JobID: id, Status: stat, Owner: currentUser.UserName } }) });
             init();
         }
 
