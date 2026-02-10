@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT UDON HOSP - Management Pro</title>
+    <title>IT Service Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', sans-serif; background: #f8fafc; color: #1e293b; }
+        body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
         .pink-grad { background: linear-gradient(135deg, #be185d 0%, #db2777 100%); }
         .overlay { display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(8px); z-index:9999; justify-content:center; align-items:center; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .card-pro { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .card-pro:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         .status-pulse { animation: pulse-blue 2s infinite; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
     </style>
@@ -23,7 +22,7 @@
     <div id="loader" class="overlay">
         <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-pink-600 border-t-transparent mb-4"></div>
-            <p class="text-slate-600 font-bold text-xs uppercase tracking-widest italic">Syncing Systems...</p>
+            <p class="text-slate-600 font-bold text-xs uppercase italic">กำลังซิงค์ข้อมูล...</p>
         </div>
     </div>
 
@@ -37,15 +36,15 @@
                         <span id="display-utid" class="text-[9px] bg-black/20 px-2.5 py-1 rounded-md font-black uppercase tracking-widest border border-white/10"></span>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-white/20 w-10 h-10 rounded-2xl flex items-center justify-center hover:bg-white/40 transition-all">🚪</button>
+                <button onclick="logout()" class="bg-white/20 w-10 h-10 rounded-2xl flex items-center justify-center">🚪</button>
             </div>
         </header>
 
         <nav class="bg-white border-b border-slate-200 sticky top-[92px] z-40">
-            <div class="max-w-5xl mx-auto flex px-2">
-                <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-[11px] font-black border-b-4 border-pink-600 text-pink-600 uppercase tracking-tighter">Dashboard</button>
-                <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-[11px] font-black border-b-4 border-transparent text-slate-400 uppercase tracking-tighter">My Jobs</button>
-                <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-[11px] font-black border-b-4 border-transparent text-slate-400 uppercase tracking-tighter">🔗 SystemLink</button>
+            <div class="max-w-5xl mx-auto flex px-2 text-center">
+                <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-[11px] font-black border-b-4 border-pink-600 text-pink-600 uppercase">Dashboard</button>
+                <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-[11px] font-black border-b-4 border-transparent text-slate-400 uppercase">My Jobs</button>
+                <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-[11px] font-black border-b-4 border-transparent text-slate-400 uppercase">SystemLink</button>
             </div>
         </nav>
 
@@ -53,88 +52,48 @@
             
             <div id="tab1" class="tab-content active space-y-4">
                 <div class="grid grid-cols-5 gap-2">
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1 italic">New</p>
-                        <p id="count-wait" class="text-xl font-black text-blue-600 leading-none">0</p>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">New</p>
+                        <p id="count-wait" class="text-xl font-black text-blue-600">0</p>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1 italic">Doing</p>
-                        <p id="count-doing" class="text-xl font-black text-orange-500 leading-none">0</p>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Doing</p>
+                        <p id="count-doing" class="text-xl font-black text-orange-500">0</p>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1 italic">Spare</p>
-                        <p id="count-spare" class="text-xl font-black text-yellow-500 leading-none">0</p>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Spare</p>
+                        <p id="count-spare" class="text-xl font-black text-yellow-500">0</p>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1 italic">Done</p>
-                        <p id="count-done" class="text-xl font-black text-green-500 leading-none">0</p>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Done</p>
+                        <p id="count-done" class="text-xl font-black text-green-500">0</p>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1 italic">Cancel</p>
-                        <p id="count-cancel" class="text-xl font-black text-slate-300 leading-none">0</p>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Cancel</p>
+                        <p id="count-cancel" class="text-xl font-black text-slate-300">0</p>
                     </div>
                 </div>
                 <div id="job-list-dashboard" class="space-y-4"></div>
             </div>
 
             <div id="tab2" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center bg-white p-5 rounded-[2rem] border border-slate-200">
                     <div>
-                        <h2 class="text-pink-600 font-black text-sm uppercase tracking-widest">My Active Tickets</h2>
+                        <h2 class="text-pink-600 font-black text-sm uppercase">My Active Tickets</h2>
                         <p class="text-[11px] text-slate-400 font-bold italic">รายการงานที่คุณกำลังดำเนินการ</p>
                     </div>
-                    <button onclick="openModal('modal-add-job')" class="bg-pink-600 text-white px-5 py-2.5 rounded-2xl text-[11px] font-black shadow-lg shadow-pink-200 active:scale-95 transition-all">
-                        ➕ เพิ่มงานใหม่
-                    </button>
+                    <button onclick="openModal('modal-add-job')" class="bg-pink-600 text-white px-5 py-2.5 rounded-2xl text-[11px] font-black shadow-lg">➕ เพิ่มงานใหม่</button>
                 </div>
                 <div id="job-list-myjob" class="space-y-4"></div>
             </div>
 
             <div id="tab3" class="tab-content space-y-4">
                 <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
-                    <h2 class="text-slate-800 font-black text-lg flex items-center gap-3 mb-6 italic">
-                        <span class="p-2.5 bg-slate-100 rounded-2xl">🔗</span> SYSTEM GATEWAY
-                    </h2>
-                    <div id="external-link-list" class="grid grid-cols-1 gap-4">
-                        </div>
+                    <h2 class="text-slate-800 font-black text-lg flex items-center gap-3 mb-6 italic">🔗 SYSTEM GATEWAY</h2>
+                    <div id="external-link-list" class="grid grid-cols-1 gap-4"></div>
                 </div>
             </div>
         </main>
-    </div>
-
-    <div id="modal-add-job" class="overlay">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden m-4 flex flex-col">
-            <div class="pink-grad p-7 text-white flex justify-between items-center">
-                <h3 class="font-black text-lg italic">NEW IT_TICKET</h3>
-                <button onclick="closeModal('modal-add-job')" class="bg-white/20 w-9 h-9 rounded-2xl flex items-center justify-center font-bold">✕</button>
-            </div>
-            <div class="p-8 space-y-5">
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Job Classification</label>
-                    <select id="new-job-type" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mt-1.5 text-sm font-bold outline-none focus:border-pink-500">
-                        <option value="IT_Ticket">IT_Ticket</option>
-                        <option value="Hardware">Hardware Repair</option>
-                        <option value="Software">Software Support</option>
-                        <option value="Network">Network / Internet</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Priority</label>
-                    <select id="new-priority" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mt-1.5 text-sm font-bold outline-none focus:border-pink-500">
-                        <option value="ปกติ">ปกติ (Normal)</option>
-                        <option value="ด่วน">ด่วน (Urgent)</option>
-                        <option value="ด่วนที่สุด">ด่วนที่สุด (Critical)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Problem Details</label>
-                    <textarea id="new-problem" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mt-1.5 text-sm font-bold h-32 outline-none focus:border-pink-500" placeholder="กรุณาระบุรายละเอียด..."></textarea>
-                </div>
-                <button onclick="submitNewJob()" class="w-full pink-grad text-white py-5 rounded-[1.8rem] font-black shadow-xl shadow-pink-100 active:scale-95 transition-all mt-4">
-                    CREATE NEW TICKET
-                </button>
-            </div>
-        </div>
     </div>
 
     <div id="modal-detail" class="overlay">
@@ -142,29 +101,42 @@
             <div class="pink-grad p-8 text-white flex justify-between items-center shrink-0">
                 <div>
                     <h3 class="font-black text-2xl tracking-tighter italic" id="md-job-id"></h3>
-                    <p class="text-[10px] font-bold text-white/70 uppercase tracking-widest" id="md-job-type-label"></p>
+                    <p class="text-[10px] font-bold text-white/80 uppercase tracking-widest">แจ้งปัญหาการใช้งาน</p>
                 </div>
                 <button onclick="closeModal('modal-detail')" class="bg-white/20 w-10 h-10 rounded-2xl flex items-center justify-center font-bold">✕</button>
             </div>
-            <div class="p-8 space-y-8 overflow-y-auto">
-                <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200">
-                    <p class="font-black text-slate-400 text-[9px] uppercase tracking-widest mb-3">Asset Information</p>
-                    <p class="text-slate-800 font-black text-base" id="md-asset-name"></p>
-                    <p class="text-pink-600 font-bold text-xs mt-1">ID: <span id="md-asset-id"></span></p>
-                    <p id="md-asset-detail" class="text-slate-500 text-[11px] mt-2 italic font-medium"></p>
+            <div class="p-8 space-y-6 overflow-y-auto">
+                <div class="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
+                    <p class="font-black text-blue-500 text-[10px] uppercase mb-3">ข้อมูลครุภัณฑ์</p>
+                    <p class="text-slate-700 font-bold text-sm">AssetID: <span id="md-asset-id" class="text-blue-900"></span></p>
+                    <p class="text-slate-800 font-black text-base mt-1" id="md-asset-name"></p>
+                    <p id="md-asset-detail" class="text-blue-600/60 text-[11px] mt-1 italic font-bold"></p>
                 </div>
-                <div class="space-y-6">
+                <div class="space-y-4">
                     <div>
-                        <label class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Requested By</label>
-                        <p id="md-dept" class="font-bold text-slate-800 text-lg flex items-center gap-2 mt-1">🏢 <span></span></p>
+                        <label class="text-[10px] text-slate-400 font-black uppercase">หน่วยงานที่แจ้ง</label>
+                        <p id="md-dept" class="font-bold text-slate-800 text-base mt-1"></p>
                     </div>
-                    <div>
-                        <label class="text-[10px] text-pink-600 font-black uppercase tracking-widest italic">Problem Description</label>
-                        <div id="md-problem" class="bg-white p-6 rounded-3xl text-slate-600 text-sm border-2 border-slate-100 shadow-inner font-medium italic mt-2 leading-relaxed"></div>
+                    <div class="border-t border-dashed pt-4">
+                        <label class="text-[10px] text-pink-500 font-black uppercase italic">ปัญหา/อาการ</label>
+                        <div id="md-problem" class="bg-slate-50 p-5 rounded-3xl text-slate-600 text-sm border border-slate-100 italic mt-2"></div>
                     </div>
                 </div>
             </div>
-            <div id="md-actions" class="p-8 bg-slate-50 border-t border-slate-200 shrink-0"></div>
+            <div id="md-actions" class="p-8 bg-slate-50 border-t shrink-0"></div>
+        </div>
+    </div>
+
+    <div id="modal-add-job" class="overlay">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden m-4">
+            <div class="pink-grad p-7 text-white flex justify-between items-center">
+                <h3 class="font-black text-lg italic">เปิดงานใหม่</h3>
+                <button onclick="closeModal('modal-add-job')" class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-8 space-y-5">
+                <textarea id="new-problem" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold h-32 outline-none" placeholder="ระบุอาการเสีย..."></textarea>
+                <button onclick="submitNewJob()" class="w-full pink-grad text-white py-5 rounded-[1.8rem] font-black shadow-xl">บันทึกข้อมูลงาน</button>
+            </div>
         </div>
     </div>
 
@@ -172,13 +144,6 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
         let store = { AllJobs: [], BackupData: [] };
         let currentUser = JSON.parse(sessionStorage.getItem('it_user')) || { UserName: "ถินคำเชิด", UserTypeID: "ITExpert" };
-
-        // ข้อมูลจำลอง SystemLink (สามารถดึงจาก API ได้ในภายหลัง)
-        const systemLinks = [
-            { LinkID: "L001", Name: "HOSxP Database", URL: "https://hosxp.com", RoleAllow: "IT,ITExpert,Admin", Active: "Y", icon: "🏥" },
-            { LinkID: "L002", Name: "Asset Management", URL: "https://asset.com", RoleAllow: "IT,ITExpert,Admin", Active: "Y", icon: "📦" },
-            { LinkID: "L003", Name: "Admin Panel", URL: "https://admin.com", RoleAllow: "Admin", Active: "Y", icon: "⚙️" }
-        ];
 
         function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -208,25 +173,18 @@
             document.getElementById('count-cancel').innerText = jobs.filter(j => j.Status === 'ยกเลิก').length;
 
             document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => {
-                const prioColor = j.Priority === 'ด่วนที่สุด' ? 'bg-red-500' : (j.Priority === 'ด่วน' ? 'bg-orange-500' : 'bg-blue-500');
                 const borderS = j.Status === 'เสร็จสิ้น' ? 'border-green-500' : (j.Status === 'รอรับงาน' ? 'border-blue-600 status-pulse' : 'border-pink-600');
                 return `
-                <div onclick="viewJobDetail('${j.JobID}')" class="card-pro overflow-hidden border-l-[8px] ${borderS}">
+                <div onclick="viewJobDetail('${j.JobID}')" class="card-pro overflow-hidden border-l-[8px] ${borderS} mb-4">
                     <div class="p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="font-black text-slate-800 text-sm tracking-tighter">${j.JobID}</p>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase">${j.JobType || 'Support'}</p>
-                            </div>
-                            <div class="flex flex-col items-end gap-1.5">
-                                <span class="${prioColor} text-white text-[9px] px-2.5 py-1 rounded-lg font-black uppercase tracking-tighter">${j.Priority || 'ปกติ'}</span>
-                                <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md italic">SLA: ${j.SLA || '24h'}</span>
-                            </div>
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-black text-slate-800 text-sm tracking-tighter">${j.JobID}</p>
+                            <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded italic">SLA: ${j.SLA || '24h'}</span>
                         </div>
                         <p class="text-[15px] font-bold text-slate-700 leading-snug line-clamp-2">${j.Problem}</p>
-                        <div class="flex justify-between items-end mt-4 pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-end mt-4 pt-4 border-t border-slate-50">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">🏢 ${j.Department}</span>
-                            <span class="text-[10px] font-black px-4 py-1.5 rounded-xl uppercase tracking-widest ${getStatusStyle(j.Status)}">${j.Status}</span>
+                            <span class="text-[10px] font-black px-3 py-1 rounded-xl uppercase ${getStatusStyle(j.Status)}">${j.Status}</span>
                         </div>
                     </div>
                 </div>`;
@@ -236,47 +194,22 @@
         function renderMyJobs() {
             const myJobs = store.AllJobs.filter(j => j.Owner === currentUser.UserName);
             document.getElementById('job-list-myjob').innerHTML = myJobs.length ? myJobs.map(j => `
-                <div onclick="viewJobDetail('${j.JobID}')" class="card-pro p-6 bg-gradient-to-br from-white to-orange-50/20 border-l-[8px] border-orange-500">
-                    <div class="flex justify-between items-start mb-3">
-                        <p class="font-black text-orange-600 text-sm tracking-widest italic">${j.JobID}</p>
-                        <span class="text-[9px] font-black text-white bg-orange-500 px-3 py-1 rounded-full uppercase italic">Owner Active</span>
-                    </div>
+                <div onclick="viewJobDetail('${j.JobID}')" class="card-pro p-6 border-l-[8px] border-orange-500 bg-orange-50/10 mb-4">
+                    <p class="font-black text-orange-600 text-sm mb-2 italic">${j.JobID}</p>
                     <p class="text-[15px] font-bold text-slate-800 mb-4">${j.Problem}</p>
                     <div class="flex justify-between items-center">
                         <p class="text-[10px] font-black text-slate-400 uppercase">🏢 ${j.Department}</p>
-                        <span class="text-[10px] font-black text-orange-600 italic">● ${j.Status}</span>
+                        <span class="text-[10px] font-black text-orange-600 italic underline">● ${j.Status}</span>
                     </div>
                 </div>
-            `).join('') : '<div class="text-center py-20 text-slate-300 font-black uppercase tracking-widest italic text-[10px]">No assigned tickets</div>';
-        }
-
-        function renderSystemLinks() {
-            const userRole = currentUser.UserTypeID;
-            const filtered = systemLinks.filter(l => l.Active === 'Y' && l.RoleAllow.split(',').includes(userRole));
-            
-            document.getElementById('external-link-list').innerHTML = filtered.map(link => `
-                <button onclick="window.open('${link.URL}', '_blank')" class="group flex items-center justify-between p-5 bg-slate-50 rounded-[2rem] border border-slate-200 hover:bg-white hover:border-pink-500 hover:shadow-xl transition-all active:scale-[0.98]">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
-                            ${link.icon}
-                        </div>
-                        <div class="text-left">
-                            <p class="font-black text-slate-700 text-sm group-hover:text-pink-600 transition-colors">${link.Name}</p>
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">LinkID: ${link.LinkID}</p>
-                        </div>
-                    </div>
-                    <span class="text-slate-300 group-hover:text-pink-500 transform group-hover:translate-x-1 transition-all">❯</span>
-                </button>
-            `).join('');
+            `).join('') : '<div class="text-center py-20 text-slate-300 font-black uppercase text-[10px]">No assigned tickets</div>';
         }
 
         function getStatusStyle(status) {
             switch(status) {
                 case 'รอรับงาน': return 'bg-blue-600 text-white';
                 case 'กำลังดำเนินการ': return 'bg-orange-500 text-white';
-                case 'รออะไหล่': return 'bg-yellow-400 text-slate-800';
-                case 'เสร็จสิ้น': return 'bg-green-600 text-white shadow-lg';
-                case 'ยกเลิก': return 'bg-slate-300 text-slate-600';
+                case 'เสร็จสิ้น': return 'bg-green-600 text-white';
                 default: return 'bg-slate-100 text-slate-400';
             }
         }
@@ -285,32 +218,21 @@
             const j = store.AllJobs.find(x => x.JobID == id);
             if(!j) return;
             document.getElementById('md-job-id').innerText = j.JobID;
-            document.getElementById('md-job-type-label').innerText = j.JobType || 'Support';
-            document.querySelector('#md-dept span').innerText = j.Department || '-';
+            document.getElementById('md-dept').innerText = j.Department || '-';
             document.getElementById('md-problem').innerText = j.Problem || '-';
             const asset = store.BackupData.find(a => a.AssetID == j.AssetCode);
             document.getElementById('md-asset-id').innerText = j.AssetCode || '-';
-            document.getElementById('md-asset-name').innerText = asset ? asset.AssetName : 'Standard Equipment';
-            document.getElementById('md-asset-detail').innerText = asset ? asset.Detail : 'Configuration not verified';
+            document.getElementById('md-asset-name').innerText = asset ? asset.AssetName : 'เครื่องพิมพ์คอมพิวเตอร์แบบLaser';
+            document.getElementById('md-asset-detail').innerText = asset ? asset.Detail : 'ยี่ห้อ HP LASER 1020';
 
             let btnHtml = '';
             const status = j.Status.trim();
-            const utid = currentUser.UserTypeID;
-
-            if (['IT','ITExpert','Admin'].includes(utid)) {
-                if (status === 'รอรับงาน') {
-                    btnHtml = `<button onclick="updateStatus('${j.JobID}', 'กำลังดำเนินการ')" class="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black shadow-xl active:scale-95 uppercase tracking-widest">🛠️ Start Operation</button>`;
-                } else if (['กำลังดำเนินการ','รออะไหล่'].includes(status)) {
-                    btnHtml = `
-                        <button onclick="updateStatus('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-600 text-white py-5 rounded-[2rem] font-black shadow-xl mb-4 active:scale-95 uppercase tracking-widest flex items-center justify-center gap-3">✅ Finish & Close Ticket</button>
-                        <div class="grid grid-cols-3 gap-3">
-                            <button onclick="updateStatus('${j.JobID}', 'โอนงาน')" class="py-4 bg-slate-900 text-white rounded-2xl text-[9px] font-black">🔄 TRANSFER</button>
-                            <button onclick="updateStatus('${j.JobID}', 'รออะไหล่')" class="py-4 bg-yellow-500 text-white rounded-2xl text-[9px] font-black">⏸️ SPARE</button>
-                            <button onclick="updateStatus('${j.JobID}', 'ยกเลิก')" class="py-4 bg-red-600 text-white rounded-2xl text-[9px] font-black">❌ CANCEL</button>
-                        </div>`;
-                } else {
-                    btnHtml = `<div class="bg-slate-100 p-4 rounded-2xl text-center text-[10px] font-black text-slate-400 uppercase border-2 border-dashed">Job Status: ${status}</div>`;
-                }
+            if (status === 'รอรับงาน') {
+                btnHtml = `<button onclick="updateStatus('${j.JobID}', 'กำลังดำเนินการ')" class="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black shadow-xl flex items-center justify-center gap-3 italic"><span class="text-xl">🛠️</span> ACCEPT & START WORK</button>`;
+            } else if (status === 'กำลังดำเนินการ') {
+                btnHtml = `<button onclick="updateStatus('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-5 rounded-[2rem] font-black shadow-xl flex items-center justify-center gap-3 italic"><span class="text-xl">✅</span> บันทึกงานซ่อมสำเร็จ</button>`;
+            } else {
+                btnHtml = `<div class="text-center text-[10px] text-slate-400 font-bold uppercase italic border-t pt-4">งานอยู่ในสถานะ: ${status}</div>`;
             }
             document.getElementById('md-actions').innerHTML = btnHtml;
             openModal('modal-detail');
@@ -322,20 +244,7 @@
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJobStatus', data: { JobID: id, Status: newStatus, Owner: currentUser.UserName } }) });
                 const result = await res.json();
                 if (result.success) { closeModal('modal-detail'); await initApp(); }
-            } catch (e) { alert("Network Error"); } finally { showLoading(false); }
-        }
-
-        async function submitNewJob() {
-            const jobType = document.getElementById('new-job-type').value;
-            const priority = document.getElementById('new-priority').value;
-            const problem = document.getElementById('new-problem').value;
-            if(!problem) return alert("กรุณาระบุปัญหา");
-            showLoading(true);
-            try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addNewJob', data: { JobType: jobType, Priority: priority, Problem: problem, Owner: currentUser.UserName, Status: 'กำลังดำเนินการ' } }) });
-                const result = await res.json();
-                if (result.success) { closeModal('modal-add-job'); await initApp(); }
-            } catch (e) { alert("Failed to add job"); } finally { showLoading(false); }
+            } catch (e) { alert("Error"); } finally { showLoading(false); }
         }
 
         function switchTab(n) {
