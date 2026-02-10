@@ -9,21 +9,18 @@
     <style>
         body { font-family: 'Kanit', sans-serif; background: linear-gradient(180deg, #FFF5F7 0%, #FFFFFF 100%); min-height: 100vh; }
         .pink-grad { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-        
-        /* OVERLAY SYSTEM */
         .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:9999; justify-content:center; align-items:center; }
         
-        /* SLA COLOR BAR (จุดเด่น) */
+        /* SLA Status Bars */
         .sla-green { border-left: 6px solid #10b981 !important; background-color: #f0fdf4; }
         .sla-yellow { border-left: 6px solid #f59e0b !important; background-color: #fffbeb; }
         .sla-red { border-left: 6px solid #ef4444 !important; background-color: #fef2f2; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .card-custom { background: white; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(236,72,153,0.05); transition: all 0.3s ease; border: 1px solid #fce7f3; }
-        .card-custom:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(236,72,153,0.1); }
+        .card-custom { background: white; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(236,72,153,0.05); border: 1px solid #fce7f3; }
     </style>
 </head>
 <body>
@@ -38,24 +35,13 @@
     <div id="login-screen" class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border border-pink-50 text-center">
             <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-24 mx-auto mb-4">
-            <h1 class="text-2xl font-bold text-gray-800">IT UDON HOSP</h1>
-            <p class="text-gray-400 text-sm mb-8">Maintenance & Service System</p>
+            <h1 class="text-2xl font-bold text-gray-800 tracking-tight">IT UDON HOSP</h1>
+            <p class="text-gray-400 text-sm mb-8">เข้าสู่ระบบเพื่อจัดการงานซ่อม</p>
 
             <div id="form-login" class="space-y-4">
-                <input type="text" id="userpn" placeholder="ชื่อเข้าระบบ (UserPN)" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-pink-400 outline-none">
-                <input type="password" id="userpw" placeholder="รหัสผ่าน (UserPW)" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-pink-400 outline-none">
+                <input type="text" id="userpn" placeholder="UserPN" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-pink-400 outline-none">
+                <input type="password" id="userpw" placeholder="UserPW" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-pink-400 outline-none">
                 <button onclick="handleLogin()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition">เข้าสู่ระบบ</button>
-                <button onclick="toggleAuth(true)" class="text-pink-500 text-sm font-medium">ยืนยันตัวตนครั้งแรก</button>
-            </div>
-
-            <div id="form-register" class="hidden space-y-4 text-left">
-                <h3 class="font-bold text-gray-700 text-center">ลงทะเบียนและกำหนดรหัสผ่าน</h3>
-                <input type="email" id="reg-email" placeholder="Email ที่ลงทะเบียนไว้" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none outline-none">
-                <input type="text" id="reg-userpn" placeholder="กำหนด UserPN" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none outline-none">
-                <input type="text" id="reg-code" placeholder="Code จากอีเมล" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none outline-none">
-                <input type="password" id="reg-newpass" placeholder="กำหนด Password ใหม่" class="w-full px-5 py-4 rounded-2xl bg-gray-50 border-none outline-none">
-                <button onclick="handleRegister()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg">ยืนยันข้อมูล</button>
-                <button onclick="toggleAuth(false)" class="w-full text-center text-gray-400 text-sm">กลับไปหน้า Login</button>
             </div>
         </div>
     </div>
@@ -67,13 +53,13 @@
                     <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-14 bg-white rounded-2xl p-1 shadow-sm">
                     <div>
                         <h2 class="font-bold text-lg leading-tight">โรงพยาบาลอุดรธานี</h2>
-                        <p class="text-[10px] opacity-90 tracking-widest">IT MAINTENANCE SYSTEM</p>
+                        <p class="text-[10px] opacity-90 tracking-widest uppercase" id="display-role-name">IT STAFF</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <p id="u-name" class="font-bold text-sm"></p>
-                        <p id="u-role" class="text-[10px] bg-black/10 px-2 rounded-full inline-block"></p>
+                        <p id="u-role-id" class="text-[9px] bg-black/20 px-2 rounded-full inline-block"></p>
                     </div>
                     <img id="u-pic" src="" class="w-11 h-11 rounded-2xl border-2 border-white object-cover bg-white">
                     <button onclick="logout()" class="ml-2 bg-white/20 p-2.5 rounded-xl hover:bg-white/30 transition">🚪</button>
@@ -85,7 +71,7 @@
             <div class="max-w-7xl mx-auto flex">
                 <button onclick="switchTab(1)" id="t1" class="flex-1 py-5 text-sm font-bold border-b-4 border-pink-500 text-pink-500">DASHBOARD</button>
                 <button onclick="switchTab(2)" id="t2" class="flex-1 py-5 text-sm font-medium text-gray-400">บันทึกกิจกรรมซ่อม</button>
-                <button onclick="switchTab(3)" id="t3" class="flex-1 py-5 text-sm font-medium text-gray-400">ระบบภายนอก</button>
+                <button onclick="switchTab(3)" id="t3" class="flex-1 py-5 text-sm font-medium text-gray-400">ระบบอื่นๆ</button>
             </div>
         </nav>
 
@@ -95,22 +81,19 @@
                 
                 <div class="card-custom overflow-hidden border-none shadow-xl">
                     <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                            <span class="w-2 h-6 pink-grad rounded-full"></span> รายการ JobTicket
-                        </h3>
+                        <h3 class="font-bold text-slate-700 flex items-center gap-2">รายการแจ้งซ่อม (JobTicket)</h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
-                            <thead class="bg-slate-100 text-slate-400 text-[10px] uppercase tracking-widest">
+                            <thead class="bg-slate-100 text-slate-400 text-[10px] uppercase tracking-widest text-center">
                                 <tr>
                                     <th class="p-4 text-left">JobID</th>
-                                    <th class="p-4 text-left">อาการเสีย / หน่วยงาน</th>
-                                    <th class="p-4 text-center">สถานะ</th>
-                                    <th class="p-4 text-center">ดู</th>
+                                    <th class="p-4 text-left">รายละเอียด / หน่วยงาน</th>
+                                    <th class="p-4">สถานะ</th>
+                                    <th class="p-4">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="job-table-body" class="divide-y divide-gray-50">
-                                </tbody>
+                            <tbody id="job-table-body" class="divide-y divide-gray-50"></tbody>
                         </table>
                     </div>
                 </div>
@@ -118,8 +101,8 @@
 
             <div id="tab2" class="tab-content space-y-6">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800 text-xl">กิจกรรมของฉัน</h3>
-                    <button onclick="openModal('modal-it-ticket')" class="pink-grad text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:shadow-pink-200 transition">+ เพิ่มบันทึก</button>
+                    <h3 class="font-bold text-slate-800 text-xl">IT_TICKET บันทึกงาน</h3>
+                    <button onclick="openModal('modal-it-ticket')" class="pink-grad text-white px-8 py-3 rounded-2xl font-bold shadow-lg">+ เพิ่มบันทึก</button>
                 </div>
                 <div id="my-ticket-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
@@ -140,9 +123,9 @@
             
             <div class="p-8 space-y-6">
                 <div class="flex items-center gap-5 bg-pink-50 p-6 rounded-[2rem] border border-pink-100">
-                    <div class="text-3xl">📞</div>
+                    <div class="text-3xl bg-white p-3 rounded-2xl shadow-sm">📞</div>
                     <div>
-                        <label class="text-[10px] uppercase text-pink-400 font-bold block">เบอร์ติดต่อ</label>
+                        <label class="text-[10px] uppercase text-pink-400 font-bold block">เบอร์โทรศัพท์ติดต่อ</label>
                         <p id="md-tel" class="text-2xl font-bold text-pink-600 tracking-wider">--</p>
                     </div>
                 </div>
@@ -153,34 +136,33 @@
                         <p id="md-dept" class="font-bold text-slate-700"></p>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400 block font-bold uppercase">ผู้แจ้ง</label>
+                        <label class="text-xs text-slate-400 block font-bold uppercase">ผู้แจ้งเจ้าหน้าที่</label>
                         <p id="md-createby" class="font-bold text-slate-700"></p>
                     </div>
                     <div class="col-span-2 border-t pt-4">
-                        <label class="text-xs text-slate-400 block font-bold uppercase mb-2">อาการ / รายละเอียด</label>
+                        <label class="text-xs text-slate-400 block font-bold uppercase mb-2">อาการเสีย / รายละเอียด</label>
                         <div id="md-problem" class="bg-slate-50 p-4 rounded-2xl text-slate-600 leading-relaxed border border-slate-100"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="md-actions" class="p-6 bg-slate-50 flex gap-3 border-t"></div>
+            <div id="md-actions" class="p-6 bg-slate-50 flex gap-3 border-t">
+                </div>
         </div>
     </div>
 
     <div id="modal-it-ticket" class="overlay">
         <div class="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div class="bg-slate-800 p-6 text-white text-center">
-                <h3 class="font-bold">แบบบันทึกกิจกรรม IT_TICKET</h3>
-            </div>
+            <div class="bg-slate-800 p-6 text-white text-center"><h3 class="font-bold">บันทึกกิจกรรม IT_TICKET</h3></div>
             <div class="p-8 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="f-type" onchange="updateSubTypes()" class="p-4 rounded-xl bg-slate-100 border-none outline-none text-sm"></select>
-                    <select id="f-sub" class="p-4 rounded-xl bg-slate-100 border-none outline-none text-sm"></select>
+                    <select id="f-type" onchange="updateSubTypes()" class="p-4 rounded-xl bg-slate-100 border-none text-sm"></select>
+                    <select id="f-sub" class="p-4 rounded-xl bg-slate-100 border-none text-sm"></select>
                 </div>
-                <input type="text" id="f-dept" list="list-dept" placeholder="ค้นหาหน่วยงาน..." class="w-full p-4 rounded-xl bg-slate-100 border-none text-sm">
-                <input type="text" id="f-asset" list="list-asset" placeholder="เลขครุภัณฑ์..." class="w-full p-4 rounded-xl bg-slate-100 border-none text-sm">
-                <textarea id="f-problem" placeholder="รายละเอียดการซ่อม/กิจกรรม..." class="w-full p-4 rounded-xl bg-slate-100 border-none h-28 text-sm"></textarea>
-                <button onclick="saveITTicket()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg mt-2">💾 บันทึกข้อมูล</button>
+                <input type="text" id="f-dept" list="list-dept" placeholder="ระบุหน่วยงาน..." class="w-full p-4 rounded-xl bg-slate-100 border-none text-sm">
+                <input type="text" id="f-asset" list="list-asset" placeholder="เลขครุภัณฑ์ (ถ้ามี)..." class="w-full p-4 rounded-xl bg-slate-100 border-none text-sm">
+                <textarea id="f-problem" placeholder="รายละเอียดการดำเนินการ..." class="w-full p-4 rounded-xl bg-slate-100 border-none h-28 text-sm"></textarea>
+                <button onclick="saveITTicket()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold">💾 บันทึกข้อมูล</button>
             </div>
         </div>
     </div>
@@ -189,36 +171,27 @@
     <datalist id="list-asset"></datalist>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec'; // ใส่ URL จากการ Deploy ของคุณ
         let store = {};
         let currentUser = null;
 
-        // --- CORE UI ---
         function showLoading(v, text = "กำลังประมวลผล...") {
             document.getElementById('loader-text').innerText = text;
             document.getElementById('loader').style.display = v ? 'flex' : 'none';
         }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function toggleAuth(isReg) {
-            document.getElementById('form-login').classList.toggle('hidden', isReg);
-            document.getElementById('form-register').classList.toggle('hidden', !isReg);
-        }
 
         async function apiPost(action, data = {}) {
             showLoading(true);
             try {
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, data }) });
-                const result = await res.json();
-                if(!result.success && result.message) alert(result.message);
-                return result;
+                return await res.json();
             } catch (e) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-                return { success: false };
+                alert("การเชื่อมต่อล้มเหลว"); return { success: false };
             } finally { showLoading(false); }
         }
 
-        // --- AUTH ---
         async function handleLogin() {
             const user = document.getElementById('userpn').value;
             const pass = document.getElementById('userpw').value;
@@ -227,26 +200,17 @@
                 currentUser = res.user;
                 sessionStorage.setItem('it_user', JSON.stringify(currentUser));
                 initApp();
-            }
+            } else { alert("User หรือ Password ไม่ถูกต้อง"); }
         }
 
-        async function handleRegister() {
-            const data = {
-                email: document.getElementById('reg-email').value,
-                userpn: document.getElementById('reg-userpn').value,
-                code: document.getElementById('reg-code').value,
-                newpass: document.getElementById('reg-newpass').value
-            };
-            const res = await apiPost('verifyFirstTime', data);
-            if(res.success) { alert("ลงทะเบียนสำเร็จ"); toggleAuth(false); }
-        }
-
-        // --- APP ---
         async function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('u-name').innerText = currentUser.UserName;
-            document.getElementById('u-role').innerText = currentUser.UserTypeName;
+            
+            // แสดงข้อมูลผู้ใช้ตามโครงสร้าง ITUsers
+            document.getElementById('u-name').innerText = currentUser.UserName + " " + (currentUser.UserSname || "");
+            document.getElementById('u-role-id').innerText = currentUser.UserTypeID;
+            document.getElementById('display-role-name').innerText = currentUser.UserTypeName || "IT STAFF";
             document.getElementById('u-pic').src = currentUser.UserPic || 'https://www.w3schools.com/howto/img_avatar.png';
 
             store = await apiPost('getInitialData');
@@ -258,46 +222,47 @@
         function renderDashboard() {
             const jobs = store.JobTicket || [];
             
-            // Stats
-            const stats = {
-                total: jobs.length,
-                wait: jobs.filter(j => j.Status === 'รอรับงาน').length,
-                proc: jobs.filter(j => j.Status === 'กำลังดำเนินการ').length,
-                done: jobs.filter(j => j.Status === 'เสร็จสิ้น').length
-            };
+            // สรุปตัวเลข
+            const wait = jobs.filter(j => j.Status === 'รอรับงาน').length;
+            const proc = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+            const done = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
+
             document.getElementById('stats-summary').innerHTML = `
                 <div class="card-custom p-5 border-b-4 border-pink-500 text-center">
                     <p class="text-[10px] text-slate-400 font-bold uppercase">งานทั้งหมด</p>
-                    <p class="text-2xl font-bold">${stats.total}</p>
+                    <p class="text-2xl font-bold">${jobs.length}</p>
                 </div>
                 <div class="card-custom p-5 border-b-4 border-orange-400 text-center">
                     <p class="text-[10px] text-orange-400 font-bold uppercase">รอรับงาน</p>
-                    <p class="text-2xl font-bold text-orange-500">${stats.wait}</p>
+                    <p class="text-2xl font-bold text-orange-500">${wait}</p>
                 </div>
                 <div class="card-custom p-5 border-b-4 border-blue-400 text-center">
                     <p class="text-[10px] text-blue-400 font-bold uppercase">กำลังทำ</p>
-                    <p class="text-2xl font-bold text-blue-500">${stats.proc}</p>
+                    <p class="text-2xl font-bold text-blue-500">${proc}</p>
                 </div>
                 <div class="card-custom p-5 border-b-4 border-green-500 text-center">
                     <p class="text-[10px] text-green-400 font-bold uppercase">เสร็จสิ้น</p>
-                    <p class="text-2xl font-bold text-green-500">${stats.done}</p>
+                    <p class="text-2xl font-bold text-green-500">${done}</p>
                 </div>
             `;
 
-            // Table with SLA
-            document.getElementById('job-table-body').innerHTML = jobs.map(j => `
-                <tr class="${getSLA(j.Timestamp, j.Status)} hover:bg-white transition cursor-pointer" onclick="viewJobDetail('${j.JobID}')">
-                    <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
-                    <td class="p-4">
-                        <div class="font-bold text-slate-700">${j.Problem}</div>
-                        <div class="text-[10px] text-slate-400">${j.Department}</div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-white border">${j.Status}</span>
-                    </td>
-                    <td class="p-4 text-center">🔍</td>
-                </tr>
-            `).join('');
+            // ตารางพร้อม SLA แถบสี
+            document.getElementById('job-table-body').innerHTML = jobs.map(j => {
+                const sla = getSLA(j.Timestamp, j.Status);
+                return `
+                    <tr class="${sla} hover:bg-white transition cursor-pointer" onclick="viewJobDetail('${j.JobID}')">
+                        <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
+                        <td class="p-4">
+                            <div class="font-bold text-slate-700">${j.Problem}</div>
+                            <div class="text-[10px] text-slate-400">${j.Department}</div>
+                        </td>
+                        <td class="p-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-white border">${j.Status}</span>
+                        </td>
+                        <td class="p-4 text-center">🔍</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function getSLA(ts, status) {
@@ -308,6 +273,7 @@
             return 'sla-green';
         }
 
+        // --- จุดเด่น: ตรวจสอบ UserTypeID เพื่อแสดงปุ่ม ---
         function viewJobDetail(id) {
             const j = store.JobTicket.find(x => x.JobID === id);
             document.getElementById('md-job-id').innerText = j.JobID;
@@ -318,11 +284,17 @@
             document.getElementById('md-timestamp').innerText = "แจ้งเมื่อ: " + new Date(j.Timestamp).toLocaleString('th-TH');
 
             let btns = '';
-            if (currentUser.UserTypeID === 'IT' && j.Status === 'รอรับงาน') {
-                btns = `<button onclick="updateJob('${j.JobID}', 'กำลังดำเนินการ')" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg">🛠️ รับงานนี้ทันที</button>`;
-            } else if (currentUser.UserTypeID === 'Boss' && j.Status === 'รอรับงาน') {
-                btns = `<button onclick="assignJob('${j.JobID}')" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold">🎯 มอบหมายช่าง</button>`;
-            } else if (j.Status === 'กำลังดำเนินการ' && currentUser.UserTypeID === 'IT') {
+            const role = currentUser.UserTypeID; // ตรวจสอบจาก UserTypeID ในฐานข้อมูล
+
+            if (j.Status === 'รอรับงาน') {
+                if (role === 'IT') {
+                    // ปุ่มสำหรับช่าง IT
+                    btns = `<button onclick="updateJob('${j.JobID}', 'กำลังดำเนินการ')" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg">🛠️ รับงานนี้ทันที (Self-Assign)</button>`;
+                } else if (role === 'Boss' || role === 'Supervisor') {
+                    // ปุ่มสำหรับหัวหน้า
+                    btns = `<button onclick="assignJob('${j.JobID}')" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold">🎯 มอบหมายงานช่าง</button>`;
+                }
+            } else if (j.Status === 'กำลังดำเนินการ' && role === 'IT') {
                 btns = `<button onclick="updateJob('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold">✅ บันทึกปิดงาน</button>`;
             }
 
@@ -335,11 +307,19 @@
             if (res.success) { closeModal('modal-detail'); initApp(); }
         }
 
+        async function assignJob(id) {
+            const name = prompt("ระบุชื่อช่างที่ต้องการมอบหมาย:");
+            if(name) {
+                const res = await apiPost('updateJobStatus', { JobID: id, Status: 'กำลังดำเนินการ', Owner: name });
+                if (res.success) { closeModal('modal-detail'); initApp(); }
+            }
+        }
+
         function renderLinks() {
-            document.getElementById('tab3').innerHTML = store.SystemLink.map(l => `
+            document.getElementById('tab3').innerHTML = (store.SystemLink || []).map(l => `
                 <a href="${l.URL}" target="_blank" class="card-custom p-6 flex flex-col items-center">
-                    <img src="${l.Linkicon}" class="w-12 h-12 mb-3 object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2065/2065157.png'">
-                    <span class="text-[10px] font-bold text-slate-600 text-center leading-tight">${l.Name}</span>
+                    <img src="${l.Linkicon}" class="w-12 h-12 mb-3 object-contain">
+                    <span class="text-[10px] font-bold text-slate-600 text-center">${l.Name}</span>
                 </a>
             `).join('');
         }
