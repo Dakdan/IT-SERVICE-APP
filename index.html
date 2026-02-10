@@ -12,8 +12,8 @@
         .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:9999; justify-content:center; align-items:center; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .card-custom { background: white; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(236,72,153,0.05); transition: all 0.2s; }
-        .card-custom:active { transform: scale(0.98); }
+        .card-custom { background: white; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(236,72,153,0.05); }
+        .stat-card { @apply p-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm border border-white; }
     </style>
 </head>
 <body>
@@ -59,11 +59,41 @@
         </nav>
 
         <main class="max-w-5xl mx-auto p-4 space-y-6">
+            
             <div id="tab1" class="tab-content active space-y-4">
+                <div class="grid grid-cols-3 md:grid-cols-5 gap-2" id="status-summary">
+                    <div class="stat-card bg-blue-50 text-blue-600">
+                        <span class="text-lg">🆕</span>
+                        <p class="text-[9px] font-bold uppercase">รอรับงาน</p>
+                        <p id="count-wait" class="text-lg font-bold">0</p>
+                    </div>
+                    <div class="stat-card bg-orange-50 text-orange-600">
+                        <span class="text-lg">🛠️</span>
+                        <p class="text-[9px] font-bold uppercase">ดำเนินการ</p>
+                        <p id="count-doing" class="text-lg font-bold">0</p>
+                    </div>
+                    <div class="stat-card bg-yellow-50 text-yellow-600">
+                        <span class="text-lg">⏸️</span>
+                        <p class="text-[9px] font-bold uppercase">รออะไหล่</p>
+                        <p id="count-spare" class="text-lg font-bold">0</p>
+                    </div>
+                    <div class="stat-card bg-green-50 text-green-600">
+                        <span class="text-lg">✅</span>
+                        <p class="text-[9px] font-bold uppercase">เสร็จสิ้น</p>
+                        <p id="count-done" class="text-lg font-bold">0</p>
+                    </div>
+                    <div class="stat-card bg-gray-50 text-gray-600">
+                        <span class="text-lg">❌</span>
+                        <p class="text-[9px] font-bold uppercase">ยกเลิก</p>
+                        <p id="count-cancel" class="text-lg font-bold">0</p>
+                    </div>
+                </div>
+
                 <div id="job-list-dashboard" class="space-y-3"></div>
             </div>
+
             <div id="tab2" class="tab-content space-y-4">
-                <button onclick="openModal('modal-it-ticket')" class="w-full pink-grad text-white p-4 rounded-2xl font-bold shadow-md">+ เพิ่มงานใหม่</button>
+                <button onclick="openModal('modal-it-ticket')" class="w-full pink-grad text-white p-4 rounded-2xl font-bold shadow-md">+ เพิ่มงาน IT_TICKET</button>
                 <div id="job-list-myjob" class="space-y-3 mt-4"></div>
             </div>
         </main>
@@ -75,7 +105,8 @@
                 <h3 class="font-bold text-lg" id="md-job-id">JOB-ID</h3>
                 <button onclick="closeModal('modal-detail')" class="bg-white/20 w-8 h-8 rounded-full">✕</button>
             </div>
-            <div class="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+            
+            <div class="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
                 <div id="asset-display-section" class="hidden">
                     <div class="bg-blue-50 p-5 rounded-[1.5rem] border border-blue-100 space-y-3 text-sm">
                         <p class="font-bold text-blue-500 uppercase text-[10px]">รายละเอียดครุภัณฑ์</p>
@@ -92,7 +123,7 @@
                     </div>
                 </div>
             </div>
-            <div id="md-actions" class="p-6 bg-gray-50 flex gap-3 border-t"></div>
+            <div id="md-actions" class="p-6 bg-gray-50 border-t"></div>
         </div>
     </div>
 
@@ -130,7 +161,6 @@
             document.getElementById('u-name').innerText = currentUser.UserName;
             document.getElementById('display-role-name').innerText = currentUser.UserTypeName;
             
-            // ส่ง userName เพื่อให้ Backend กรอง MyJob
             store = await apiPost('getInitialData', { userName: currentUser.UserName });
             
             renderDashboard();
@@ -139,57 +169,83 @@
 
         function renderDashboard() {
             const jobs = store.AllJobs || [];
+            
+            // สรุปจำนวนตามสถานะ
+            const counts = {
+                wait: jobs.filter(j => j.Status === 'รอรับงาน').length,
+                doing: jobs.filter(j => j.Status === 'กำลังดำเนินการ').length,
+                spare: jobs.filter(j => j.Status === 'รออะไหล่').length,
+                done: jobs.filter(j => j.Status === 'เสร็จสิ้น').length,
+                cancel: jobs.filter(j => j.Status === 'ยกเลิก').length
+            };
+
+            document.getElementById('count-wait').innerText = counts.wait;
+            document.getElementById('count-doing').innerText = counts.doing;
+            document.getElementById('count-spare').innerText = counts.spare;
+            document.getElementById('count-done').innerText = counts.done;
+            document.getElementById('count-cancel').innerText = counts.cancel;
+
             document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => createCard(j)).join('');
         }
 
         function renderMyJobs() {
             const jobs = store.MyJobs || [];
-            document.getElementById('job-list-myjob').innerHTML = jobs.length ? jobs.map(j => createCard(j)).join('') : '<p class="text-center py-10 text-gray-400 text-xs">ไม่มีงานรับผิดชอบ</p>';
+            document.getElementById('job-list-myjob').innerHTML = jobs.map(j => createCard(j)).join('');
         }
 
         function createCard(j) {
-            return `<div onclick="viewJobDetail('${j.JobID}')" class="card-custom p-5 border-l-4 ${j.Status === 'เสร็จสิ้น' ? 'border-green-400' : 'border-pink-500'} cursor-pointer">
-                <div class="flex justify-between items-start mb-2">
-                    <p class="font-bold text-pink-600 text-sm">${j.JobID}</p>
-                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-gray-100 font-bold text-gray-500">${j.Status}</span>
+            let statusColor = 'border-pink-500';
+            if(j.Status === 'เสร็จสิ้น') statusColor = 'border-green-400';
+            if(j.Status === 'รอรับงาน') statusColor = 'border-blue-400';
+            if(j.Status === 'รออะไหล่') statusColor = 'border-yellow-400';
+            if(j.Status === 'ยกเลิก') statusColor = 'border-gray-300';
+
+            return `
+                <div onclick="viewJobDetail('${j.JobID}')" class="card-custom p-5 border-l-4 ${statusColor} cursor-pointer active:scale-95 transition-all">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-bold text-pink-600 text-sm">${j.JobID}</p>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-gray-100 font-bold text-gray-500 uppercase">${j.Status}</span>
+                    </div>
+                    <p class="text-xs font-bold text-gray-700 truncate">${j.Problem || 'ไม่ระบุปัญหา'}</p>
+                    <p class="text-[9px] text-gray-400 mt-1 uppercase font-medium">${j.JobType || 'งานซ่อม'} • ${j.Department || '-'}</p>
                 </div>
-                <p class="text-xs font-bold text-gray-700 truncate">${j.Problem}</p>
-                <p class="text-[9px] text-gray-400 mt-1 uppercase font-medium">${j.JobType} • ${j.Department}</p>
-            </div>`;
+            `;
         }
 
         function viewJobDetail(id) {
             const j = (store.AllJobs || []).find(x => x.JobID == id);
-            if (!j) return;
-
+            if(!j) return;
+            
             document.getElementById('md-job-id').innerText = j.JobID;
-            document.getElementById('md-dept').innerText = j.Department;
-            document.getElementById('md-problem').innerText = j.Problem;
+            document.getElementById('md-dept').innerText = j.Department || '-';
+            document.getElementById('md-problem').innerText = j.Problem || '-';
 
             const assetSec = document.getElementById('asset-display-section');
-            if (j.AssetCode || j.NOID) {
+            if(j.AssetCode || j.NOID) {
                 assetSec.classList.remove('hidden');
-                // ค้นหาข้อมูลจาก BackupData (AssetID คือคอลัมน์ที่ 4 ตามที่คุณระบุ)
-                const asset = (store.BackupData || []).find(a => a.AssetID == j.AssetCode || a.NOID == j.AssetCode);
-                document.getElementById('md-asset-id').innerText = asset ? asset.AssetID : (j.AssetCode || '-');
-                document.getElementById('md-asset-name').innerText = asset ? asset.AssetName : 'เครื่องพิมพ์คอมพิวเตอร์แบบLaser';
-                document.getElementById('md-asset-detail').innerText = asset ? asset.Detail : 'ยี่ห้อ NEC รุ่น P2000';
+                const asset = (store.BackupData || []).find(a => a.AssetID == (j.AssetCode || j.NOID) || a.NOID == (j.AssetCode || j.NOID));
+                document.getElementById('md-asset-id').innerText = asset ? asset.AssetID : (j.AssetCode || j.NOID);
+                document.getElementById('md-asset-name').innerText = asset ? asset.AssetName : 'ไม่พบข้อมูลครุภัณฑ์';
+                document.getElementById('md-asset-detail').innerText = asset ? asset.Detail : '';
             } else { assetSec.classList.add('hidden'); }
 
-            // ส่วนของปุ่มรับงาน (ย้ายมาไว้ใน Modal)
             let btns = '';
             if (j.Status === 'รอรับงาน' && currentUser.UserTypeID === 'IT') {
                 btns = `<button onclick="updateJob('${j.JobID}', 'กำลังดำเนินการ')" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg">🛠️ กดเพื่อรับงานนี้</button>`;
-            } else if (j.Status === 'กำลังดำเนินการ' && j.Owner === currentUser.UserName) {
+            } else if (j.Status === 'กำลังดำเนินการ' && (j.Owner === currentUser.UserName || currentUser.UserTypeID === 'IT')) {
                 btns = `<button onclick="updateJob('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold shadow-lg">✅ บันทึกงานซ่อมสำเร็จ</button>`;
             }
             document.getElementById('md-actions').innerHTML = btns;
+            
             openModal('modal-detail');
         }
 
         async function updateJob(id, status) {
-            // ส่งค่า Status และ Owner ไปที่ Backend เพื่ออัปเดต
-            const res = await apiPost('updateJobStatus', { JobID: id, Status: status, Owner: currentUser.UserName });
+            const res = await apiPost('updateJobStatus', { 
+                JobID: id, 
+                Status: status, 
+                Owner: currentUser.UserName 
+            });
             if (res.success) { closeModal('modal-detail'); initApp(); }
         }
 
