@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IT Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        .pink-grad { background: linear-gradient(135deg, #be185d 0%, #db2777 100%); }
+    </style>
+</head>
+<body class="pink-grad min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden">
+        <div class="p-10 text-center">
+            <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-20 mx-auto mb-6 drop-shadow-lg">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tighter uppercase italic">IT Service Login</h1>
+            <p class="text-slate-400 text-xs font-bold mt-2 tracking-widest uppercase italic">Udon Thani Hospital</p>
+            
+            <div class="mt-10 space-y-4">
+                <input type="text" id="username" placeholder="ชื่อผู้ใช้งาน" 
+                    class="w-full p-5 bg-slate-50 border border-slate-200 rounded-[1.5rem] text-sm font-bold outline-none focus:ring-4 focus:ring-pink-100 transition-all">
+                
+                <select id="userRole" class="w-full p-5 bg-slate-50 border border-slate-200 rounded-[1.5rem] text-sm font-bold outline-none">
+                    <option value="ITExpert">IT Expert</option>
+                    <option value="IT">IT Staff</option>
+                    <option value="Admin">System Admin</option>
+                </select>
+
+                <button onclick="handleLogin()" class="w-full pink-grad text-white py-5 rounded-[2rem] font-black shadow-xl shadow-pink-200 active:scale-95 transition-all mt-4 uppercase tracking-widest">
+                    เข้าสู่ระบบ 🚪
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin() {
+            const user = document.getElementById('username').value;
+            const role = document.getElementById('userRole').value;
+
+            if (!user) return alert("กรุณาระบุชื่อผู้ใช้งาน");
+
+            // บันทึกข้อมูลลง Session
+            const userData = { UserName: user, UserTypeID: role };
+            sessionStorage.setItem('it_user', JSON.stringify(userData));
+
+            // ไปที่หน้า Index
+            window.location.href = 'index.html';
+        }
+
+        // เช็คว่าถ้า Login ค้างไว้แล้ว ให้ไปหน้า index ทันที
+        if (sessionStorage.getItem('it_user')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
