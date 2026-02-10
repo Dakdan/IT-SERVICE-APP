@@ -1,326 +1,846 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT UDON HOSP - Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Kanit', sans-serif; background-color: #fff5f7; }
-        .pink-grad { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .loading-overlay { display:none; position:fixed; inset:0; background:rgba(255,255,255,0.8); z-index:100; justify-content:center; align-items:center; flex-direction:column; }
-    </style>
-</head>
-<body class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT UDON HOSP - ระบบจัดการงานบริการและซ่อมอุปกรณ์</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body, #app { height: 100%; width: 100%; }
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(180deg, #fce7f3 0%, #fdf2f8 30%, #ffffff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #app {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-    <div id="loading" class="loading-overlay">
-        <div class="animate-spin text-pink-500 mb-4"><i data-lucide="loader-2" size="48"></i></div>
-        <p class="text-pink-600 font-bold">กำลังประมวลผล...</p>
+    body::before {
+      content: 'IT UDON HOSP';
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 120px;
+      font-weight: 700;
+      color: rgba(236, 72, 153, 0.03);
+      z-index: 0;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .container-main {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 40;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(236, 72, 153, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(236, 72, 153, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #ec4899;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 2px solid #ec4899;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #fce7f3;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.1);
+      border: 1px solid rgba(236, 72, 153, 0.1);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-waiting { background: #fee2e2; color: #991b1b; }
+    .badge-progress { background: #fef3c7; color: #92400e; }
+    .badge-done { background: #dcfce7; color: #166534; }
+    .badge-high { background: #fee2e2; color: #991b1b; }
+    .badge-medium { background: #fef3c7; color: #92400e; }
+    .badge-low { background: #dcfce7; color: #166534; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      display: none;
+      z-index: 50;
+      animation: slideInUp 0.3s ease;
+    }
+
+    .toast.active { display: flex; gap: 12px; align-items: center; }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-success { border-left: 4px solid #10b981; }
+    .toast-error { border-left: 4px solid #ef4444; }
+    .toast-warning { border-left: 4px solid #f59e0b; }
+    .toast-info { border-left: 4px solid #3b82f6; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .stat-box {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(236, 72, 153, 0.1);
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ec4899;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: #fce7f3;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 2px solid #fbcfe8;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #f3e8f3;
+    }
+
+    tr:hover {
+      background: #fdf2f8;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      .modal {
+        padding: 24px;
+      }
+      table { font-size: 12px; }
+      th, td { padding: 8px; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body>
+  <div id="app" class="container-main"><!-- LOGIN PAGE -->
+   <div id="loginPage" class="flex items-center justify-center h-full">
+    <div class="card w-full max-w-md mx-4">
+     <div class="text-center mb-8"><img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="โรงพยาบาล" class="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-pink-200 object-cover">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">โรงพยาบาลอุดรธานี</h1>
+      <p class="text-sm text-pink-600">กลุ่มงาน: เทคโนโลยีสารสนเทศ</p>
+      <p class="text-xs text-gray-500 mt-2">ระบบจัดการงานบริการและซ่อมอุปกรณ์คอมพิวเตอร์</p>
+     </div>
+     <div id="loginForm" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้ใช้งาน</label> <input type="text" id="loginUsername" placeholder="กรอกชื่อผู้ใช้งาน" class="w-full">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน" class="w-full">
+      </div><button onclick="handleLogin()" class="btn-primary w-full">🔓 เข้าสู่ระบบ</button>
+      <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-xs text-blue-800">
+       <p class="font-semibold mb-1">📘 ตัวอย่างข้อมูล:</p>
+       <p>👤 k7 / 212224</p>
+       <p>👤 admin / 1234</p>
+      </div>
+     </div>
+     <div class="mt-6 text-center space-y-3">
+      <p class="text-sm text-gray-600">ครั้งแรกเข้าใช้งาน?</p><button onclick="showFirstTimeVerify()" class="btn-secondary w-full">📝 ยืนยันตัวตน</button>
+     </div>
     </div>
-
-    <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border border-pink-100">
-            <div class="text-center mb-8">
-                <div class="inline-block p-4 rounded-full bg-pink-50 mb-4 text-pink-500">
-                    <i data-lucide="shield-check" size="48"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-gray-800">IT UDON HOSP</h1>
-                <p class="text-gray-500">ระบบจัดการงานบริการคอมพิวเตอร์</p>
-            </div>
-            <div class="space-y-4">
-                <input type="text" id="userpn" placeholder="ชื่อผู้ใช้งาน (UserPN)" class="w-full px-6 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-pink-300 outline-none">
-                <input type="password" id="userpw" placeholder="รหัสผ่าน" class="w-full px-6 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-pink-300 outline-none">
-                <button onclick="doLogin()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg hover:opacity-90 transition flex justify-center items-center gap-2">
-                    <i data-lucide="log-in" size="20"></i> เข้าสู่ระบบ
-                </button>
-            </div>
+   </div><!-- MAIN APP -->
+   <div id="mainApp" class="hidden flex flex-col h-full"><!-- HEADER -->
+    <header class="bg-gradient-to-b from-pink-50 to-white shadow-lg sticky top-0 z-30 border-b-4 border-pink-200">
+     <div class="max-w-full px-6 py-4">
+      <div class="flex items-center justify-between gap-6">
+       <div class="flex items-center gap-5"><img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="โรงพยาบาลอุดรธานี" class="w-16 h-16 rounded-full shadow-md border-4 border-pink-200 object-cover">
+        <div class="flex flex-col justify-center">
+         <h1 class="text-xl font-bold text-gray-800 leading-tight">โรงพยาบาลอุดรธานี</h1>
+         <p class="text-sm font-semibold text-pink-600">กลุ่มงาน: เทคโนโลยีสารสนเทศ</p>
+         <p class="text-xs text-gray-600 mt-1">ระบบจัดการงานบริการและซ่อมอุปกรณ์คอมพิวเตอร์</p>
         </div>
+       </div>
+       <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 bg-white rounded-2xl px-5 py-3 shadow-md border-2 border-pink-100"><img id="userProfileImg" src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Profile" class="w-12 h-12 rounded-full border-3 border-pink-300 object-cover">
+         <div class="text-right flex flex-col justify-center">
+          <p id="userName" class="font-bold text-gray-800 text-sm">ผู้ใช้งาน</p>
+          <p id="userRole" class="text-xs text-pink-600 font-semibold">บทบาท</p>
+         </div>
+        </div><button onclick="handleLogout()" class="btn-danger btn-logout whitespace-nowrap">🚪 ออก</button>
+       </div>
+      </div>
+     </div>
+    </header><!-- TABS -->
+    <nav class="bg-white border-b border-pink-100 sticky top-16 z-20">
+     <div class="max-w-full px-4 flex gap-2 overflow-x-auto"><button onclick="switchTab(1)" class="tab-btn active px-6 py-3 font-semibold text-sm whitespace-nowrap border-b-4 border-pink-500 text-pink-600" data-tab="1">📊 Dashboard</button> <button onclick="switchTab(2)" class="tab-btn px-6 py-3 font-semibold text-sm whitespace-nowrap border-b-4 border-transparent text-gray-600" data-tab="2">📋 งานของฉัน</button> <button onclick="switchTab(3)" class="tab-btn px-6 py-3 font-semibold text-sm whitespace-nowrap border-b-4 border-transparent text-gray-600" data-tab="3">📝 บันทึกกิจกรรม</button> <button onclick="switchTab(4)" class="tab-btn px-6 py-3 font-semibold text-sm whitespace-nowrap border-b-4 border-transparent text-gray-600" data-tab="4">🔗 ลิงค์ระบบอื่น</button>
+     </div>
+    </nav><!-- CONTENT -->
+    <div class="content-area p-4"><!-- TAB 1: DASHBOARD -->
+     <div id="tab-1" class="tab-content active space-y-6">
+      <div>
+       <h2 class="text-lg font-bold text-gray-800 mb-4">📊 แดชบอร์ด</h2>
+       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="stat-box">
+         <div class="stat-number" id="stat-all">
+          0
+         </div>
+         <div class="stat-label">
+          งานทั้งหมด
+         </div>
+        </div>
+        <div class="stat-box">
+         <div class="stat-number text-red-600" id="stat-waiting">
+          0
+         </div>
+         <div class="stat-label">
+          รอรับงาน
+         </div>
+        </div>
+        <div class="stat-box">
+         <div class="stat-number text-yellow-600" id="stat-progress">
+          0
+         </div>
+         <div class="stat-label">
+          ดำเนินการ
+         </div>
+        </div>
+        <div class="stat-box">
+         <div class="stat-number text-green-600" id="stat-done">
+          0
+         </div>
+         <div class="stat-label">
+          เสร็จสิ้น
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="card">
+       <h3 class="text-base font-bold text-gray-800 mb-4">📝 รายการแจ้งงานล่าสุด</h3>
+       <div class="table-responsive">
+        <table>
+         <thead>
+          <tr>
+           <th>ID</th>
+           <th>ประเภท</th>
+           <th>ปัญหา</th>
+           <th>แผนก</th>
+           <th>ความสำคัญ</th>
+           <th>สถานะ</th>
+           <th>จัดการ</th>
+          </tr>
+         </thead>
+         <tbody id="dashboard-jobs">
+          <tr>
+           <td colspan="7" class="text-center text-gray-500 py-8">กำลังโหลดข้อมูล...</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- TAB 2: MY JOBS -->
+     <div id="tab-2" class="tab-content space-y-6">
+      <div>
+       <h2 class="text-lg font-bold text-gray-800 mb-4">📋 งานของฉัน (ดำเนินการ)</h2>
+       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="stat-box">
+         <div class="stat-number text-blue-600" id="my-stat-total">
+          0
+         </div>
+         <div class="stat-label">
+          งานทั้งหมด
+         </div>
+        </div>
+        <div class="stat-box">
+         <div class="stat-number text-orange-600" id="my-stat-assigned">
+          0
+         </div>
+         <div class="stat-label">
+          ที่มอบหมาย
+         </div>
+        </div>
+        <div class="stat-box">
+         <div class="stat-number text-purple-600" id="my-stat-inprogress">
+          0
+         </div>
+         <div class="stat-label">
+          ดำเนินการ
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="card">
+       <h3 class="text-base font-bold text-gray-800 mb-4">📝 รายการงาน</h3>
+       <div class="table-responsive">
+        <table>
+         <thead>
+          <tr>
+           <th>ID</th>
+           <th>ประเภท</th>
+           <th>ปัญหา</th>
+           <th>แผนก</th>
+           <th>สถานะ</th>
+           <th>จัดการ</th>
+          </tr>
+         </thead>
+         <tbody id="my-jobs">
+          <tr>
+           <td colspan="6" class="text-center text-gray-500 py-8">กำลังโหลดข้อมูล...</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- TAB 3: RECORD ACTIVITY -->
+     <div id="tab-3" class="tab-content space-y-6">
+      <div class="card">
+       <h3 class="text-base font-bold text-gray-800 mb-4">📝 บันทึกกิจกรรม</h3><button onclick="showAddActivityForm()" class="btn-primary mb-4">➕ เพิ่มกิจกรรมใหม่</button>
+       <div class="table-responsive">
+        <table>
+         <thead>
+          <tr>
+           <th>วันที่</th>
+           <th>ประเภท</th>
+           <th>หน่วยงาน</th>
+           <th>รายละเอียด</th>
+           <th>จัดการ</th>
+          </tr>
+         </thead>
+         <tbody id="activities-list">
+          <tr>
+           <td colspan="5" class="text-center text-gray-500 py-8">กำลังโหลดข้อมูล...</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- TAB 4: EXTERNAL LINKS -->
+     <div id="tab-4" class="tab-content space-y-6">
+      <div class="card">
+       <h3 class="text-base font-bold text-gray-800 mb-4">🔗 ระบบงานภายนอก</h3>
+       <div id="external-links" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center text-gray-500 py-8">
+         กำลังโหลดข้อมูล...
+        </div>
+       </div>
+      </div>
+     </div>
     </div>
-
-    <div id="main-app" class="hidden min-h-screen flex flex-col">
-        <header class="pink-grad text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-2 font-bold text-lg">
-                <i data-lucide="activity"></i> IT UDON HOSP
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="display-name" class="text-sm bg-white/20 px-3 py-1 rounded-full border border-white/30 hidden sm:block"></span>
-                <button onclick="doLogout()" class="bg-white/20 p-2 rounded-lg hover:bg-white/40"><i data-lucide="power" size="18"></i></button>
-            </div>
-        </header>
-
-        <nav class="bg-white flex border-b sticky top-[64px] z-40 shadow-sm overflow-x-auto">
-            <button onclick="switchTab(1)" id="btn-t1" class="flex-1 py-4 text-sm font-bold border-b-4 border-pink-500 text-pink-600 flex justify-center items-center gap-2 whitespace-nowrap px-4">
-                <i data-lucide="layout-dashboard" size="18"></i> แดชบอร์ด
-            </button>
-            <button onclick="switchTab(2)" id="btn-t2" class="flex-1 py-4 text-sm font-medium text-gray-400 border-b-4 border-transparent flex justify-center items-center gap-2 whitespace-nowrap px-4">
-                <i data-lucide="plus-circle" size="18"></i> บันทึกงานใหม่
-            </button>
-        </nav>
-
-        <main class="flex-1 p-4 max-w-6xl mx-auto w-full">
-            <div id="tab-1" class="tab-content active space-y-4">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="stat-cards">
-                    </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-pink-50 overflow-hidden">
-                    <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-pink-50/30">
-                        <h3 class="font-bold text-gray-700">รายการแจ้งซ่อมล่าสุด</h3>
-                        <button onclick="refreshData()" class="text-pink-500 hover:rotate-180 transition-transform duration-500"><i data-lucide="refresh-cw" size="18"></i></button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 text-gray-500 font-medium">
-                                <tr>
-                                    <th class="p-4">JobID</th>
-                                    <th class="p-4">ประเภท/งานย่อย</th>
-                                    <th class="p-4">แผนก</th>
-                                    <th class="p-4 text-center">สถานะ</th>
-                                    <th class="p-4"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="job-list" class="divide-y divide-gray-50">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-2" class="tab-content">
-                <div class="bg-white rounded-[2rem] p-6 sm:p-10 shadow-sm border border-pink-100 max-w-2xl mx-auto">
-                    <h2 class="text-xl font-bold text-pink-600 flex items-center gap-2 mb-6">
-                        <i data-lucide="pen-tool"></i> บันทึกกิจกรรม IT_Ticket
-                    </h2>
-                    <form id="ticket-form" class="space-y-5">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 ml-2 uppercase">ประเภทงานหลัก</label>
-                                <select id="f-type" onchange="onTypeChange()" class="w-full p-4 rounded-2xl bg-pink-50/30 border-none outline-none mt-1 focus:ring-2 focus:ring-pink-300 transition" required>
-                                    <option value="">-- เลือกประเภท --</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 ml-2 uppercase">งานย่อย</label>
-                                <select id="f-sub" class="w-full p-4 rounded-2xl bg-pink-50/30 border-none outline-none mt-1 focus:ring-2 focus:ring-pink-300 transition" required disabled>
-                                    <option value="">-- เลือกงานย่อย --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 ml-2 uppercase">หน่วยงาน/แผนก</label>
-                            <input list="dl-dept" id="f-dept" placeholder="ค้นหาแผนก..." class="w-full p-4 rounded-2xl bg-pink-50/30 border-none outline-none mt-1 focus:ring-2 focus:ring-pink-300 transition" required>
-                            <datalist id="dl-dept"></datalist>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 ml-2 uppercase">รายละเอียดปัญหา / การแก้ไข</label>
-                            <textarea id="f-problem" rows="4" placeholder="ระบุรายละเอียด..." class="w-full p-4 rounded-2xl bg-pink-50/30 border-none outline-none mt-1 focus:ring-2 focus:ring-pink-300 transition"></textarea>
-                        </div>
-                        <button type="button" onclick="saveTicket()" class="w-full pink-grad text-white py-5 rounded-2xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition transform flex justify-center items-center gap-2">
-                            <i data-lucide="save" size="20"></i> บันทึกข้อมูลลงฐานข้อมูล
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </main>
+   </div>
+  </div><!-- OVERLAY & MODALS -->
+  <div class="overlay" id="overlay" onclick="closeModal(event)"></div><!-- First Time Verify Modal -->
+  <div class="overlay hidden" id="firstTimeOverlay">
+   <div class="modal">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">✅ ยืนยันตัวตนครั้งแรก</h2>
+    <div class="space-y-4">
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">📧 อีเมล</label> <input type="email" id="verifyEmail" placeholder="example@email.com" class="w-full">
+     </div>
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">👤 ชื่อผู้ใช้งาน</label> <input type="text" id="verifyUsername" placeholder="กรอกชื่อผู้ใช้งาน" class="w-full">
+     </div>
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">🔐 รหัสยืนยัน</label> <input type="text" id="verifyCode" placeholder="กรอกรหัสยืนยัน" class="w-full">
+     </div>
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">🔑 รหัสผ่านใหม่</label> <input type="password" id="verifyNewPass" placeholder="สร้างรหัสผ่านใหม่" class="w-full">
+     </div>
+     <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded text-xs text-green-800 mt-4">
+      <p class="font-semibold">💡 ตัวอย่าง:</p>
+      <p>อีเมล: staff@udonhosp.go.th</p>
+      <p>ชื่อผู้ใช้: k7</p>
+      <p>รหัสยืนยัน: 2024001</p>
+     </div>
+     <div class="flex gap-3 pt-4"><button id="verifyBtn" onclick="handleFirstTimeVerify()" class="btn-primary flex-1">✓ ยืนยัน</button> <button onclick="closeFirstTimeModal()" class="btn-secondary flex-1">✕ ยกเลิก</button>
+     </div>
     </div>
+   </div>
+  </div><!-- Toast -->
+  <div id="toast" class="toast"></div><!-- MAIN SCRIPT -->
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec';
+    let currentUser = null;
+    let allData = {};
+    let currentTab = 1;
 
-    <script>
-        // แทนที่ด้วย Web App URL ของคุณ
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec"; 
+    // ============ UTILITIES ============
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.className = `toast active toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+        <span>${message}</span>
+      `;
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+
+    function closeModal(e) {
+      if (e && e.target.id !== 'overlay') return;
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    function showFirstTimeVerify() {
+      document.getElementById('firstTimeOverlay').classList.remove('hidden');
+    }
+
+    function closeFirstTimeModal() {
+      document.getElementById('firstTimeOverlay').classList.add('hidden');
+      clearVerifyForm();
+    }
+
+    function clearVerifyForm() {
+      document.getElementById('verifyEmail').value = '';
+      document.getElementById('verifyUsername').value = '';
+      document.getElementById('verifyCode').value = '';
+      document.getElementById('verifyNewPass').value = '';
+    }
+
+    // ============ AUTH ============
+    async function handleLogin() {
+      const user = document.getElementById('loginUsername').value.trim();
+      const pass = document.getElementById('loginPassword').value;
+
+      if (!user || !pass) {
+        showToast('🚨 กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+        return;
+      }
+
+      showToast('⏳ กำลังเข้าสู่ระบบ...', 'info');
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'checkLogin', data: { user, pass } }),
+          headers: { 'Content-Type': 'application/json' }
+        });
         
-        let store = {};
-        let user = null;
-
-        window.onload = () => {
-            lucide.createIcons();
-            checkSession();
-        };
-
-        // --- AUTH FUNCTIONS ---
-        async function doLogin() {
-            const u = document.getElementById('userpn').value;
-            const p = document.getElementById('userpw').value;
-            if(!u || !p) return alert('กรุณากรอกข้อมูลให้ครบ');
-
-            toggleLoading(true);
-            try {
-                const res = await apiPost('checkLogin', { user: u, pass: p });
-                if(res.success) {
-                    user = res.user;
-                    localStorage.setItem('it_user', JSON.stringify(user));
-                    showApp();
-                } else {
-                    alert(res.message);
-                }
-            } catch(e) { alert('การเชื่อมต่อผิดพลาด'); }
-            toggleLoading(false);
+        const result = await response.json();
+        
+        if (result.success) {
+          currentUser = result.user;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          showToast(`✨ ยินดีต้อนรับ ${currentUser.UserName}`, 'success');
+          showMainApp();
+        } else {
+          showToast('❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
         }
+      } catch (err) {
+        console.error('Login error:', err);
+        showToast('⚠️ ไม่สามารถเชื่อมต่อระบบได้', 'error');
+      }
+    }
 
-        function checkSession() {
-            const saved = localStorage.getItem('it_user');
-            if(saved) {
-                user = JSON.parse(saved);
-                showApp();
-            }
+    async function handleFirstTimeVerify() {
+      const email = document.getElementById('verifyEmail').value.trim();
+      const username = document.getElementById('verifyUsername').value.trim();
+      const code = document.getElementById('verifyCode').value.trim();
+      const newPass = document.getElementById('verifyNewPass').value;
+
+      if (!email || !username || !code || !newPass) {
+        showToast('🚨 กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+        return;
+      }
+
+      if (newPass.length < 4) {
+        showToast('🚨 รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร', 'warning');
+        return;
+      }
+
+      const verifyBtn = document.getElementById('verifyBtn');
+      verifyBtn.disabled = true;
+      showToast('⏳ กำลังตรวจสอบ...', 'info');
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'verifyFirstTime', 
+            data: { email, username, code, newPass } 
+          }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('✅ ยืนยันตัวตนสำเร็จ! ท่านสามารถเข้าสู่ระบบได้แล้ว', 'success');
+          closeFirstTimeModal();
+          setTimeout(() => {
+            document.getElementById('loginUsername').value = username;
+            document.getElementById('loginPassword').value = newPass;
+          }, 500);
+        } else {
+          showToast(`❌ ${result.message || 'ยืนยันตัวตนไม่สำเร็จ กรุณาตรวจสอบข้อมูล'}`, 'error');
         }
+      } catch (err) {
+        console.error('Verify error:', err);
+        showToast('⚠️ ไม่สามารถเชื่อมต่อระบบได้', 'error');
+      } finally {
+        verifyBtn.disabled = false;
+      }
+    }
 
-        function doLogout() {
-            localStorage.removeItem('it_user');
-            location.reload();
+    function handleLogout() {
+      const confirmed = confirm('🚪 คุณต้องการออกจากระบบหรือ?');
+      if (confirmed) {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        document.getElementById('mainApp').classList.add('hidden');
+        document.getElementById('loginPage').classList.remove('hidden');
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        showToast('✅ ออกจากระบบสำเร็จ', 'success');
+      }
+    }
+
+    // ============ UI ============
+    function showMainApp() {
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      document.getElementById('userName').textContent = currentUser.UserName;
+      document.getElementById('userRole').textContent = currentUser.UserTypeID || 'ผู้ใช้งาน';
+      loadAllData();
+    }
+
+    async function loadAllData() {
+      showToast('⏳ กำลังโหลดข้อมูล...', 'info');
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getInitialData' }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          allData = result;
+          updateDashboard();
+          updateMyJobs();
+          updateActivities();
+          updateExternalLinks();
+          showToast('✅ โหลดข้อมูลสำเร็จ', 'success');
+        } else {
+          showToast('❌ ไม่สามารถโหลดข้อมูลได้', 'error');
         }
+      } catch (err) {
+        console.error('Load data error:', err);
+        showToast('⚠️ ไม่สามารถเชื่อมต่อระบบได้', 'error');
+      }
+    }
 
-        // --- DATA MAPPING & UI ---
-        async function showApp() {
-            document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('display-name').innerText = `คุณ: ${user.UserName}`;
-            await refreshData();
+    function updateDashboard() {
+      const jobs = allData.JobTicket || [];
+      const waiting = jobs.filter(j => j.Status === 'รอรับงาน').length;
+      const progress = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+      const done = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
+
+      document.getElementById('stat-all').textContent = jobs.length;
+      document.getElementById('stat-waiting').textContent = waiting;
+      document.getElementById('stat-progress').textContent = progress;
+      document.getElementById('stat-done').textContent = done;
+
+      const tbody = document.getElementById('dashboard-jobs');
+      if (jobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">ไม่มีข้อมูลงาน</td></tr>';
+      } else {
+        tbody.innerHTML = jobs.slice(0, 10).map(job => `
+          <tr>
+            <td>${job.JobID || '-'}</td>
+            <td>${job.JobType || '-'}</td>
+            <td>${job.Problem ? job.Problem.substring(0, 30) + (job.Problem.length > 30 ? '...' : '') : '-'}</td>
+            <td>${job.Department || '-'}</td>
+            <td><span class="badge badge-${getPriority(job.Priority)}">${job.Priority || '-'}</span></td>
+            <td><span class="badge badge-${getStatus(job.Status)}">${job.Status || '-'}</span></td>
+            <td><button onclick="showJobDetail('${job.JobID}')" class="btn-primary text-xs px-3 py-2">ดูรายละเอียด</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function updateMyJobs() {
+      const jobs = (allData.JobTicket || []).filter(j => j.Owner === currentUser.UserPN);
+      const assigned = jobs.filter(j => j.Status === 'รอรับงาน').length;
+      const inprogress = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+
+      document.getElementById('my-stat-total').textContent = jobs.length;
+      document.getElementById('my-stat-assigned').textContent = assigned;
+      document.getElementById('my-stat-inprogress').textContent = inprogress;
+
+      const tbody = document.getElementById('my-jobs');
+      if (jobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">ไม่มีงานที่มอบหมาย</td></tr>';
+      } else {
+        tbody.innerHTML = jobs.map(job => `
+          <tr>
+            <td>${job.JobID || '-'}</td>
+            <td>${job.JobType || '-'}</td>
+            <td>${job.Problem ? job.Problem.substring(0, 30) + (job.Problem.length > 30 ? '...' : '') : '-'}</td>
+            <td>${job.Department || '-'}</td>
+            <td><span class="badge badge-${getStatus(job.Status)}">${job.Status || '-'}</span></td>
+            <td><button onclick="showJobDetail('${job.JobID}')" class="btn-primary text-xs px-3 py-2">จัดการ</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function updateActivities() {
+      const activities = allData.IT_Ticket || [];
+      const tbody = document.getElementById('activities-list');
+      
+      if (activities.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">ไม่มีกิจกรรม</td></tr>';
+      } else {
+        tbody.innerHTML = activities.slice(0, 5).map(act => `
+          <tr>
+            <td>${act.Timestamp ? new Date(act.Timestamp).toLocaleDateString('th-TH') : '-'}</td>
+            <td>${act.JobType || '-'}</td>
+            <td>${act.Department || '-'}</td>
+            <td>${(act.Problem || '-').substring(0, 50)}${(act.Problem || '').length > 50 ? '...' : ''}</td>
+            <td><button onclick="showActivityDetail('${act.JobID}')" class="btn-primary text-xs px-3 py-2">ดู</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function updateExternalLinks() {
+      const links = (allData.SystemLink || []).filter(l => l.Active === 'Y');
+      const container = document.getElementById('external-links');
+      
+      if (links.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 py-8 col-span-4">ไม่มีลิงค์ระบบอื่น</div>';
+      } else {
+        container.innerHTML = links.map(link => `
+          <a href="${link.URL}" target="_blank" rel="noopener noreferrer" 
+             class="card text-center hover:shadow-lg transition cursor-pointer p-6">
+            <div class="text-4xl mb-2">${link.Linkicon || '🔗'}</div>
+            <p class="font-semibold text-sm text-gray-800">${link.Name || '-'}</p>
+          </a>
+        `).join('');
+      }
+    }
+
+    function switchTab(tabNum) {
+      currentTab = tabNum;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('border-pink-500', btn.dataset.tab == tabNum);
+        btn.classList.toggle('border-transparent', btn.dataset.tab != tabNum);
+        btn.classList.toggle('text-pink-600', btn.dataset.tab == tabNum);
+        btn.classList.toggle('text-gray-600', btn.dataset.tab != tabNum);
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `tab-${tabNum}`);
+      });
+    }
+
+    function getPriority(p) {
+      if (p === 'สูง') return 'high';
+      if (p === 'ปานกลาง') return 'medium';
+      return 'low';
+    }
+
+    function getStatus(s) {
+      if (s === 'รอรับงาน') return 'waiting';
+      if (s === 'กำลังดำเนินการ') return 'progress';
+      if (s === 'เสร็จสิ้น') return 'done';
+      return 'waiting';
+    }
+
+    function showJobDetail(jobId) {
+      showToast('🔍 แสดงรายละเอียดงาน ' + jobId, 'info');
+    }
+
+    function showActivityDetail(actId) {
+      showToast('🔍 แสดงรายละเอียดกิจกรรม ' + actId, 'info');
+    }
+
+    function showAddActivityForm() {
+      showToast('📝 เปิดแบบฟอร์มเพิ่มกิจกรรม', 'info');
+    }
+
+    // ============ INIT ============
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('currentUser');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          showMainApp();
+        } catch (err) {
+          console.error('Error parsing saved user:', err);
+          localStorage.removeItem('currentUser');
         }
-
-        async function refreshData() {
-            toggleLoading(true);
-            try {
-                const res = await apiPost('getInitialData');
-                if(res.success) {
-                    store = res;
-                    renderDashboard();
-                    setupForms();
-                }
-            } catch(e) { console.error(e); }
-            toggleLoading(false);
-        }
-
-        function setupForms() {
-            // Setup JobTypeMaster Dropdown
-            const typeSelect = document.getElementById('f-type');
-            typeSelect.innerHTML = '<option value="">-- เลือกประเภท --</option>' + 
-                store.JobTypeMaster.map(t => `<option value="${t.TypeName}" data-id="${t.TypeID}">${t.TypeName}</option>`).join('');
-            
-            // Setup Department Datalist
-            const deptList = document.getElementById('dl-dept');
-            deptList.innerHTML = store.Department.map(d => `<option value="${d.DepartmentName}">`).join('');
-        }
-
-        // เชื่อมโยง TypeID ระหว่าง งานหลัก กับ งานย่อย
-        function onTypeChange() {
-            const typeSelect = document.getElementById('f-type');
-            const subSelect = document.getElementById('f-sub');
-            const selectedType = typeSelect.options[typeSelect.selectedIndex];
-            const typeID = selectedType.getAttribute('data-id');
-
-            if(!typeID) {
-                subSelect.disabled = true;
-                subSelect.innerHTML = '<option value="">-- เลือกงานย่อย --</option>';
-                return;
-            }
-
-            const filteredSubs = store.JobSubTypeMaster.filter(s => s.TypeID == typeID);
-            subSelect.innerHTML = '<option value="">-- เลือกงานย่อย --</option>' + 
-                filteredSubs.map(s => `<option value="${s.SubTypeName}">${s.SubTypeName}</option>`).join('');
-            subSelect.disabled = false;
-        }
-
-        function renderDashboard() {
-            const jobs = store.JobTicket || [];
-            
-            // Render Stats
-            const stats = [
-                { label: 'ทั้งหมด', val: jobs.length, color: 'text-pink-600', icon: 'list' },
-                { label: 'รอรับงาน', val: jobs.filter(j => j.Status == 'รอรับงาน').length, color: 'text-red-500', icon: 'clock' },
-                { label: 'ดำเนินการ', val: jobs.filter(j => j.Status == 'กำลังดำเนินการ').length, color: 'text-blue-500', icon: 'wrench' },
-                { label: 'สำเร็จ', val: jobs.filter(j => j.Status == 'เสร็จสิ้น').length, color: 'text-green-500', icon: 'check-circle' }
-            ];
-
-            document.getElementById('stat-cards').innerHTML = stats.map(s => `
-                <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm flex items-center gap-4">
-                    <div class="${s.color} bg-gray-50 p-3 rounded-2xl"><i data-lucide="${s.icon}"></i></div>
-                    <div>
-                        <p class="text-xs text-gray-400 font-bold uppercase">${s.label}</p>
-                        <p class="text-2xl font-bold ${s.color}">${s.val}</p>
-                    </div>
-                </div>
-            `).join('');
-
-            // Render Table
-            document.getElementById('job-list').innerHTML = jobs.slice(0, 15).map(j => `
-                <tr class="hover:bg-pink-50/30 transition">
-                    <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
-                    <td class="p-4">
-                        <div class="font-bold">${j.JobType || '-'}</div>
-                        <div class="text-xs text-gray-400">${j.JobSubType || '-'}</div>
-                    </td>
-                    <td class="p-4 text-gray-600">${j.Department || '-'}</td>
-                    <td class="p-4 text-center">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(j.Status)}">
-                            ${j.Status}
-                        </span>
-                    </td>
-                    <td class="p-4 text-right">
-                        <button class="text-gray-300 hover:text-pink-500"><i data-lucide="chevron-right"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        async function saveTicket() {
-            const payload = {
-                JobID: 'T-' + Date.now(),
-                JobType: document.getElementById('f-type').value,
-                JobSubType: document.getElementById('f-sub').value,
-                Department: document.getElementById('f-dept').value,
-                Problem: document.getElementById('f-problem').value,
-                CreateBy: user.UserPN,
-                Status: 'เสร็จสิ้น'
-            };
-
-            if(!payload.JobType || !payload.Department) return alert('กรุณาระบุข้อมูลที่จำเป็น');
-
-            toggleLoading(true);
-            try {
-                const res = await apiPost('saveITTicket', payload);
-                if(res.success) {
-                    alert('บันทึกข้อมูลเรียบร้อยแล้ว');
-                    document.getElementById('ticket-form').reset();
-                    switchTab(1);
-                    await refreshData();
-                }
-            } catch(e) { alert('เกิดข้อผิดพลาดในการส่งข้อมูล'); }
-            toggleLoading(false);
-        }
-
-        // --- HELPERS ---
-        async function apiPost(action, data = {}) {
-            const res = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action, data })
-            });
-            return await res.json();
-        }
-
-        function switchTab(n) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('text-pink-600', 'border-pink-500', 'font-bold');
-                b.classList.add('text-gray-400', 'border-transparent', 'font-medium');
-            });
-            document.getElementById(`tab-${n}`).classList.add('active');
-            document.getElementById(`btn-t${n}`).classList.add('text-pink-600', 'border-pink-500', 'font-bold');
-        }
-
-        function toggleLoading(show) {
-            document.getElementById('loading').style.display = show ? 'flex' : 'none';
-        }
-
-        function getStatusColor(s) {
-            if(s == 'รอรับงาน') return 'bg-red-100 text-red-600';
-            if(s == 'กำลังดำเนินการ') return 'bg-blue-100 text-blue-600';
-            if(s == 'เสร็จสิ้น') return 'bg-green-100 text-green-600';
-            return 'bg-gray-100 text-gray-500';
-        }
-    </script>
-</body>
+      }
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb7b06dd3d1a18c',t:'MTc3MDY4NTQzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
