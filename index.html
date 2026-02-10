@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT UDON HOSP - Smart Service</title>
+    <title>IT UDON HOSP - Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
@@ -12,27 +12,34 @@
         .pink-grad { background: linear-gradient(135deg, #db2777 0%, #f472b6 100%); }
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); z-index:999; justify-content:center; align-items:center; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        input, select, textarea { border: 1px solid #f9a8d4 !important; }
     </style>
 </head>
 <body>
 
     <div id="loader" class="modal-overlay" style="display:flex; background:white; z-index:1000;">
         <div class="text-center">
-            <div class="animate-spin text-pink-500 mb-2"><i data-lucide="loader-2" size="48"></i></div>
-            <p class="text-pink-600 font-bold">กำลังโหลดข้อมูล...</p>
+            <div class="animate-spin text-pink-500 mb-2 flex justify-center"><i data-lucide="loader-2" size="48"></i></div>
+            <p class="text-pink-600 font-bold">กำลังประมวลผล...</p>
         </div>
     </div>
 
     <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-xl border border-pink-100">
-            <div class="flex justify-center mb-6 text-pink-500"><i data-lucide="shield-check" size="64"></i></div>
-            <h1 class="text-2xl font-bold text-center mb-8">IT MANAGEMENT</h1>
+            <div class="flex justify-center mb-6 text-pink-500"><i data-lucide="lock-keyhole" size="64"></i></div>
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-8 uppercase tracking-wide">IT Login</h1>
             <div class="space-y-4">
-                <input type="text" id="userpn" placeholder="ชื่อผู้ใช้ (UserPN)" class="w-full px-6 py-4 rounded-2xl bg-pink-50/30 outline-none focus:ring-2 focus:ring-pink-300">
-                <input type="password" id="userpw" placeholder="รหัสผ่าน" class="w-full px-6 py-4 rounded-2xl bg-pink-50/30 outline-none focus:ring-2 focus:ring-pink-300">
-                <button onclick="doLogin()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg flex justify-center items-center gap-2">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-4 flex items-center text-pink-400"><i data-lucide="user" size="18"></i></span>
+                    <input type="text" id="userpn" placeholder="UserPN" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-pink-50/30 outline-none focus:ring-2 focus:ring-pink-300">
+                </div>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-4 flex items-center text-pink-400"><i data-lucide="key" size="18"></i></span>
+                    <input type="password" id="userpw" placeholder="UserPW" class="w-full pl-12 pr-4 py-4 rounded-2xl bg-pink-50/30 outline-none focus:ring-2 focus:ring-pink-300">
+                </div>
+                <button onclick="handleLogin()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg hover:opacity-90 flex justify-center items-center gap-2 transition">
                     <i data-lucide="log-in" size="20"></i> เข้าสู่ระบบ
                 </button>
             </div>
@@ -41,119 +48,138 @@
 
     <div id="app-page" class="hidden min-h-screen">
         <header class="pink-grad text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-md">
-            <div class="flex items-center gap-2 font-bold"><i data-lucide="activity"></i> IT UDON HOSP</div>
-            <button onclick="location.reload()" class="bg-white/20 p-2 rounded-lg"><i data-lucide="power" size="18"></i></button>
+            <div class="flex items-center gap-2 font-bold"><i data-lucide="monitor-smartphone"></i> IT UDON HOSP</div>
+            <div class="flex items-center gap-4">
+                <span id="display-user" class="text-xs bg-white/20 px-3 py-1 rounded-full border border-white/30 hidden sm:block"></span>
+                <button onclick="location.reload()" class="bg-red-400 p-2 rounded-xl hover:bg-red-500 transition"><i data-lucide="power" size="18"></i></button>
+            </div>
         </header>
 
-        <nav class="bg-white flex border-b sticky top-[64px] z-40">
+        <nav class="bg-white flex border-b sticky top-[64px] z-40 shadow-sm">
             <button onclick="showTab(1)" id="t1" class="flex-1 py-4 text-sm font-bold border-b-4 border-pink-500 text-pink-600 flex justify-center items-center gap-2">
-                <i data-lucide="layout-dashboard" size="18"></i> Dashboard
+                <i data-lucide="layout-grid" size="18"></i> Dashboard
             </button>
             <button onclick="showTab(2)" id="t2" class="flex-1 py-4 text-sm font-medium text-gray-400 flex justify-center items-center gap-2">
-                <i data-lucide="plus-circle" size="18"></i> บันทึกงาน
+                <i data-lucide="file-edit" size="18"></i> บันทึกงาน IT
             </button>
         </nav>
 
         <main class="p-4 max-w-5xl mx-auto">
             <div id="content1" class="tab-content active space-y-4">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="stat-cards"></div>
-                <div class="bg-white rounded-3xl shadow-sm border p-4 overflow-hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="stats-panel"></div>
+                <div class="bg-white rounded-3xl shadow-sm border border-pink-100 overflow-hidden">
+                    <div class="p-5 bg-pink-50 border-b border-pink-100 font-bold text-pink-600 flex items-center gap-2">
+                        <i data-lucide="list-checks"></i> รายการ Job Ticket ล่าสุด
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-pink-50 text-pink-600">
+                            <thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-bold">
                                 <tr>
                                     <th class="p-4">JobID</th>
-                                    <th class="p-4">ปัญหา</th>
-                                    <th class="p-4">สถานะ</th>
-                                    <th class="p-4">จัดการ</th>
+                                    <th class="p-4">รายละเอียดปัญหา</th>
+                                    <th class="p-4 text-center">สถานะ</th>
+                                    <th class="p-4 text-center">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody id="job-list" class="divide-y"></tbody>
+                            <tbody id="job-table-body" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <div id="content2" class="tab-content">
-                <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border space-y-6 max-w-2xl mx-auto">
-                    <h2 class="text-xl font-bold text-pink-600 flex items-center gap-2"><i data-lucide="pen-tool"></i> บันทึกกิจกรรม IT_Ticket</h2>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs text-gray-400 ml-2">ประเภทงาน</label>
-                                <select id="f-type" onchange="updateSubTypes()" class="w-full p-4 rounded-xl bg-pink-50/20 border-none outline-none mt-1"></select>
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-400 ml-2">งานย่อย</label>
-                                <select id="f-sub" class="w-full p-4 rounded-xl bg-pink-50/20 border-none outline-none mt-1"></select>
-                            </div>
+                <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-pink-100 space-y-6 max-w-2xl mx-auto">
+                    <h2 class="text-xl font-bold text-pink-600 flex items-center gap-2 mb-2"><i data-lucide="save-all"></i> บันทึกกิจกรรมลง IT_Ticket</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-1">
+                            <label class="text-[10px] text-gray-400 ml-2 uppercase font-bold">ประเภทงานหลัก</label>
+                            <select id="f-type" onchange="filterSubTypes()" class="w-full p-4 rounded-2xl bg-pink-50/20 border-none outline-none mt-1 focus:ring-2 focus:ring-pink-300"></select>
                         </div>
-                        <div>
-                            <label class="text-xs text-gray-400 ml-2">หน่วยงาน</label>
-                            <input list="dl-dept" id="f-dept" class="w-full p-4 rounded-xl bg-pink-50/20 outline-none mt-1" placeholder="พิมพ์ค้นหาหน่วยงาน...">
+                        <div class="sm:col-span-1">
+                            <label class="text-[10px] text-gray-400 ml-2 uppercase font-bold">งานย่อย</label>
+                            <select id="f-sub" class="w-full p-4 rounded-2xl bg-pink-50/20 border-none outline-none mt-1 focus:ring-2 focus:ring-pink-300"></select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="text-[10px] text-gray-400 ml-2 uppercase font-bold">หน่วยงาน</label>
+                            <input list="dl-dept" id="f-dept" class="w-full p-4 rounded-2xl bg-pink-50/20 outline-none mt-1 focus:ring-2 focus:ring-pink-300" placeholder="ค้นหาหน่วยงาน...">
                             <datalist id="dl-dept"></datalist>
                         </div>
-                        <div>
-                            <label class="text-xs text-gray-400 ml-2">รายละเอียด</label>
-                            <textarea id="f-detail" class="w-full p-4 rounded-xl bg-pink-50/20 outline-none mt-1 h-24"></textarea>
+                        <div class="sm:col-span-2">
+                            <label class="text-[10px] text-gray-400 ml-2 uppercase font-bold">รายละเอียดการซ่อม/ดำเนินการ</label>
+                            <textarea id="f-detail" class="w-full p-4 rounded-2xl bg-pink-50/20 outline-none mt-1 h-32 focus:ring-2 focus:ring-pink-300" placeholder="ระบุสิ่งที่ดำเนินการ..."></textarea>
                         </div>
-                        <button onclick="saveTicket()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg flex justify-center items-center gap-2">
-                            <i data-lucide="save"></i> บันทึกข้อมูล
-                        </button>
                     </div>
+                    <button onclick="submitITTicket()" class="w-full pink-grad text-white py-5 rounded-2xl font-bold shadow-lg flex justify-center items-center gap-2 hover:scale-[1.02] transition transform active:scale-95">
+                        <i data-lucide="check-circle"></i> บันทึกข้อมูลเรียบร้อย
+                    </button>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec'; 
+        const API_URL = 'YOUR_WEB_APP_URL'; // ** ใส่ URL จาก Google Apps Script ที่นี่ **
         let store = {};
-        let user = null;
+        let currentUser = null;
 
         window.onload = () => { lucide.createIcons(); document.getElementById('loader').style.display='none'; }
 
-        async function doLogin() {
-            const u = document.getElementById('userpn').value;
-            const p = document.getElementById('userpw').value;
-            document.getElementById('loader').style.display='flex';
-            const res = await fetch(WEB_APP_URL, { method:'POST', body: JSON.stringify({ action:'checkLogin', data: {user:u, pass:p} }) }).then(r=>r.json());
-            if(res.success) {
-                user = res.user;
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('app-page').classList.remove('hidden');
-                await refreshData();
-            } else { alert('เข้าสู่ระบบไม่สำเร็จ'); }
-            document.getElementById('loader').style.display='none';
+        async function handleLogin() {
+            const user = document.getElementById('userpn').value;
+            const pass = document.getElementById('userpw').value;
+            if(!user || !pass) return alert('กรุณากรอกข้อมูลให้ครบ');
+
+            toggleLoader(true);
+            try {
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'checkLogin', data: { user, pass } }) 
+                }).then(r => r.json());
+
+                if(res.success) {
+                    currentUser = res.user;
+                    document.getElementById('display-user').innerText = `คุณ: ${res.user.UserName}`;
+                    document.getElementById('login-page').classList.add('hidden');
+                    document.getElementById('app-page').classList.remove('hidden');
+                    await loadMasterData();
+                } else {
+                    alert('UserPN หรือ UserPW ไม่ถูกต้อง');
+                }
+            } catch(e) { alert('การเชื่อมต่อผิดพลาด'); }
+            toggleLoader(false);
         }
 
-        async function refreshData() {
-            const res = await fetch(WEB_APP_URL, { method:'POST', body: JSON.stringify({ action:'getInitialData' }) }).then(r=>r.json());
+        async function loadMasterData() {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'getInitialData' }) 
+            }).then(r => r.json());
+            
             if(res.success) {
                 store = res;
                 renderDashboard();
-                setupForms();
+                populateDropdowns();
                 lucide.createIcons();
             }
         }
 
-        function setupForms() {
-            // Map JobTypeMaster
+        function populateDropdowns() {
+            // ประเภทงานหลัก
             const fType = document.getElementById('f-type');
             fType.innerHTML = '<option value="">-- เลือกประเภท --</option>' + 
                 store.JobTypeMaster.map(t => `<option value="${t.TypeName}" data-id="${t.TypeID}">${t.TypeName}</option>`).join('');
             
-            // Map Department
+            // หน่วยงาน
             const dlDept = document.getElementById('dl-dept');
             dlDept.innerHTML = store.Department.map(d => `<option value="${d.DepartmentName}">`).join('');
         }
 
-        function updateSubTypes() {
+        function filterSubTypes() {
             const fType = document.getElementById('f-type');
             const typeID = fType.options[fType.selectedIndex].getAttribute('data-id');
             const fSub = document.getElementById('f-sub');
             
-            // Map JobSubTypeMaster กรองด้วย TypeID
+            // กรองด้วย TypeID ที่ดึงมาจาก JobTypeMaster
             const filtered = store.JobSubTypeMaster.filter(s => s.TypeID == typeID);
             fSub.innerHTML = '<option value="">-- เลือกงานย่อย --</option>' + 
                 filtered.map(s => `<option value="${s.SubTypeName}">${s.SubTypeName}</option>`).join('');
@@ -161,40 +187,71 @@
 
         function renderDashboard() {
             const jobs = store.JobTicket;
-            document.getElementById('job-list').innerHTML = jobs.map(j => `
-                <tr class="hover:bg-pink-50">
-                    <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
-                    <td class="p-4 text-xs">${j.Problem}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold">${j.Status}</span></td>
-                    <td class="p-4"><button class="text-pink-400"><i data-lucide="eye" size="18"></i></button></td>
-                </tr>
-            `).join('');
-            
-            document.getElementById('stat-cards').innerHTML = `
-                <div class="bg-white p-4 rounded-2xl border-l-4 border-pink-500 shadow-sm">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">ทั้งหมด</p>
-                    <p class="text-2xl font-bold">${jobs.length}</p>
+            // สรุปยอด
+            document.getElementById('stats-panel').innerHTML = `
+                <div class="bg-white p-5 rounded-2xl border-l-4 border-pink-500 shadow-sm">
+                    <p class="text-[10px] text-gray-400 font-bold">JOB ทั้งหมด</p>
+                    <p class="text-2xl font-bold text-pink-600">${jobs.length}</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border-l-4 border-orange-400 shadow-sm text-orange-500">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">ค้างรับงาน</p>
+                    <p class="text-2xl font-bold">${jobs.filter(j => j.Status === 'รอรับงาน').length}</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border-l-4 border-blue-400 shadow-sm text-blue-500">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">กำลังทำ</p>
+                    <p class="text-2xl font-bold">${jobs.filter(j => j.Status === 'กำลังดำเนินการ').length}</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border-l-4 border-green-400 shadow-sm text-green-500">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">สำเร็จ</p>
+                    <p class="text-2xl font-bold">${jobs.filter(j => j.Status === 'เสร็จสิ้น').length}</p>
                 </div>
             `;
+
+            // รายการตาราง
+            document.getElementById('job-table-body').innerHTML = jobs.map(j => `
+                <tr class="hover:bg-pink-50/50 transition">
+                    <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
+                    <td class="p-4"><div class="font-medium">${j.Problem}</div><div class="text-[10px] text-gray-400">${j.Department}</div></td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold ${j.Status === 'รอรับงาน' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}">
+                            ${j.Status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button class="text-pink-400 hover:text-pink-600 transition"><i data-lucide="info" size="20"></i></button>
+                    </td>
+                </tr>
+            `).join('');
             lucide.createIcons();
         }
 
-        async function saveTicket() {
+        async function submitITTicket() {
             const data = {
                 JobID: 'T-' + Date.now(),
                 JobType: document.getElementById('f-type').value,
                 JobSubType: document.getElementById('f-sub').value,
                 Department: document.getElementById('f-dept').value,
                 Detail: document.getElementById('f-detail').value,
-                CreateBy: user.UserPN,
+                CreateBy: currentUser.UserPN,
                 Status: 'เสร็จสิ้น'
             };
-            document.getElementById('loader').style.display='flex';
-            await fetch(WEB_APP_URL, { method:'POST', body: JSON.stringify({ action:'saveITTicket', data }) });
-            alert('บันทึกสำเร็จ');
-            showTab(1);
-            await refreshData();
-            document.getElementById('loader').style.display='none';
+
+            if(!data.JobType || !data.Department) return alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+
+            toggleLoader(true);
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'saveITTicket', data }) 
+            }).then(r => r.json());
+
+            if(res.success) {
+                alert('บันทึกข้อมูลลง IT_Ticket สำเร็จ!');
+                showTab(1);
+                await loadMasterData();
+            } else {
+                alert('เกิดข้อผิดพลาดในการบันทึก');
+            }
+            toggleLoader(false);
         }
 
         function showTab(n) {
@@ -205,7 +262,10 @@
                 b.classList.add('text-gray-400');
             });
             document.getElementById('t'+n).classList.add('text-pink-600', 'border-pink-500', 'font-bold');
+            lucide.createIcons();
         }
+
+        function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     </script>
 </body>
 </html>
