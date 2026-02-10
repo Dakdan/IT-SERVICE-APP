@@ -59,14 +59,14 @@
 
         <main class="max-w-5xl mx-auto p-4 space-y-6">
             <div id="tab1" class="tab-content active space-y-4">
-                <div id="job-list" class="space-y-3"></div>
+                <div id="job-list-dashboard" class="space-y-3"></div>
             </div>
 
             <div id="tab2" class="tab-content space-y-4">
                 <button onclick="openModal('modal-it-ticket')" class="w-full pink-grad text-white p-4 rounded-2xl font-bold shadow-md">+ เพิ่มงาน IT_TICKET</button>
                 <div class="mt-4">
-                    <h2 class="text-gray-500 text-[10px] font-bold uppercase mb-3 px-2">งานที่ฉันรับผิดชอบ</h2>
-                    <div id="my-job-list" class="space-y-3"></div>
+                    <h2 class="text-pink-500 text-[10px] font-bold uppercase mb-3 px-2">งานที่ฉันรับผิดชอบ (JobTicket & IT_Ticket)</h2>
+                    <div id="job-list-myjob" class="space-y-3"></div>
                 </div>
             </div>
         </main>
@@ -79,15 +79,14 @@
                 <button onclick="closeModal('modal-detail')" class="bg-white/20 w-8 h-8 rounded-full">✕</button>
             </div>
             
-            <div class="p-8 space-y-6">
+            <div class="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
                 <div id="asset-display-section" class="hidden">
                     <div class="bg-blue-50 p-5 rounded-[1.5rem] border border-blue-100 space-y-3">
-                        <p class="text-[10px] font-bold text-blue-500 uppercase">รายละเอียดครุภัณฑ์ (BackupData)</p>
+                        <p class="text-[10px] font-bold text-blue-500 uppercase">รายละเอียดครุภัณฑ์</p>
                         <div class="grid grid-cols-2 gap-y-2 text-xs">
                             <span class="text-gray-400">NOID:</span> <span id="md-noid" class="font-bold text-blue-800"></span>
                             <span class="text-gray-400">AssetID:</span> <span id="md-asset-id" class="font-bold text-blue-800"></span>
                             <span class="text-gray-400">รายการ:</span> <span id="md-asset-name" class="font-bold text-blue-800"></span>
-                            <span class="col-span-2 text-gray-400">สเปค/รายละเอียด:</span>
                             <span id="md-asset-detail" class="col-span-2 font-bold text-blue-800 italic"></span>
                         </div>
                     </div>
@@ -139,53 +138,78 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('u-name').innerText = currentUser.UserName;
             document.getElementById('display-role-name').innerText = currentUser.UserTypeName;
+            
             store = await apiPost('getInitialData');
+            
             renderDashboard();
             renderMyJobs();
         }
 
         function renderDashboard() {
+            // Dashboard แสดงข้อมูลทั้งหมดจาก JobTicket
             const jobs = store.JobTicket || [];
-            document.getElementById('job-list').innerHTML = jobs.map(j => createJobCard(j)).join('');
+            document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => createCard(j)).join('');
         }
 
         function renderMyJobs() {
-            const jobs = store.JobTicket || [];
-            // กรองงานที่ Owner ตรงกับชื่อผู้ Login
-            const myJobs = jobs.filter(j => j.Owner === currentUser.UserName);
-            const container = document.getElementById('my-job-list');
+            // My Job กรองจาก JobTicket และ IT_Ticket ที่ Owner หรือ CreateBy ตรงกับ User
+            const jobTicket = store.JobTicket || [];
+            const itTicket = store.IT_Ticket || []; // สมมติว่าใน store มี IT_Ticket
+            
+            // กรองจาก JobTicket (เช็คจาก Owner)
+            const filteredJobTicket = jobTicket.filter(j => j.Owner === currentUser.UserName);
+            
+            // กรองจาก IT_Ticket (เช็คจาก CreateBy)
+            const filteredITTicket = itTicket.filter(j => j.CreateBy === currentUser.UserName || j.Owner === currentUser.UserName);
+            
+            // รวมข้อมูล
+            const myJobs = [...filteredJobTicket, ...filteredITTicket];
+            
+            const container = document.getElementById('job-list-myjob');
             if(myJobs.length > 0) {
-                container.innerHTML = myJobs.map(j => createJobCard(j)).join('');
+                container.innerHTML = myJobs.map(j => createCard(j)).join('');
             } else {
                 container.innerHTML = `<p class="text-center text-gray-400 text-[10px] py-10">ยังไม่มีงานที่คุณรับผิดชอบ</p>`;
             }
         }
 
-        function createJobCard(j) {
+        function createCard(j) {
+            // เช็ค ID ว่าเป็น JobID หรือ JobeID/IT_Ticket ID
+            const id = j.JobID || j.JobeID || 'N/A';
+            const problem = j.Problem || 'ไม่มีข้อมูล';
+            const status = j.Status || 'รอ';
+            const type = j.JobType || 'ทั่วไป';
+            const dept = j.Department || '';
+
             return `
-                <div onclick="viewJobDetail('${j.JobID}')" class="card-custom p-5 border-l-4 ${j.Status === 'เสร็จสิ้น' ? 'border-green-400' : 'border-pink-500'} cursor-pointer active:scale-95 transition-all">
+                <div onclick="viewJobDetail('${id}')" class="card-custom p-5 border-l-4 ${status === 'เสร็จสิ้น' ? 'border-green-400' : 'border-pink-500'} cursor-pointer active:scale-95 transition-all">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="font-bold text-pink-600 text-sm">${j.JobID}</p>
-                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-gray-100 font-bold text-gray-500">${j.Status}</span>
+                        <p class="font-bold text-pink-600 text-sm">${id}</p>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-gray-100 font-bold text-gray-500">${status}</span>
                     </div>
-                    <p class="text-xs font-bold text-gray-700 truncate">${j.Problem}</p>
-                    <p class="text-[9px] text-gray-400 mt-1 uppercase font-medium">${j.JobType} • ${j.Department}</p>
+                    <p class="text-xs font-bold text-gray-700 truncate">${problem}</p>
+                    <p class="text-[9px] text-gray-400 mt-1 uppercase font-medium">${type} ${dept ? '• ' + dept : ''}</p>
                 </div>
             `;
         }
 
         function viewJobDetail(id) {
-            const j = store.JobTicket.find(x => x.JobID === id);
-            document.getElementById('md-job-id').innerText = j.JobID;
-            document.getElementById('md-dept').innerText = j.Department;
-            document.getElementById('md-createby').innerText = j.CreateBy;
-            document.getElementById('md-problem').innerText = j.Problem;
-            document.getElementById('md-type-info').innerText = "ประเภท: " + j.JobType;
+            // ค้นหาจากทั้งสองแหล่ง
+            const allJobs = [...(store.JobTicket || []), ...(store.IT_Ticket || [])];
+            const j = allJobs.find(x => (x.JobID || x.JobeID) === id);
+            
+            if(!j) return;
+
+            document.getElementById('md-job-id').innerText = id;
+            document.getElementById('md-dept').innerText = j.Department || '-';
+            document.getElementById('md-createby').innerText = j.CreateBy || j.CreateBy || '-';
+            document.getElementById('md-problem').innerText = j.Problem || '-';
+            document.getElementById('md-type-info').innerText = "ประเภท: " + (j.JobType || '-');
 
             const assetSection = document.getElementById('asset-display-section');
-            if (j.JobType === 'งานแจ้งซ่อมครุภัณฑ์') {
+            if (j.JobType === 'งานแจ้งซ่อมครุภัณฑ์' || j.AssetCode) {
                 assetSection.classList.remove('hidden');
-                const asset = store.BackupData.find(a => a.NOID == j.AssetCode || a.AssetID == j.AssetCode);
+                const asset = store.BackupData ? store.BackupData.find(a => a.NOID == j.AssetCode || a.AssetID == j.AssetCode) : null;
                 document.getElementById('md-noid').innerText = asset ? asset.NOID : (j.AssetCode || '-');
                 document.getElementById('md-asset-id').innerText = asset ? asset.AssetID : '-';
                 document.getElementById('md-asset-name').innerText = asset ? asset.AssetName : '-';
@@ -194,12 +218,11 @@
                 assetSection.classList.add('hidden');
             }
 
-            // ปุ่ม Action ตามสถานะและสิทธิ์
             let btns = '';
             if (j.Status === 'รอรับงาน' && currentUser.UserTypeID === 'IT') {
-                btns = `<button onclick="updateJob('${j.JobID}', 'กำลังดำเนินการ')" class="w-full pink-grad text-white py-4 rounded-2xl font-bold">🛠️ รับงานทันที</button>`;
+                btns = `<button onclick="updateJob('${id}', 'กำลังดำเนินการ')" class="w-full pink-grad text-white py-4 rounded-2xl font-bold">🛠️ รับงานทันที</button>`;
             } else if (j.Status === 'กำลังดำเนินการ' && (j.Owner === currentUser.UserName || currentUser.UserTypeID === 'IT')) {
-                btns = `<button onclick="updateJob('${j.JobID}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold">✅ เสร็จสิ้นงาน</button>`;
+                btns = `<button onclick="updateJob('${id}', 'เสร็จสิ้น')" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold">✅ เสร็จสิ้นงาน</button>`;
             }
             document.getElementById('md-actions').innerHTML = btns;
             openModal('modal-detail');
@@ -209,10 +232,7 @@
             const res = await apiPost('updateJobStatus', { JobID: id, Status: status, Owner: currentUser.UserName });
             if (res.success) { 
                 closeModal('modal-detail'); 
-                // รีโหลดข้อมูลหลังจาก Update
-                store = await apiPost('getInitialData');
-                renderDashboard();
-                renderMyJobs();
+                initApp(); // รีโหลดข้อมูลใหม่
             }
         }
 
