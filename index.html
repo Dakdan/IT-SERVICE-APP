@@ -143,7 +143,7 @@
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
         let store = { AllJobs: [], BackupData: [] };
-        let currentUser = JSON.parse(sessionStorage.getItem('it_user')) || { UserName: "ถินคำเชิด", UserTypeID: "ITExpert" };
+        let currentUser = JSON.parse(sessionStorage.getItem('it_user')) || { UserName: currentUser.UserName, UserTypeID:currentUser.usertypeID};
 
         function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
