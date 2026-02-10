@@ -3,285 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT UDON HOSP</title>
+    <title>IT UDON HOSP - Smart Service</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', sans-serif; background: #fffcfd; }
-        .pink-grad { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center; padding:15px; }
+        body { font-family: 'Kanit', sans-serif; background: #fff5f7; }
+        .pink-grad { background: linear-gradient(135deg, #db2777 0%, #f472b6 100%); }
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); z-index:999; justify-content:center; align-items:center; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: white; border-radius: 2rem; box-shadow: 0 10px 25px -5px rgba(236,72,153,0.1); border: 1px solid #fce7f3; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="text-slate-700">
+<body>
 
-    <div id="modalNotify" class="modal-overlay">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl">
-            <div id="notifyIcon" class="text-6xl mb-4"></div>
-            <h3 id="notifyTitle" class="text-xl font-bold mb-2"></h3>
-            <p id="notifyMsg" class="text-gray-500 mb-6 text-sm"></p>
-            <button onclick="closeModal('modalNotify')" class="w-full pink-grad text-white py-3 rounded-2xl font-bold shadow-lg">ปิดหน้าต่าง</button>
+    <div id="loader" class="modal-overlay" style="display:flex; background:white; z-index:1000;">
+        <div class="text-center">
+            <div class="animate-spin text-pink-500 mb-2"><i data-lucide="loader-2" size="48"></i></div>
+            <p class="text-pink-600 font-bold">กำลังโหลดข้อมูล...</p>
         </div>
     </div>
 
-    <div id="modalDetail" class="modal-overlay">
-        <div class="bg-white w-full max-w-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div class="pink-grad p-6 text-white flex justify-between items-center">
-                <h3 class="font-bold text-lg">รายละเอียดงาน</h3>
-                <button onclick="closeModal('modalDetail')" class="text-2xl">&times;</button>
-            </div>
-            <div id="detailContent" class="p-8 space-y-4 max-h-[60vh] overflow-y-auto text-sm"></div>
-            <div id="detailActions" class="p-6 bg-gray-50 flex gap-3 border-t"></div>
-        </div>
-    </div>
-
-    <div id="login-screen" class="flex items-center justify-center min-h-screen p-4">
-        <div class="card w-full max-w-md p-10 text-center">
-            <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-20 h-20 mx-auto mb-6">
-            <h1 class="text-2xl font-bold text-gray-800 mb-8">IT MANAGEMENT</h1>
-            <div class="space-y-4 text-left">
-                <input type="text" id="userpn" placeholder="UserPN" class="w-full px-6 py-4 rounded-2xl bg-gray-50 outline-none focus:ring-2 focus:ring-pink-300">
-                <input type="password" id="userpw" placeholder="UserPW" class="w-full px-6 py-4 rounded-2xl bg-gray-50 outline-none focus:ring-2 focus:ring-pink-300">
-                <button onclick="handleLogin()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg mt-4 transform active:scale-95 transition">เข้าสู่ระบบ</button>
-                <button onclick="openModal('modalRegister')" class="w-full text-pink-500 text-xs font-bold mt-2">ยืนยันตัวตนครั้งแรก</button>
+    <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-xl border border-pink-100">
+            <div class="flex justify-center mb-6 text-pink-500"><i data-lucide="shield-check" size="64"></i></div>
+            <h1 class="text-2xl font-bold text-center mb-8">IT MANAGEMENT</h1>
+            <div class="space-y-4">
+                <input type="text" id="userpn" placeholder="ชื่อผู้ใช้ (UserPN)" class="w-full px-6 py-4 rounded-2xl bg-pink-50/30 outline-none focus:ring-2 focus:ring-pink-300">
+                <input type="password" id="userpw" placeholder="รหัสผ่าน" class="w-full px-6 py-4 rounded-2xl bg-pink-50/30 outline-none focus:ring-2 focus:ring-pink-300">
+                <button onclick="doLogin()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg flex justify-center items-center gap-2">
+                    <i data-lucide="log-in" size="20"></i> เข้าสู่ระบบ
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="main-app" class="hidden min-h-screen">
-        <header class="pink-grad text-white p-5 sticky top-0 z-50 shadow-lg flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-white p-1 rounded-xl"><img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-8 h-8"></div>
-                <div>
-                    <h2 class="font-bold leading-none">IT UDON HOSP</h2>
-                    <span id="u-role" class="text-[9px] opacity-80 uppercase tracking-widest"></span>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="u-name" class="font-bold text-sm"></span>
-                <button onclick="location.reload()" class="bg-white/20 p-2 rounded-xl">🚪</button>
-            </div>
+    <div id="app-page" class="hidden min-h-screen">
+        <header class="pink-grad text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-md">
+            <div class="flex items-center gap-2 font-bold"><i data-lucide="activity"></i> IT UDON HOSP</div>
+            <button onclick="location.reload()" class="bg-white/20 p-2 rounded-lg"><i data-lucide="power" size="18"></i></button>
         </header>
 
-        <nav class="bg-white/80 backdrop-blur-md border-b sticky top-[72px] z-40 flex">
-            <button onclick="switchTab(1)" id="btn1" class="flex-1 py-4 text-sm font-bold border-b-4 border-pink-500 text-pink-500">Dashboard</button>
-            <button onclick="switchTab(2)" id="btn2" class="flex-1 py-4 text-sm font-medium text-gray-400">บันทึกงาน IT</button>
-            <button onclick="switchTab(3)" id="btn3" class="flex-1 py-4 text-sm font-medium text-gray-400">ลิงก์ระบบ</button>
+        <nav class="bg-white flex border-b sticky top-[64px] z-40">
+            <button onclick="showTab(1)" id="t1" class="flex-1 py-4 text-sm font-bold border-b-4 border-pink-500 text-pink-600 flex justify-center items-center gap-2">
+                <i data-lucide="layout-dashboard" size="18"></i> Dashboard
+            </button>
+            <button onclick="showTab(2)" id="t2" class="flex-1 py-4 text-sm font-medium text-gray-400 flex justify-center items-center gap-2">
+                <i data-lucide="plus-circle" size="18"></i> บันทึกงาน
+            </button>
         </nav>
 
-        <main class="max-w-7xl mx-auto p-6 pb-24">
-            <div id="tab1" class="tab-content active space-y-6">
-                <div id="stats-area" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-                <div class="card overflow-hidden">
-                    <div class="p-6 bg-pink-50/50 border-b font-bold text-gray-600">รายการ JobTicket ล่าสุด</div>
+        <main class="p-4 max-w-5xl mx-auto">
+            <div id="content1" class="tab-content active space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="stat-cards"></div>
+                <div class="bg-white rounded-3xl shadow-sm border p-4 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase">
+                            <thead class="bg-pink-50 text-pink-600">
                                 <tr>
                                     <th class="p-4">JobID</th>
-                                    <th class="p-4">รายละเอียด</th>
-                                    <th class="p-4 text-center">ความสำคัญ</th>
-                                    <th class="p-4 text-center">สถานะ</th>
+                                    <th class="p-4">ปัญหา</th>
+                                    <th class="p-4">สถานะ</th>
+                                    <th class="p-4">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody id="job-table-body" class="divide-y divide-gray-100"></tbody>
+                            <tbody id="job-list" class="divide-y"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div id="tab2" class="tab-content">
-                <div class="card p-8 max-w-2xl mx-auto space-y-5">
-                    <h3 class="text-xl font-bold text-pink-600">📝 บันทึกกิจกรรม IT_Ticket</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="text-xs text-gray-400 ml-2">ประเภทงาน</label>
-                            <select id="f-type" onchange="updateSub()" class="w-full p-4 rounded-2xl bg-gray-50 outline-none mt-1"></select>
-                        </div>
-                        <div class="col-span-2">
-                            <label class="text-xs text-gray-400 ml-2">งานย่อย</label>
-                            <select id="f-sub" class="w-full p-4 rounded-2xl bg-gray-50 outline-none mt-1"></select>
+            <div id="content2" class="tab-content">
+                <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border space-y-6 max-w-2xl mx-auto">
+                    <h2 class="text-xl font-bold text-pink-600 flex items-center gap-2"><i data-lucide="pen-tool"></i> บันทึกกิจกรรม IT_Ticket</h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-gray-400 ml-2">ประเภทงาน</label>
+                                <select id="f-type" onchange="updateSubTypes()" class="w-full p-4 rounded-xl bg-pink-50/20 border-none outline-none mt-1"></select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400 ml-2">งานย่อย</label>
+                                <select id="f-sub" class="w-full p-4 rounded-xl bg-pink-50/20 border-none outline-none mt-1"></select>
+                            </div>
                         </div>
                         <div>
                             <label class="text-xs text-gray-400 ml-2">หน่วยงาน</label>
-                            <input id="f-dept" list="dl-dept" class="w-full p-4 rounded-2xl bg-gray-50 outline-none mt-1" placeholder="พิมพ์ชื่อหน่วยงาน...">
+                            <input list="dl-dept" id="f-dept" class="w-full p-4 rounded-xl bg-pink-50/20 outline-none mt-1" placeholder="พิมพ์ค้นหาหน่วยงาน...">
                             <datalist id="dl-dept"></datalist>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-400 ml-2">เลขครุภัณฑ์ (AssetID)</label>
-                            <input id="f-asset" list="dl-asset" class="w-full p-4 rounded-2xl bg-gray-50 outline-none mt-1" placeholder="ระบุเลขครุภัณฑ์...">
-                            <datalist id="dl-asset"></datalist>
+                            <label class="text-xs text-gray-400 ml-2">รายละเอียด</label>
+                            <textarea id="f-detail" class="w-full p-4 rounded-xl bg-pink-50/20 outline-none mt-1 h-24"></textarea>
                         </div>
-                        <div class="col-span-2">
-                            <label class="text-xs text-gray-400 ml-2">รายละเอียดการซ่อม</label>
-                            <textarea id="f-detail" class="w-full p-4 rounded-2xl bg-gray-50 outline-none mt-1 h-32" placeholder="ระบุรายละเอียด..."></textarea>
-                        </div>
+                        <button onclick="saveTicket()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg flex justify-center items-center gap-2">
+                            <i data-lucide="save"></i> บันทึกข้อมูล
+                        </button>
                     </div>
-                    <button onclick="handleSaveTicket()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold shadow-lg">บันทึกข้อมูลลง IT_Ticket</button>
                 </div>
             </div>
-
-            <div id="tab3" class="tab-content grid grid-cols-2 md:grid-cols-6 gap-6"></div>
         </main>
     </div>
 
-    <div id="modalRegister" class="modal-overlay">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl space-y-4">
-            <h3 class="font-bold text-xl text-pink-600">ยืนยันตัวตนครั้งแรก</h3>
-            <input id="r-email" placeholder="Email ในระบบ Register" class="w-full p-4 rounded-2xl bg-gray-50 outline-none">
-            <input id="r-pn" placeholder="UserPN" class="w-full p-4 rounded-2xl bg-gray-50 outline-none">
-            <input id="r-code" placeholder="Verification Code" class="w-full p-4 rounded-2xl bg-gray-50 outline-none">
-            <input id="r-pw" type="password" placeholder="ตั้งรหัสผ่านใหม่ (UserPW)" class="w-full p-4 rounded-2xl bg-gray-50 outline-none">
-            <button onclick="handleVerify()" class="w-full pink-grad text-white py-4 rounded-2xl font-bold">ยืนยันรหัสผ่าน</button>
-            <button onclick="closeModal('modalRegister')" class="w-full text-gray-400 text-sm">ยกเลิก</button>
-        </div>
-    </div>
-
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxF7ImGdY6XqcFZ4zp6wSK4KMWTrkBk_NoMS5TucQ-e46EvvzP9O32hSzaENSqgoe0B/exec'; 
+        const WEB_APP_URL = 'YOUR_WEB_APP_URL'; 
         let store = {};
-        let currentUser = null;
+        let user = null;
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        function notify(type, title, msg) {
-            document.getElementById('notifyIcon').innerText = type === 'success' ? '✅' : '❌';
-            document.getElementById('notifyTitle').innerText = title;
-            document.getElementById('notifyMsg').innerText = msg;
-            openModal('modalNotify');
-        }
+        window.onload = () => { lucide.createIcons(); document.getElementById('loader').style.display='none'; }
 
-        async function handleLogin() {
-            const user = document.getElementById('userpn').value;
-            const pass = document.getElementById('userpw').value;
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'checkLogin', data: { user, pass } }) }).then(r => r.json());
+        async function doLogin() {
+            const u = document.getElementById('userpn').value;
+            const p = document.getElementById('userpw').value;
+            document.getElementById('loader').style.display='flex';
+            const res = await fetch(WEB_APP_URL, { method:'POST', body: JSON.stringify({ action:'checkLogin', data: {user:u, pass:p} }) }).then(r=>r.json());
             if(res.success) {
-                currentUser = res.user;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('u-name').innerText = currentUser.UserName;
-                document.getElementById('u-role').innerText = currentUser.UserTypeName;
-                loadData();
-            } else { notify('error', 'Login Failed', res.message); }
+                user = res.user;
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app-page').classList.remove('hidden');
+                await refreshData();
+            } else { alert('เข้าสู่ระบบไม่สำเร็จ'); }
+            document.getElementById('loader').style.display='none';
         }
 
-        async function loadData() {
-            store = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getInitialData' }) }).then(r => r.json());
-            renderDashboard();
-            renderLinks();
-            setupForm();
+        async function refreshData() {
+            const res = await fetch(WEB_APP_URL, { method:'POST', body: JSON.stringify({ action:'getInitialData' }) }).then(r=>r.json());
+            if(res.success) {
+                store = res;
+                renderDashboard();
+                setupForms();
+                lucide.createIcons();
+            }
+        }
+
+        function setupForms() {
+            // Map JobTypeMaster
+            const fType = document.getElementById('f-type');
+            fType.innerHTML = '<option value="">-- เลือกประเภท --</option>' + 
+                store.JobTypeMaster.map(t => `<option value="${t.TypeName}" data-id="${t.TypeID}">${t.TypeName}</option>`).join('');
+            
+            // Map Department
+            const dlDept = document.getElementById('dl-dept');
+            dlDept.innerHTML = store.Department.map(d => `<option value="${d.DepartmentName}">`).join('');
+        }
+
+        function updateSubTypes() {
+            const fType = document.getElementById('f-type');
+            const typeID = fType.options[fType.selectedIndex].getAttribute('data-id');
+            const fSub = document.getElementById('f-sub');
+            
+            // Map JobSubTypeMaster กรองด้วย TypeID
+            const filtered = store.JobSubTypeMaster.filter(s => s.TypeID == typeID);
+            fSub.innerHTML = '<option value="">-- เลือกงานย่อย --</option>' + 
+                filtered.map(s => `<option value="${s.SubTypeName}">${s.SubTypeName}</option>`).join('');
         }
 
         function renderDashboard() {
-            const jobs = store.jobs;
-            const wait = jobs.filter(j => j.Status === 'รอรับงาน').length;
-            const proc = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
-            const done = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
-
-            document.getElementById('stats-area').innerHTML = `
-                <div class="card p-6 text-center border-b-4 border-pink-500">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">ทั้งหมด</p>
-                    <p class="text-3xl font-bold">${jobs.length}</p>
-                </div>
-                <div class="card p-6 text-center border-b-4 border-orange-400">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">รอรับงาน</p>
-                    <p class="text-3xl font-bold text-orange-500">${wait}</p>
-                </div>
-                <div class="card p-6 text-center border-b-4 border-blue-400">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">กำลังทำ</p>
-                    <p class="text-3xl font-bold text-blue-500">${proc}</p>
-                </div>
-                <div class="card p-6 text-center border-b-4 border-green-400">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">เสร็จสิ้น</p>
-                    <p class="text-3xl font-bold text-green-500">${done}</p>
-                </div>
-            `;
-
-            document.getElementById('job-table-body').innerHTML = jobs.map(j => `
-                <tr class="hover:bg-pink-50/30 cursor-pointer transition" onclick="showDetail('${j.JobID}')">
+            const jobs = store.JobTicket;
+            document.getElementById('job-list').innerHTML = jobs.map(j => `
+                <tr class="hover:bg-pink-50">
                     <td class="p-4 font-bold text-pink-600">${j.JobID}</td>
-                    <td class="p-4"><div class="font-bold">${j.Problem}</div><div class="text-[10px] text-gray-400">${j.Department}</div></td>
-                    <td class="p-4 text-center"><span class="px-3 py-1 rounded-full text-[9px] font-bold ${j.Priority === 'ด่วนที่สุด' ? 'bg-red-500 text-white' : 'bg-gray-100'}">${j.Priority}</span></td>
-                    <td class="p-4 text-center"><span class="text-[10px] font-bold ${j.Status === 'รอรับงาน' ? 'text-orange-500' : 'text-blue-500'}">● ${j.Status}</span></td>
+                    <td class="p-4 text-xs">${j.Problem}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold">${j.Status}</span></td>
+                    <td class="p-4"><button class="text-pink-400"><i data-lucide="eye" size="18"></i></button></td>
                 </tr>
             `).join('');
-        }
-
-        function showDetail(id) {
-            const j = store.jobs.find(x => x.JobID == id);
-            document.getElementById('detailContent').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 bg-pink-50 p-4 rounded-2xl">
-                    <div><p class="text-gray-400 text-[10px]">JobID</p><p class="font-bold">${j.JobID}</p></div>
-                    <div><p class="text-gray-400 text-[10px]">สถานะ</p><p class="font-bold text-pink-600">${j.Status}</p></div>
+            
+            document.getElementById('stat-cards').innerHTML = `
+                <div class="bg-white p-4 rounded-2xl border-l-4 border-pink-500 shadow-sm">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">ทั้งหมด</p>
+                    <p class="text-2xl font-bold">${jobs.length}</p>
                 </div>
-                <div><p class="text-gray-400 text-[10px]">ปัญหา</p><p class="text-lg font-bold">${j.Problem}</p></div>
-                <div><p class="text-gray-400 text-[10px]">หน่วยงาน</p><p class="font-bold">${j.Department}</p></div>
-                <div><p class="text-gray-400 text-[10px]">ครุภัณฑ์</p><p class="font-bold">${j.AssetCode || '-'}</p></div>
             `;
-            const act = document.getElementById('detailActions');
-            act.innerHTML = `<button onclick="closeModal('modalDetail')" class="flex-1 py-3 bg-gray-200 rounded-xl font-bold">ปิด</button>`;
-            if(currentUser.UserTypeID === 'IT' && j.Status === 'รอรับงาน') {
-                act.innerHTML = `<button onclick="updateJob('${j.JobID}', 'กำลังดำเนินการ')" class="flex-1 py-3 pink-grad text-white rounded-xl font-bold shadow-lg">รับงานซ่อม</button>` + act.innerHTML;
-            }
-            openModal('modalDetail');
+            lucide.createIcons();
         }
 
-        async function updateJob(id, status) {
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJobStatus', data: { JobID: id, Status: status, Owner: currentUser.UserPN } }) });
-            closeModal('modalDetail');
-            loadData();
-            notify('success', 'สำเร็จ', 'อัปเดตสถานะงานเรียบร้อย');
-        }
-
-        function renderLinks() {
-            document.getElementById('tab3').innerHTML = store.links.map(l => `
-                <a href="${l.URL}" target="_blank" class="card p-6 flex flex-col items-center hover:scale-105 transition">
-                    <span class="text-4xl mb-2">${l.Linkicon || '🔗'}</span>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase">${l.Name}</span>
-                </a>
-            `).join('');
-        }
-
-        function setupForm() {
-            document.getElementById('f-type').innerHTML = store.jobTypes.map(t => `<option>${t.TypeName}</option>`).join('');
-            document.getElementById('dl-dept').innerHTML = store.depts.map(d => `<option value="${d.DepartmentName}">${d.DeptNOID}</option>`).join('');
-            document.getElementById('dl-asset').innerHTML = store.assets.map(a => `<option value="${a.AssetID}">${a.AssetName}</option>`).join('');
-            updateSub();
-        }
-
-        function updateSub() {
-            const val = document.getElementById('f-type').value;
-            const subs = store.jobSubTypes.filter(s => s.MainTypeName === val);
-            document.getElementById('f-sub').innerHTML = subs.map(s => `<option>${s.SubTypeName}</option>`).join('');
-        }
-
-        async function handleSaveTicket() {
+        async function saveTicket() {
             const data = {
-                JobID: 'TK-' + Date.now(),
+                JobID: 'T-' + Date.now(),
                 JobType: document.getElementById('f-type').value,
                 JobSubType: document.getElementById('f-sub').value,
                 Department: document.getElementById('f-dept').value,
-                AssetID: document.getElementById('f-asset').value,
                 Detail: document.getElementById('f-detail').value,
-                CreateBy: currentUser.UserPN,
+                CreateBy: user.UserPN,
                 Status: 'เสร็จสิ้น'
             };
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'saveITTicket', data }) }).then(r => r.json());
-            if(res.success) {
-                notify('success', 'บันทึกสำเร็จ', 'ข้อมูลถูกบันทึกลง Sheet: IT_Ticket แล้ว');
-                loadData();
-            }
+            document.getElementById('loader').style.display='flex';
+            await fetch(WEB_APP_URL, { method:'POST', body: JSON.stringify({ action:'saveITTicket', data }) });
+            alert('บันทึกสำเร็จ');
+            showTab(1);
+            await refreshData();
+            document.getElementById('loader').style.display='none';
         }
 
-        function switchTab(n) {
+        function showTab(n) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab'+n).classList.add('active');
-            document.querySelectorAll('nav button').forEach(b => { b.classList.remove('text-pink-500', 'border-pink-500', 'font-bold'); b.classList.add('text-gray-400'); });
-            document.getElementById('btn'+n).classList.add('text-pink-500', 'border-pink-500', 'font-bold');
+            document.getElementById('content'+n).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('text-pink-600', 'border-pink-500', 'font-bold');
+                b.classList.add('text-gray-400');
+            });
+            document.getElementById('t'+n).classList.add('text-pink-600', 'border-pink-500', 'font-bold');
         }
     </script>
 </body>
