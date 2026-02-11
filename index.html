@@ -171,83 +171,59 @@
     Auth.checkAuth(); 
 
     // 2. ดึงข้อมูล User จาก LocalStorage ที่เก็บไว้ตอน Login
-    const currentUser = Auth.getUser() || { UserName: "Guest", UserTypeID: "N/A" };
-    let store = { AllJobs: [], BackupData: [], SystemLink: [] };
+  // ... โค้ดด้านบนที่มี Auth.checkAuth() ...
 
-    // ฟังก์ชันจัดการ UI เบื้องต้น
-    function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+const currentUser = Auth.getUser() || { UserName: "Guest", UserTypeID: "N/A" };
+let store = { AllJobs: [], BackupData: [], SystemLink: [] };
 
-    // 3. เริ่มต้นโหลดข้อมูล
-    async function initApp() {
-        document.getElementById('u-name').innerText = currentUser.UserName || currentUser.UserPN;
-        document.getElementById('display-utid').innerText = currentUser.UserTypeID || 'IT STAFF';
+// --- วางฟังก์ชัน initApp ไว้ตรงนี้ ---
+async function initApp() {
+    // 1. แสดงข้อมูลผู้ใช้งานที่ดึงมาจาก Session/LocalStorage เข้าสู่ Header
+    if (currentUser) {
+        document.getElementById('u-id').innerText = currentUser.USERID || '-';
+        document.getElementById('u-fname').innerText = currentUser.UserName || '';
+        document.getElementById('u-sname').innerText = currentUser.UserSname || '';
+        document.getElementById('u-type-id').innerText = currentUser.UserTypeID || 'IT';
+        document.getElementById('u-type-name').innerText = currentUser.UserTypeName || 'เจ้าหน้าที่';
         
-        showLoading(true);
-        try {
-            // เรียกใช้ API ตามโครงสร้างที่วางไว้ (ส่ง userName ไปกรอง MyJobs)
-            const response = await fetch(API_URL, { 
-                method: 'POST', 
-                mode: 'cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ 
-                    action: 'getInitialData', 
-                    data: { userName: currentUser.UserName || currentUser.UserPN } 
-                }) 
-            });
+        if (currentUser.UserPic && currentUser.UserPic !== "") {
+            document.getElementById('u-pic').src = currentUser.UserPic;
+        }
+    }
+
+    showLoading(true);
+    try {
+        // 2. ดึงข้อมูลงานและระบบอื่นๆ จาก Google Sheets
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ 
+                action: 'getInitialData', 
+                data: { userName: currentUser.UserName } 
+            }) 
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            store.AllJobs = result.AllJobs || [];
+            store.BackupData = result.BackupData || [];
+            store.SystemLink = result.SystemLink || [];
             
-            const result = await response.json();
-            if (result.success) {
-                store.AllJobs = result.AllJobs || [];
-                store.BackupData = result.BackupData || [];
-                store.SystemLink = result.SystemLink || []; // สำหรับ Tab 3
-                
-                renderDashboard();
-                renderMyJobs();
-                renderSystemLinks();
-            }
-        } catch (e) { 
-            console.error("Init Error:", e);
-            if(typeof showModal === "function") showModal("ข้อผิดพลาด", "ไม่สามารถซิงค์ข้อมูลจากเซิร์ฟเวอร์ได้", "error");
-        } finally { 
-            showLoading(false); 
+            // 3. สั่งวาดหน้าจอ (Render)
+            renderDashboard();
+            renderMyJobs();
+            renderSystemLinks();
         }
+    } catch (e) { 
+        console.error("Init Error:", e);
+    } finally { 
+        showLoading(false); 
     }
+}
+// ------------------------------------
 
-    // 4. แสดงผล System Gateway (Tab 3)
-    function renderSystemLinks() {
-        const listEl = document.getElementById('external-link-list');
-        if (!listEl) return;
-        
-        if (store.SystemLink.length === 0) {
-            listEl.innerHTML = `<p class="text-center text-slate-400 text-xs">ไม่มีลิงก์ระบบงานในขณะนี้</p>`;
-            return;
-        }
-
-        listEl.innerHTML = store.SystemLink.map(link => `
-            <a href="${link.URL}" target="_blank" class="flex items-center justify-between p-5 bg-slate-50 border border-slate-100 rounded-3xl hover:bg-pink-50 hover:border-pink-200 transition-all group">
-                <div class="flex items-center gap-4">
-                    <span class="text-2xl group-hover:scale-110 transition-transform">🌐</span>
-                    <div>
-                        <p class="font-black text-slate-700 text-sm">${link.SystemName}</p>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">${link.Description || 'External System'}</p>
-                    </div>
-                </div>
-                <span class="text-slate-300 group-hover:text-pink-500">➜</span>
-            </a>
-        `).join('');
-    }
-
-    // แก้ไขฟังก์ชัน Logout ให้ใช้มาตรฐานเดียวกัน
-    function logout() {
-        if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-            Auth.logout();
-        }
-    }
-
-    // คงฟังก์ชัน renderDashboard, renderMyJobs, viewJobDetail, updateStatus, switchTab ไว้ตามเดิมของคุณ (ถูกต้องแล้ว)
-    // ... ฟังก์ชันเดิมของคุณ ...
+// ... ฟังก์ชัน renderDashboard และอื่นๆ ด้านล่าง ...
 
     window.onload = initApp;
 </script>
