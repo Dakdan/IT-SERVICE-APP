@@ -131,6 +131,26 @@
 
     <script src="./js/main.js"></script>
   <script>
+    
+    // --- ก๊อปปี้จาก main.js มาวางตรงนี้ชั่วคราว ---
+    const Auth = {
+        checkAuth: () => {
+            const session = localStorage.getItem("it_session");
+            if (!session) window.location.href = "login.html";
+        },
+        getUser: () => {
+            const session = localStorage.getItem("it_session");
+            return session ? JSON.parse(session) : null;
+        }
+    };
+    // ------------------------------------------
+
+    const API_URL = 'https://...'; // URL เดิมของคุณ
+    
+    async function initApp() {
+        // ... โค้ดที่เหลือจะทำงานได้ทันที เพราะ Auth อยู่ในไฟล์เดียวกันแล้ว ...
+    }
+
     const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
     
     // ประกาศตัวแปร Global
