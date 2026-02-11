@@ -1,5 +1,5 @@
 /**
- * Main.js - ศูนย์กลางควบคุม UI และ Session
+ * Main.js - ศูนย์กลางควบคุม UI และ Session (ฉบับปรับปรุง)
  */
 
 // 1. จัดการ Loader (วงกลมหมุนๆ)
@@ -14,21 +14,41 @@ const Loader = {
   }
 };
 
-// 2. จัดการ Popup แจ้งเตือน
-function showPopup(title, message) {
+// 2. จัดการ Modal/Popup แจ้งเตือน
+/**
+ * @param {string} title - หัวข้อ
+ * @param {string} message - ข้อความ
+ * @param {string} type - 'success', 'error', 'warning'
+ */
+function showModal(title, message, type = 'success') {
   const popup = document.getElementById('popup');
   const pTitle = document.getElementById('popup-title');
   const pMsg = document.getElementById('popup-message');
-  
-  if (popup && pTitle && pMsg) {
-    pTitle.innerText = title;
+  const pBox = document.querySelector('.popup-box');
+
+  if (popup && pTitle && pMsg && pBox) {
+    // ล้าง class สถานะเดิมและเพิ่มอันใหม่ (เพื่อให้ CSS เปลี่ยนสี)
+    pBox.classList.remove('success', 'error', 'warning');
+    pBox.classList.add(type);
+
+    // เลือก Icon ตามประเภท
+    let icon = "🔔";
+    if (type === 'success') icon = "✅";
+    if (type === 'error') icon = "❌";
+    if (type === 'warning') icon = "⚠️";
+
+    // ใส่เนื้อหา
+    pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">${icon}</span>${title}`;
     pMsg.innerText = message;
+    
     popup.style.display = 'flex';
   } else {
+    // กรณีหา Element ในหน้าจอไม่เจอให้ใช้ alert พื้นฐาน
     alert(`${title}: ${message}`);
   }
 }
 
+// ฟังก์ชันสำหรับปิด Popup
 function closePopup() {
   const popup = document.getElementById('popup');
   if (popup) popup.style.display = 'none';
@@ -50,41 +70,15 @@ const Auth = {
     localStorage.removeItem("it_session");
     location.href = "login.html";
   },
-  // ตรวจสอบว่าเป็นพนักงาน IT หรือไม่ (ถ้ามี field UserRole ใน Sheet)
+  // ตรวจสอบความปลอดภัย
   checkAuth: () => {
     if (!Auth.getUser()) {
       location.href = "login.html";
     }
   }
 };
-/**
- * ฟังก์ชันแสดง Modal แจ้งผลการทำงาน
- * @param {string} title - หัวข้อ
- * @param {string} message - ข้อความ
- * @param {string} type - 'success', 'error', 'warning'
- */
-function showModal(title, message, type = 'success') {
-  const popup = document.getElementById('popup');
-  const pTitle = document.getElementById('popup-title');
-  const pMsg = document.getElementById('popup-message');
-  const pBox = document.querySelector('.popup-box');
 
-  // ล้าง class เดิมออกก่อน
-  pBox.classList.remove('success', 'error', 'warning');
-  pBox.classList.add(type);
-
-  // กำหนด Icon ตามประเภท
-  let icon = "🔔";
-  if (type === 'success') icon = "✅";
-  if (type === 'error') icon = "❌";
-  if (type === 'warning') icon = "⚠️";
-
-  pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">${icon}</span>${title}`;
-  pMsg.innerText = message;
-  
-  popup.style.display = 'flex';
-}
-
-function closePopup() {
-  document.getElementById('popup').style.display = 'none';
+// เช็คเผื่อกรณีโค้ดเดิมเรียกใช้ชื่อ showPopup ให้ส่งไปที่ showModal แทน
+function showPopup(title, message) {
+    showModal(title, message, 'warning');
 }
