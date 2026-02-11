@@ -72,12 +72,16 @@ const Auth = {
     },
 
     // ออกจากระบบ (ล้างค่าและเปลี่ยนหน้า)
-    logout: () => {
-        console.log("Logging out...");
-        localStorage.removeItem("it_session");
-        // ใช้ location.replace เพื่อป้องกันการกด Back กลับมาหน้าเดิม
-        window.location.replace("login.html");
-    },
+   // แก้ไขส่วน Auth.logout ในไฟล์ js/main.js
+logout: () => {
+    console.log("Logging out...");
+    // 1. ล้างข้อมูล Session ทั้งหมด
+    localStorage.clear(); 
+    
+    // 2. ใช้การ Redirect แบบระบุ Path ให้ชัดเจน
+    // ทดลองใช้ ./ เพื่อบอกว่าเป็นไฟล์ที่อยู่ในโฟลเดอร์เดียวกัน
+    window.location.href = "./login.html"; 
+}
 
     // ตรวจสอบสิทธิ์เข้าหน้าเว็บ
     checkAuth: () => {
