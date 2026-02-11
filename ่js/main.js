@@ -73,14 +73,25 @@ const Auth = {
 
     // ออกจากระบบ (ล้างค่าและเปลี่ยนหน้า)
    // แก้ไขส่วน Auth.logout ในไฟล์ js/main.js
-logout: () => {
-    console.log("Logging out...");
-    // 1. ล้างข้อมูล Session ทั้งหมด
-    localStorage.clear(); 
-    
-    // 2. ใช้การ Redirect แบบระบุ Path ให้ชัดเจน
-    // ทดลองใช้ ./ เพื่อบอกว่าเป็นไฟล์ที่อยู่ในโฟลเดอร์เดียวกัน
-    window.location.href = "./login.html"; 
+const Auth = {
+    // ... ฟังก์ชันอื่นๆ (setSession, getUser) ...
+
+    logout: () => {
+        console.log("ล้างข้อมูล Session...");
+        // ลบข้อมูลทั้งหมดใน LocalStorage
+        localStorage.clear(); 
+        
+        // ใช้ชื่อไฟล์ให้ตรงกับใน GitHub (login.html ตัวเล็กทั้งหมด)
+        // ระบุ path แบบชัดเจนด้วย ./
+        window.location.href = "./login.html"; 
+    },
+
+    checkAuth: () => {
+        if (!Auth.getUser()) {
+            window.location.href = "./login.html";
+        }
+    }
+};
 }
 
     // ตรวจสอบสิทธิ์เข้าหน้าเว็บ
