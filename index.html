@@ -151,7 +151,27 @@
 
         await loadData();
     }
+// ดึงข้อมูลออกมาดูว่าในเครื่องเก็บชื่ออะไรไว้
+const user = Auth.getUser(); 
 
+if (user) {
+    // 1. แสดงชื่อ-นามสกุล
+    // ถ้าในฐานข้อมูลส่งมาเป็น username (ตัวเล็ก) หรือ UserName (ตัวใหญ่) ก็ให้ใช้ได้ทั้งคู่
+    const firstName = user.UserName || user.username || "";
+    const lastName = user.UserSname || user.usersname || "";
+    document.getElementById('u-fname').innerText = firstName;
+    document.getElementById('u-sname').innerText = lastName;
+
+    // 2. แสดง User ID
+    const userId = user.USERID || user.userid || "-";
+    document.getElementById('u-id').innerText = userId;
+
+    // 3. แสดงรูปภาพ (ถ้ามี)
+    const userPic = user.UserPic || user.userpic;
+    if (userPic) {
+        document.getElementById('u-pic').src = userPic;
+    }
+}
     // 2. ฟังก์ชันอัปเดตข้อมูลบนหน้าจอ (แก้ปัญหา User ไม่ขึ้น)
     function updateUserUI(user) {
         try {
