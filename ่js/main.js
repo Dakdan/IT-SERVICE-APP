@@ -1,17 +1,17 @@
 /**
- * Main.js - ศูนย์กลางควบคุม UI และ Session (ฉบับปรับปรุง)
+ * Main.js - ศูนย์กลางควบคุม UI และ Session (ฉบับเสถียร)
  */
 
 // 1. จัดการ Loader (วงกลมหมุนๆ)
 const Loader = {
-  show: () => {
-    const loader = document.getElementById('loader');
-    if (loader) loader.style.display = 'flex';
-  },
-  hide: () => {
-    const loader = document.getElementById('loader');
-    if (loader) loader.style.display = 'none';
-  }
+    show: () => {
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = 'flex';
+    },
+    hide: () => {
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = 'none';
+    }
 };
 
 // 2. จัดการ Modal/Popup แจ้งเตือน
@@ -21,80 +21,74 @@ const Loader = {
  * @param {string} type - 'success', 'error', 'warning'
  */
 function showModal(title, message, type = 'success') {
-  const popup = document.getElementById('popup');
-  const pTitle = document.getElementById('popup-title');
-  const pMsg = document.getElementById('popup-message');
-  const pBox = document.querySelector('.popup-box'); // ตัวนี้สำคัญมาก
+    const popup = document.getElementById('popup');
+    const pTitle = document.getElementById('popup-title');
+    const pMsg = document.getElementById('popup-message');
+    const pBox = document.querySelector('.popup-box');
 
-  // เช็คก่อนว่า Element ครบไหม
-  if (popup && pTitle && pMsg) {
-    
-    // ถ้ามี pBox ให้เปลี่ยนสีตาม Type (ถ้าไม่มีให้ข้ามส่วนสีไปก่อน)
-    if (pBox) {
-      pBox.classList.remove('success', 'error', 'warning');
-      pBox.classList.add(type);
+    if (popup && pTitle && pMsg) {
+        // เปลี่ยนสีแถบตามประเภท
+        if (pBox) {
+            pBox.classList.remove('success', 'error', 'warning');
+            pBox.classList.add(type);
+        }
+
+        let icon = "🔔";
+        if (type === 'success') icon = "✅";
+        if (type === 'error') icon = "❌";
+        if (type === 'warning') icon = "⚠️";
+
+        pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">${icon}</span>${title}`;
+        pMsg.innerText = message;
+        
+        popup.style.display = 'flex';
+    } else {
+        // Fallback กรณีหา Element ไม่เจอ
+        alert(`${title}: ${message}`);
     }
-
-    let icon = "🔔";
-    if (type === 'success') icon = "✅";
-    if (type === 'error') icon = "❌";
-    if (type === 'warning') icon = "⚠️";
-
-    pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">${icon}</span>${title}`;
-    pMsg.innerText = message;
-    
-    popup.style.display = 'flex';
-  } else {
-    alert(`${title}: ${message}`);
-  }
 }
 
-// ฟังก์ชันสำหรับปิด Popup
 function closePopup() {
-  const popup = document.getElementById('popup');
-  if (popup) popup.style.display = 'none';
+    const popup = document.getElementById('popup');
+    if (popup) popup.style.display = 'none';
 }
 
 // 3. จัดการ Session ผู้ใช้
 const Auth = {
-  // บันทึกข้อมูลลงเครื่อง
-  setSession: (userData) => {
-    localStorage.setItem("it_session", JSON.stringify(userData));
-  },
-  // ดึงข้อมูลผู้ใช้ออกมา
-  getUser: () => {
-    const data = localStorage.getItem("it_session");
-    return data ? JSON.parse(data) : null;
-  },
-  // ออกจากระบบ
-  logout: () => {
-    localStorage.removeItem("it_session");
-    location.href = "login.html";
-  },
-  // ตรวจสอบความปลอดภัย
-  checkAuth: () => {
-    if (!Auth.getUser()) {
-      location.href = "login.html";
+    // บันทึกข้อมูล (ชื่อ key ต้องตรงกับที่เรียกใน index.html)
+    setSession: (userData) => {
+        localStorage.setItem("it_session", JSON.stringify(userData));
+    },
+
+    // ดึงข้อมูล
+    getUser: () => {
+        const data = localStorage.getItem("it_session");
+        try {
+            return data ? JSON.parse(data) : null;
+        } catch (e) {
+            console.error("Session parse error", e);
+            return null;
+        }
+    },
+
+    // ออกจากระบบ (ล้างค่าและเปลี่ยนหน้า)
+    logout: () => {
+        console.log("Logging out...");
+        localStorage.removeItem("it_session");
+        // ใช้ location.replace เพื่อป้องกันการกด Back กลับมาหน้าเดิม
+        window.location.replace("login.html");
+    },
+
+    // ตรวจสอบสิทธิ์เข้าหน้าเว็บ
+    checkAuth: () => {
+        const user = Auth.getUser();
+        if (!user) {
+            window.location.replace("login.html");
+        }
     }
-  }
 };
 
-// เช็คเผื่อกรณีโค้ดเดิมเรียกใช้ชื่อ showPopup ให้ส่งไปที่ showModal แทน
+// ป้องกันกรณีโค้ดเดิมเรียกชื่อฟังก์ชันเก่า
 function showPopup(title, message) {
     showModal(title, message, 'warning');
-}
-/* ตัวอย่างสีสำหรับ Popup ตามประเภท */
-.popup-box.success { border-top: 5px solid #28a745; }
-.popup-box.error { border-top: 5px solid #dc3545; }
-.popup-box.warning { border-top: 5px solid #ffc107; }
-
-.popup-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; /* ถูกควบคุมโดย JS ให้เป็น none/flex */
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
 }
