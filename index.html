@@ -163,4 +163,35 @@
                     method: 'POST', 
                     body: JSON.stringify({ action: 'updateJobStatus', data: { JobID: jobId, type: type, Owner: currentUser.UserName, ...extra } }) 
                 });
-                const result = await res.json
+                const result = await res.json();
+                if (result.success) { closeModal('modal-transfer'); await loadData(); }
+            } catch (e) { alert("เกิดข้อผิดพลาด"); }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function openTransfer(jobId) {
+            const select = document.getElementById('select-staff');
+            select.innerHTML = (store.StaffList || []).map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            document.getElementById('modal-transfer').style.display = 'flex';
+            document.getElementById('btn-confirm-transfer').onclick = () => {
+                const reason = document.getElementById('transfer-reason').value;
+                if (!reason) return alert("กรุณาใส่เหตุผล");
+                handleJob(jobId, 'transfer', { NewOwner: select.value, Reason: reason, By: currentUser.UserName });
+            };
+        }
+
+        function switchTab(n) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab' + n).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => { 
+                b.classList.remove('text-pink-600', 'border-pink-600'); 
+                b.classList.add('text-slate-400', 'border-transparent'); 
+            });
+            document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function logout() { localStorage.removeItem("it_session"); window.location.href = "login.html"; }
+    </script>
+</body>
+</html>
