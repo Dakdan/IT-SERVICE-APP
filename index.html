@@ -276,6 +276,31 @@ async function handleJob(jobId, type, extra = {}) {
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
 
         window.onload = initApp;
+        // --- ฟังก์ชัน Logout (ซ่อมแซมให้กลับมาทำงานสมบูรณ์) ---
+function logout() {
+    // 1. ถามยืนยันก่อนออก (เพื่อป้องกันมือลั่น)
+    if (!confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) return;
+
+    try {
+        // 2. แสดง Loader เพื่อให้ User รู้ว่ากำลังประมวลผล
+        if (typeof showLoading === 'function') showLoading(true);
+
+        // 3. ล้างข้อมูล Session ทั้งหมด (ใช้ทั้ง localStorage และ sessionStorage เพื่อความชัวร์)
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // 4. หน่วงเวลาเล็กน้อยเพื่อให้ระบบเคลียร์ Cache
+        setTimeout(() => {
+            // 5. ส่งกลับไปหน้า login.html (ตรวจสอบให้แน่ใจว่าชื่อไฟล์ถูกต้อง)
+            window.location.href = 'login.html';
+        }, 300);
+
+    } catch (e) {
+        console.error("Logout Error:", e);
+        // กรณีเกิด Error รุนแรง ให้บังคับไปหน้า login ทันที
+        window.location.href = 'login.html';
+    }
+}
     </script>
 </body>
 </html>
