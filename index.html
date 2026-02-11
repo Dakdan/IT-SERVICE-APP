@@ -240,14 +240,38 @@
             document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
         }
 
-        function logout() {
-            // เรียกใช้ Modal ที่เราสร้างไว้ใน main.js/html
-            showModal("ออกจากระบบ", "กำลังพาท่านกลับไปยังหน้า Login...", "warning");
-            setTimeout(() => {
-                Auth.logout();
-            }, 1500);
+     // ฟังก์ชัน Logout แบบใหม่ที่ทำงานร่วมกับ Modal ในหน้าเว็บ
+function logout() {
+    // 1. ดึง Element ของ Modal ออกมา
+    const popup = document.getElementById('popup');
+    const pTitle = document.getElementById('popup-title');
+    const pMsg = document.getElementById('popup-message');
+    
+    // 2. ตั้งค่าข้อความ (เลียนแบบการทำงานของ showModal)
+    if (popup && pTitle && pMsg) {
+        pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
+        pMsg.innerText = "กำลังพาท่านกลับไปยังหน้า Login...";
+        
+        // 3. แสดง Modal
+        popup.style.display = 'flex';
+        
+        // 4. หน่วงเวลาแล้วเปลี่ยนหน้า
+        setTimeout(() => {
+            Auth.logout(); // ฟังก์ชันนี้จะลบ it_session และไปหน้า login.html
+        }, 1500);
+    } else {
+        // กรณีหา Modal ไม่เจอจริงๆ ให้ใช้ Confirm มาตรฐานแทน เพื่อไม่ให้ปุ่มค้าง
+        if(confirm("ยืนยันการออกจากระบบ?")) {
+            Auth.logout();
         }
+    }
+}
 
+// ฟังก์ชันปิด Popup (กรณีต้องการปิดเอง)
+function closePopup() {
+    const popup = document.getElementById('popup');
+    if (popup) popup.style.display = 'none';
+}
         window.onload = initApp;
     </script>
 </body>
