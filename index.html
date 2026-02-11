@@ -151,15 +151,7 @@
     // 3. ฟังก์ชันเริ่มต้นแอป
     async function initApp() {
         // --- ส่วนที่ 1: บังคับใส่ข้อมูลจำลองกรณีหาไม่เจอ ---
-        if (!localStorage.getItem("it_session")) {
-            const dummy = { 
-                username: "เจ้าหน้าที่", 
-                usersname: "ทดสอบระบบ", 
-                userid: "IT-001", 
-                usertypename: "Admin" 
-            };
-            localStorage.setItem("it_session", JSON.stringify(dummy));
-        }
+     
 
         try {
             // เช็คสิทธิ์และดึงข้อมูล
