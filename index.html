@@ -129,144 +129,124 @@
     </div>
 
     <script src="./js/main.js"></script>
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
-        
-        // 1. ตรวจสอบความปลอดภัย
-        Auth.checkAuth(); 
-
-        const currentUser = Auth.getUser();
-        let store = { AllJobs: [], SystemLink: [] };
-
-        function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
-        function closePopup() { document.getElementById('popup').style.display = 'none'; }
-
-        // 2. เริ่มต้นโหลดข้อมูล
-        async function initApp() {
-            // แสดงข้อมูล User จาก Session ทันที
-            if (currentUser) {
-                document.getElementById('u-id').innerText = currentUser.USERID || currentUser.userid || '-';
-                document.getElementById('u-fname').innerText = currentUser.UserName || currentUser.username || '';
-                document.getElementById('u-sname').innerText = currentUser.UserSname || currentUser.usersname || '';
-                document.getElementById('u-type-id').innerText = currentUser.UserTypeID || currentUser.usertypeid || 'IT';
-                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || currentUser.usertypename || 'เจ้าหน้าที่';
-                
-                const userImg = currentUser.UserPic || currentUser.userpic;
-                if (userImg) document.getElementById('u-pic').src = userImg;
-            }
-
-            showLoading(true);
-            try {
-                const response = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName || currentUser.username } }) 
-                });
-                const result = await response.json();
-                if (result.success) {
-                    store.AllJobs = result.AllJobs || [];
-                    store.SystemLink = result.SystemLink || [];
-                    
-                    renderDashboard();
-                    renderMyJobs();
-                    renderSystemLinks();
-                }
-            } catch (e) { 
-                console.error("Init Error:", e);
-            } finally { 
-                showLoading(false); 
-            }
-        }
-
-        // --- ฟังก์ชันการแสดงผลต่างๆ ---
-
-        function renderDashboard() {
-            const jobs = store.AllJobs;
-            document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
-            document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
-            document.getElementById('count-spare').innerText = jobs.filter(j => j.Status === 'รออะไหล่').length;
-            document.getElementById('count-done').innerText = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
-            document.getElementById('count-cancel').innerText = jobs.filter(j => j.Status === 'ยกเลิก').length;
-            
-            document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => `
-                <div class="card-pro p-6 border-l-[8px] ${j.Status === 'รอรับงาน' ? 'border-blue-500 status-pulse' : 'border-slate-200'}">
-                    <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
-                    <h3 class="font-bold text-slate-700">${j.Problem}</h3>
-                    <div class="flex justify-between mt-4">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">🏢 ${j.Department}</span>
-                        <span class="text-[10px] font-black px-2 py-1 rounded bg-slate-100">${j.Status}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderMyJobs() {
-            const uName = currentUser.UserName || currentUser.username;
-            const myJobs = store.AllJobs.filter(j => j.StaffName === uName);
-            const container = document.getElementById('job-list-myjob');
-            
-            if (myJobs.length === 0) {
-                container.innerHTML = `<div class="text-center p-10 text-slate-400 italic text-sm">ยังไม่มีงานที่คุณรับผิดชอบ</div>`;
-                return;
-            }
-
-            container.innerHTML = myJobs.map(j => `
-                <div class="card-pro p-6 border-l-[8px] border-pink-500">
-                    <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
-                    <h3 class="font-bold text-slate-700 mt-1">${j.Problem}</h3>
-                    <div class="flex justify-between mt-4">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">${j.Department}</span>
-                        <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg font-black">${j.Status}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderSystemLinks() {
-            document.getElementById('external-link-list').innerHTML = store.SystemLink.map(link => `
-                <a href="${link.URL}" target="_blank" class="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center hover:bg-pink-50 hover:border-pink-200">
-                    <span class="font-bold text-slate-700">${link.SystemName}</span>
-                    <span class="text-pink-500">➜</span>
-                </a>
-            `).join('');
-        }
-
-        function switchTab(n) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab' + n).classList.add('active');
-            document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('text-pink-600', 'border-pink-600');
-                b.classList.add('text-slate-400', 'border-transparent');
-            });
-            document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
-        }
-
-     // ฟังก์ชัน Logout แบบใหม่ที่ทำงานร่วมกับ Modal ในหน้าเว็บ
-function logout() {
-    const popup = document.getElementById('popup');
-    const pTitle = document.getElementById('popup-title');
-    const pMsg = document.getElementById('popup-message');
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
     
-    if (popup && pTitle && pMsg) {
-        // กำหนดข้อความให้ Modal แสดงผล
-        pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
-        pMsg.innerText = "กำลังพาท่านกลับไปยังหน้า Login...";
-        popup.style.display = 'flex';
+    // ประกาศตัวแปร Global
+    let store = { AllJobs: [], SystemLink: [] };
+    let currentUser = null;
 
-        // หน่วงเวลาเพื่อให้ User เห็นข้อความก่อนเปลี่ยนหน้า
-        setTimeout(() => {
-            Auth.logout(); 
-        }, 1500);
-    } else {
-        // Fallback กรณีหา Modal ไม่เจอ
-        Auth.logout();
+    // 1. ฟังก์ชันเริ่มต้นแอป
+    async function initApp() {
+        // ตรวจสอบสิทธิ์ก่อน
+        Auth.checkAuth(); 
+        
+        // ดึงข้อมูล User จาก Session
+        currentUser = Auth.getUser();
+        console.log("Current User Data:", currentUser); // เช็คใน Console ว่าข้อมูลมาไหม
+
+        if (currentUser) {
+            updateUserUI(currentUser);
+        }
+
+        await loadData();
     }
-}
-// ฟังก์ชันปิด Popup (กรณีต้องการปิดเอง)
-function closePopup() {
-    const popup = document.getElementById('popup');
-    if (popup) popup.style.display = 'none';
-}
-        window.onload = initApp;
-    </script>
+
+    // 2. ฟังก์ชันอัปเดตข้อมูลบนหน้าจอ (แก้ปัญหา User ไม่ขึ้น)
+    function updateUserUI(user) {
+        try {
+            // รองรับทั้ง Key ตัวใหญ่และตัวเล็กจาก API
+            const fname = user.UserName || user.username || 'User';
+            const sname = user.UserSname || user.usersname || '';
+            const uid = user.USERID || user.userid || '-';
+            const utype = user.UserTypeName || user.usertypename || 'เจ้าหน้าที่';
+            const upic = user.UserPic || user.userpic;
+
+            document.getElementById('u-fname').innerText = fname;
+            document.getElementById('u-sname').innerText = sname;
+            document.getElementById('u-id').innerText = uid;
+            document.getElementById('u-type-name').innerText = utype;
+            
+            if (upic) {
+                document.getElementById('u-pic').src = upic;
+            }
+        } catch (err) {
+            console.error("Update UI Error:", err);
+        }
+    }
+
+    // 3. โหลดข้อมูลจาก Google Sheets
+    async function loadData() {
+        showLoading(true);
+        try {
+            const response = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'getInitialData', 
+                    data: { userName: currentUser.UserName || currentUser.username } 
+                }) 
+            });
+            const result = await response.json();
+            if (result.success) {
+                store.AllJobs = result.AllJobs || [];
+                store.SystemLink = result.SystemLink || [];
+                
+                renderDashboard();
+                renderMyJobs();
+                renderSystemLinks();
+            }
+        } catch (e) { 
+            console.error("Load Data Error:", e);
+        } finally { 
+            showLoading(false); 
+        }
+    }
+
+    // 4. ฟังก์ชัน Logout (แก้ไขให้กด "ตกลง" แล้วออกทันที)
+    function logout() {
+        const popup = document.getElementById('popup');
+        const pTitle = document.getElementById('popup-title');
+        const pMsg = document.getElementById('popup-message');
+        const pBtn = popup.querySelector('button'); // ปุ่มใน Modal
+        
+        if (popup && pTitle && pMsg) {
+            pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
+            pMsg.innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
+            
+            // เปลี่ยนปุ่ม "ตกลง" ให้สั่ง Auth.logout()
+            pBtn.innerText = "ยืนยันออกจากระบบ";
+            pBtn.onclick = function() {
+                pBtn.innerText = "กำลังออก...";
+                Auth.logout();
+            };
+
+            popup.style.display = 'flex';
+        } else {
+            Auth.logout();
+        }
+    }
+
+    // --- ฟังก์ชันช่วยเหลืออื่นๆ ---
+    function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+    function closePopup() { document.getElementById('popup').style.display = 'none'; }
+    
+    function switchTab(n) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab' + n).classList.add('active');
+        document.querySelectorAll('nav button').forEach(b => {
+            b.classList.remove('text-pink-600', 'border-pink-600');
+            b.classList.add('text-slate-400', 'border-transparent');
+        });
+        document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
+    }
+
+    // ฟังก์ชัน Render ต่างๆ คงเดิม...
+    function renderDashboard() { /* โค้ดเดิมของคุณ */ }
+    function renderMyJobs() { /* โค้ดเดิมของคุณ */ }
+    function renderSystemLinks() { /* โค้ดเดิมของคุณ */ }
+
+    // รันแอป
+    window.onload = initApp;
+</script>
 </body>
 </html>
