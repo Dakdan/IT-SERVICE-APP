@@ -136,59 +136,61 @@
     let store = { AllJobs: [], SystemLink: [] };
     let currentUser = null;
 
-    // 1. ฟังก์ชันเริ่มต้นแอป
+    // 1. ฟังก์ชันเริ่มต้นแอป (ย้ายทุกอย่างมาทำงานที่นี่)
     async function initApp() {
-        // ตรวจสอบสิทธิ์ก่อน
-        Auth.checkAuth(); 
-        
-        // ดึงข้อมูล User จาก Session
-        currentUser = Auth.getUser();
-        console.log("Current User Data:", currentUser); // เช็คใน Console ว่าข้อมูลมาไหม
+        try {
+            // ตรวจสอบว่า Auth ถูกโหลดมาหรือยัง
+            if (typeof Auth === 'undefined') {
+                console.error("Auth object is not loaded yet.");
+                return;
+            }
 
-        if (currentUser) {
-            updateUserUI(currentUser);
+            // ตรวจสอบสิทธิ์
+            Auth.checkAuth(); 
+            
+            // ดึงข้อมูล User จาก Session
+            currentUser = Auth.getUser();
+            console.log("Current User Data:", currentUser);
+
+            if (currentUser) {
+                // อัปเดต UI ทันที
+                updateUserUI(currentUser);
+            }
+
+            // โหลดข้อมูลจาก API ต่อ
+            await loadData();
+            
+        } catch (error) {
+            console.error("Init App Error:", error);
         }
-
-        await loadData();
     }
-// ดึงข้อมูลออกมาดูว่าในเครื่องเก็บชื่ออะไรไว้
-const user = Auth.getUser(); 
 
-if (user) {
-    // 1. แสดงชื่อ-นามสกุล
-    // ถ้าในฐานข้อมูลส่งมาเป็น username (ตัวเล็ก) หรือ UserName (ตัวใหญ่) ก็ให้ใช้ได้ทั้งคู่
-    const firstName = user.UserName || user.username || "";
-    const lastName = user.UserSname || user.usersname || "";
-    document.getElementById('u-fname').innerText = firstName;
-    document.getElementById('u-sname').innerText = lastName;
-
-    // 2. แสดง User ID
-    const userId = user.USERID || user.userid || "-";
-    document.getElementById('u-id').innerText = userId;
-
-    // 3. แสดงรูปภาพ (ถ้ามี)
-    const userPic = user.UserPic || user.userpic;
-    if (userPic) {
-        document.getElementById('u-pic').src = userPic;
-    }
-}
-    // 2. ฟังก์ชันอัปเดตข้อมูลบนหน้าจอ (แก้ปัญหา User ไม่ขึ้น)
+    // 2. ฟังก์ชันอัปเดตข้อมูลบนหน้าจอ
     function updateUserUI(user) {
         try {
-            // รองรับทั้ง Key ตัวใหญ่และตัวเล็กจาก API
-            const fname = user.UserName || user.username || 'User';
-            const sname = user.UserSname || user.usersname || '';
-            const uid = user.USERID || user.userid || '-';
-            const utype = user.UserTypeName || user.usertypename || 'เจ้าหน้าที่';
-            const upic = user.UserPic || user.userpic;
+            // ดึง Element ต่างๆ มาเตรียมไว้
+            const elFname = document.getElementById('u-fname');
+            const elSname = document.getElementById('u-sname');
+            const elId = document.getElementById('u-id');
+            const elTypeName = document.getElementById('u-type-name');
+            const elPic = document.getElementById('u-pic');
+            const elTypeId = document.getElementById('u-type-id');
 
-            document.getElementById('u-fname').innerText = fname;
-            document.getElementById('u-sname').innerText = sname;
-            document.getElementById('u-id').innerText = uid;
-            document.getElementById('u-type-name').innerText = utype;
+            // แสดงชื่อ-นามสกุล (รองรับทั้งตัวเล็ก-ใหญ่)
+            if (elFname) elFname.innerText = user.UserName || user.username || "";
+            if (elSname) elSname.innerText = user.UserSname || user.usersname || "";
+
+            // แสดง User ID
+            if (elId) elId.innerText = user.USERID || user.userid || "-";
+
+            // แสดงประเภทผู้ใช้งาน
+            if (elTypeName) elTypeName.innerText = user.UserTypeName || user.usertypename || 'เจ้าหน้าที่';
+            if (elTypeId) elTypeId.innerText = user.UserTypeID || user.usertypeid || 'IT';
             
-            if (upic) {
-                document.getElementById('u-pic').src = upic;
+            // แสดงรูปภาพ
+            const userPic = user.UserPic || user.userpic;
+            if (userPic && elPic) {
+                elPic.src = userPic;
             }
         } catch (err) {
             console.error("Update UI Error:", err);
@@ -197,6 +199,8 @@ if (user) {
 
     // 3. โหลดข้อมูลจาก Google Sheets
     async function loadData() {
+        if (!currentUser) return;
+        
         showLoading(true);
         try {
             const response = await fetch(API_URL, { 
@@ -222,37 +226,33 @@ if (user) {
         }
     }
 
-    // 4. ฟังก์ชัน Logout (แก้ไขให้กด "ตกลง" แล้วออกทันที)
-   function logout() {
-    const popup = document.getElementById('popup');
-    const pTitle = document.getElementById('popup-title');
-    const pMsg = document.getElementById('popup-message');
-    const pBtn = popup.querySelector('button'); 
-    
-    if (popup && pTitle && pMsg) {
-        pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
-        pMsg.innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
+    // 4. ฟังก์ชัน Logout
+    function logout() {
+        const popup = document.getElementById('popup');
+        const pTitle = document.getElementById('popup-title');
+        const pMsg = document.getElementById('popup-message');
+        const pBtn = popup ? popup.querySelector('button') : null;
         
-        pBtn.innerText = "ยืนยันออกจากระบบ";
-        pBtn.onclick = function() {
-            pBtn.innerText = "กำลังออก...";
+        if (popup && pTitle && pMsg && pBtn) {
+            pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
+            pMsg.innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
             
-            // ล้างข้อมูลในเครื่อง
+            pBtn.innerText = "ยืนยันออกจากระบบ";
+            pBtn.onclick = function() {
+                pBtn.innerText = "กำลังออก...";
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = "login.html";
+            };
+
+            popup.style.display = 'flex';
+        } else {
             localStorage.clear();
-            sessionStorage.clear();
-            
-            // บังคับเปลี่ยนหน้าไป login.html ทันที (ไม่ผ่าน Auth.logout)
             window.location.href = "login.html";
-        };
-
-        popup.style.display = 'flex';
-    } else {
-        localStorage.clear();
-        window.location.href = "login.html";
+        }
     }
-}
 
-    // --- ฟังก์ชันช่วยเหลืออื่นๆ ---
+    // ฟังก์ชันช่วยเหลือ (Loading, Tabs, Render)
     function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
     function closePopup() { document.getElementById('popup').style.display = 'none'; }
     
@@ -266,12 +266,57 @@ if (user) {
         document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
     }
 
-    // ฟังก์ชัน Render ต่างๆ คงเดิม...
-    function renderDashboard() { /* โค้ดเดิมของคุณ */ }
-    function renderMyJobs() { /* โค้ดเดิมของคุณ */ }
-    function renderSystemLinks() { /* โค้ดเดิมของคุณ */ }
+    function renderDashboard() {
+        const jobs = store.AllJobs;
+        document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
+        document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+        document.getElementById('count-spare').innerText = jobs.filter(j => j.Status === 'รออะไหล่').length;
+        document.getElementById('count-done').innerText = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
+        document.getElementById('count-cancel').innerText = jobs.filter(j => j.Status === 'ยกเลิก').length;
+        
+        document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => `
+            <div class="card-pro p-6 border-l-[8px] ${j.Status === 'รอรับงาน' ? 'border-blue-500 status-pulse' : 'border-slate-200'}">
+                <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
+                <h3 class="font-bold text-slate-700">${j.Problem}</h3>
+                <div class="flex justify-between mt-4">
+                    <span class="text-[10px] uppercase font-bold text-slate-400">🏢 ${j.Department}</span>
+                    <span class="text-[10px] font-black px-2 py-1 rounded bg-slate-100">${j.Status}</span>
+                </div>
+            </div>
+        `).join('');
+    }
 
-    // รันแอป
+    function renderMyJobs() {
+        const uName = currentUser.UserName || currentUser.username;
+        const myJobs = store.AllJobs.filter(j => j.StaffName === uName);
+        const container = document.getElementById('job-list-myjob');
+        
+        if (myJobs.length === 0) {
+            container.innerHTML = `<div class="text-center p-10 text-slate-400 italic text-sm">ยังไม่มีงานที่คุณรับผิดชอบ</div>`;
+            return;
+        }
+
+        container.innerHTML = myJobs.map(j => `
+            <div class="card-pro p-6 border-l-[8px] border-pink-500">
+                <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
+                <h3 class="font-bold text-slate-700 mt-1">${j.Problem}</h3>
+                <div class="flex justify-between mt-4">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">${j.Department}</span>
+                    <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg font-black">${j.Status}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderSystemLinks() {
+        document.getElementById('external-link-list').innerHTML = store.SystemLink.map(link => `
+            <a href="${link.URL}" target="_blank" class="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center hover:bg-pink-50 hover:border-pink-200">
+                <span class="font-bold text-slate-700">${link.SystemName}</span>
+                <span class="text-pink-500">➜</span>
+            </a>
+        `).join('');
+    }
+
     window.onload = initApp;
 </script>
 </body>
