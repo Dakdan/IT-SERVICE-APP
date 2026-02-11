@@ -173,6 +173,8 @@
     // 2. ดึงข้อมูล User จาก LocalStorage ที่เก็บไว้ตอน Login
   // ... โค้ดด้านบนที่มี Auth.checkAuth() ...
 
+// ... โค้ดด้านบนที่มี Auth.checkAuth() ...
+
 const currentUser = Auth.getUser() || { UserName: "Guest", UserTypeID: "N/A" };
 let store = { AllJobs: [], BackupData: [], SystemLink: [] };
 
@@ -190,6 +192,43 @@ async function initApp() {
             document.getElementById('u-pic').src = currentUser.UserPic;
         }
     }
+
+    showLoading(true);
+    try {
+        // 2. ดึงข้อมูลงานและระบบอื่นๆ จาก Google Sheets
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ 
+                action: 'getInitialData', 
+                data: { userName: currentUser.UserName } 
+            }) 
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            store.AllJobs = result.AllJobs || [];
+            store.BackupData = result.BackupData || [];
+            store.SystemLink = result.SystemLink || [];
+            
+            // 3. สั่งวาดหน้าจอ (Render)
+            renderDashboard();
+            renderMyJobs();
+            renderSystemLinks();
+        }
+    } catch (e) { 
+        console.error("Init Error:", e);
+    } finally { 
+        showLoading(false); 
+    }
+}
+// ------------------------------------
+
+// ... ฟังก์ชัน renderDashboard และอื่นๆ ด้านล่าง ...
+
+// --- วางฟังก์ชัน initApp ไว้ตรงนี้ ---
+
 
     showLoading(true);
     try {
