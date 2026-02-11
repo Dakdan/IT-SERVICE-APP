@@ -130,9 +130,13 @@
     </div>
 
     <script src="./js/main.js"></script>
-  <script>
-    
-    // --- ก๊อปปี้จาก main.js มาวางตรงนี้ชั่วคราว ---
+ <script>
+    // 1. ตั้งค่าพื้นฐาน
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
+    let store = { AllJobs: [], SystemLink: [] };
+    let currentUser = null;
+
+    // 2. ระบบจัดการ Session (Auth) - ย้ายมาไว้ตรงนี้เพื่อให้เรียกใช้ได้แน่นอน
     const Auth = {
         checkAuth: () => {
             const session = localStorage.getItem("it_session");
@@ -143,100 +147,57 @@
             return session ? JSON.parse(session) : null;
         }
     };
-    // ------------------------------------------
 
-    const API_URL = 'https://...'; // URL เดิมของคุณ
-    
+    // 3. ฟังก์ชันเริ่มต้นแอป
     async function initApp() {
-        // ... โค้ดที่เหลือจะทำงานได้ทันที เพราะ Auth อยู่ในไฟล์เดียวกันแล้ว ...
-    }
+        // --- ส่วนที่ 1: บังคับใส่ข้อมูลจำลองกรณีหาไม่เจอ ---
+        if (!localStorage.getItem("it_session")) {
+            const dummy = { 
+                username: "เจ้าหน้าที่", 
+                usersname: "ทดสอบระบบ", 
+                userid: "IT-001", 
+                usertypename: "Admin" 
+            };
+            localStorage.setItem("it_session", JSON.stringify(dummy));
+        }
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
-    
-    // ประกาศตัวแปร Global
-    let store = { AllJobs: [], SystemLink: [] };
-    let currentUser = null;
-
-    // 1. ฟังก์ชันเริ่มต้นแอป (ย้ายทุกอย่างมาทำงานที่นี่)
-    async function initApp() {
-        async function initApp() {
-    // --- โค้ดทดสอบ: บังคับใส่ข้อมูลจำลอง (ลบออกได้ภายหลัง) ---
-    if (!localStorage.getItem("it_session")) {
-        const dummy = { 
-            username: "เจ้าหน้าที่", 
-            usersname: "ทดสอบ", 
-            userid: "IT-001", 
-            usertypename: "Admin" 
-        };
-        localStorage.setItem("it_session", JSON.stringify(dummy));
-    }
-    // --------------------------------------------------
-
-    // ... ส่วนที่เหลือของ initApp ...
-}
         try {
-            // ตรวจสอบว่า Auth ถูกโหลดมาหรือยัง
-            if (typeof Auth === 'undefined') {
-                console.error("Auth object is not loaded yet.");
-                return;
-            }
-
-            // ตรวจสอบสิทธิ์
-            Auth.checkAuth(); 
-            
-            // ดึงข้อมูล User จาก Session
+            // เช็คสิทธิ์และดึงข้อมูล
+            Auth.checkAuth();
             currentUser = Auth.getUser();
-            console.log("Current User Data:", currentUser);
+            console.log("Current User:", currentUser);
 
             if (currentUser) {
-                // อัปเดต UI ทันที
                 updateUserUI(currentUser);
+                await loadData(); // โหลดข้อมูลจาก Google Sheets
             }
-
-            // โหลดข้อมูลจาก API ต่อ
-            await loadData();
-            
         } catch (error) {
             console.error("Init App Error:", error);
         }
     }
 
-    // 2. ฟังก์ชันอัปเดตข้อมูลบนหน้าจอ
+    // 4. แสดงข้อมูล User บนหน้าจอ
     function updateUserUI(user) {
-        try {
-            // ดึง Element ต่างๆ มาเตรียมไว้
-            const elFname = document.getElementById('u-fname');
-            const elSname = document.getElementById('u-sname');
-            const elId = document.getElementById('u-id');
-            const elTypeName = document.getElementById('u-type-name');
-            const elPic = document.getElementById('u-pic');
-            const elTypeId = document.getElementById('u-type-id');
+        // ดึงค่าโดยรองรับทั้งตัวเล็กและตัวใหญ่
+        const fname = user.UserName || user.username || 'User';
+        const sname = user.UserSname || user.usersname || '';
+        const uid = user.USERID || user.userid || '-';
+        const utype = user.UserTypeName || user.usertypename || 'IT Service';
+        const upic = user.UserPic || user.userpic;
 
-            // แสดงชื่อ-นามสกุล (รองรับทั้งตัวเล็ก-ใหญ่)
-            if (elFname) elFname.innerText = user.UserName || user.username || "";
-            if (elSname) elSname.innerText = user.UserSname || user.usersname || "";
-
-            // แสดง User ID
-            if (elId) elId.innerText = user.USERID || user.userid || "-";
-
-            // แสดงประเภทผู้ใช้งาน
-            if (elTypeName) elTypeName.innerText = user.UserTypeName || user.usertypename || 'เจ้าหน้าที่';
-            if (elTypeId) elTypeId.innerText = user.UserTypeID || user.usertypeid || 'IT';
-            
-            // แสดงรูปภาพ
-            const userPic = user.UserPic || user.userpic;
-            if (userPic && elPic) {
-                elPic.src = userPic;
-            }
-        } catch (err) {
-            console.error("Update UI Error:", err);
+        // ใส่ค่าลงใน HTML
+        if(document.getElementById('u-fname')) document.getElementById('u-fname').innerText = fname;
+        if(document.getElementById('u-sname')) document.getElementById('u-sname').innerText = sname;
+        if(document.getElementById('u-id')) document.getElementById('u-id').innerText = uid;
+        if(document.getElementById('u-type-name')) document.getElementById('u-type-name').innerText = utype;
+        
+        if (upic && document.getElementById('u-pic')) {
+            document.getElementById('u-pic').src = upic;
         }
     }
 
-    // 3. โหลดข้อมูลจาก Google Sheets
+    // 5. โหลดข้อมูลจาก Google Sheets API
     async function loadData() {
-        if (!currentUser) return;
-        
         showLoading(true);
         try {
             const response = await fetch(API_URL, { 
@@ -250,7 +211,6 @@
             if (result.success) {
                 store.AllJobs = result.AllJobs || [];
                 store.SystemLink = result.SystemLink || [];
-                
                 renderDashboard();
                 renderMyJobs();
                 renderSystemLinks();
@@ -262,33 +222,25 @@
         }
     }
 
-    // 4. ฟังก์ชัน Logout
+    // 6. ฟังก์ชัน Logout
     function logout() {
         const popup = document.getElementById('popup');
-        const pTitle = document.getElementById('popup-title');
-        const pMsg = document.getElementById('popup-message');
         const pBtn = popup ? popup.querySelector('button') : null;
         
-        if (popup && pTitle && pMsg && pBtn) {
-            pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
-            pMsg.innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
+        if (popup && pBtn) {
+            document.getElementById('popup-title').innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
+            document.getElementById('popup-message').innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
             
             pBtn.innerText = "ยืนยันออกจากระบบ";
             pBtn.onclick = function() {
-                pBtn.innerText = "กำลังออก...";
                 localStorage.clear();
-                sessionStorage.clear();
                 window.location.href = "login.html";
             };
-
             popup.style.display = 'flex';
-        } else {
-            localStorage.clear();
-            window.location.href = "login.html";
         }
     }
 
-    // ฟังก์ชันช่วยเหลือ (Loading, Tabs, Render)
+    // --- ฟังก์ชันช่วยเหลืออื่นๆ (Helper Functions) ---
     function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
     function closePopup() { document.getElementById('popup').style.display = 'none'; }
     
@@ -326,22 +278,18 @@
         const uName = currentUser.UserName || currentUser.username;
         const myJobs = store.AllJobs.filter(j => j.StaffName === uName);
         const container = document.getElementById('job-list-myjob');
-        
-        if (myJobs.length === 0) {
-            container.innerHTML = `<div class="text-center p-10 text-slate-400 italic text-sm">ยังไม่มีงานที่คุณรับผิดชอบ</div>`;
-            return;
-        }
-
-        container.innerHTML = myJobs.map(j => `
-            <div class="card-pro p-6 border-l-[8px] border-pink-500">
-                <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
-                <h3 class="font-bold text-slate-700 mt-1">${j.Problem}</h3>
-                <div class="flex justify-between mt-4">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">${j.Department}</span>
-                    <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg font-black">${j.Status}</span>
+        container.innerHTML = myJobs.length === 0 
+            ? `<div class="text-center p-10 text-slate-400 italic text-sm">ยังไม่มีงานที่คุณรับผิดชอบ</div>`
+            : myJobs.map(j => `
+                <div class="card-pro p-6 border-l-[8px] border-pink-500">
+                    <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
+                    <h3 class="font-bold text-slate-700 mt-1">${j.Problem}</h3>
+                    <div class="flex justify-between mt-4">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">${j.Department}</span>
+                        <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg font-black">${j.Status}</span>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
     }
 
     function renderSystemLinks() {
@@ -353,7 +301,9 @@
         `).join('');
     }
 
+    // รันแอปพลิเคชัน
     window.onload = initApp;
 </script>
+
 </body>
 </html>
