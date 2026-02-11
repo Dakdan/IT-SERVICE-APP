@@ -1,47 +1,23 @@
 <!DOCTYPE html>
 <html lang="th">
-<script src="./js/main.js"></script>
-<script>
-  Auth.checkAuth(); // ตรวจสอบทันทีที่โหลดหน้า
-  // ... โค้ดอื่นๆ ...
-</script>
-<header class="pink-grad text-white px-6 py-5 sticky top-0 z-50 shadow-lg">
-    <div class="max-w-5xl mx-auto space-y-4">
-        <div class="flex items-center gap-4 border-b border-white/10 pb-4">
-            <img src="./โรงพยาบาลอุดรธานี .png" class="w-14 h-14 bg-white rounded-2xl p-1 shadow-inner" alt="Logo">
-            <div>
-                <h1 class="font-bold text-xl leading-tight tracking-tight">โรงพยาบาลอุดรธานี</h1>
-                <p class="text-[11px] text-white/90 font-light italic">ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
-                <p class="text-[10px] bg-white/20 inline-block px-2 py-0.5 rounded mt-1 font-medium">กลุ่มงาน: เทคโนโลยีสารสนเทศคอมพิวเตอร์</p>
-            </div>
-        </div>
-
-        <div class="flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <img id="u-pic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
-                         class="w-12 h-12 object-cover bg-white/20 p-0.5 rounded-xl border border-white/30 backdrop-blur-md">
-                    <span id="u-type-id" class="absolute -bottom-1 -right-1 bg-yellow-400 text-black text-[8px] font-black px-1 rounded shadow-sm border border-white">IT</span>
-                </div>
-                
-                <div class="flex flex-col">
-                    <h2 class="font-bold text-sm leading-none">
-                        <span id="u-fname"></span> <span id="u-sname"></span>
-                    </h2>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span id="u-type-name" class="text-[10px] text-white/80 font-medium"></span>
-                        <span class="text-white/40">|</span>
-                        <span class="text-[9px] font-mono text-white/70 tracking-tighter">ID: <span id="u-id"></span></span>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="logout()" class="bg-white/10 hover:bg-red-500/40 transition-all w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 active:scale-90">
-                🚪
-            </button>
-        </div>
-    </div>
-</header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Service Management - รพ.อุดรธานี</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
+        .pink-grad { background: linear-gradient(135deg, #be185d 0%, #db2777 100%); }
+        .overlay { display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(8px); z-index:9999; justify-content:center; align-items:center; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-pro { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
+        .card-pro:hover { transform: translateY(-2px); shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .status-pulse { animation: pulse-blue 2s infinite; }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
+    </style>
+</head>
 <body>
 
     <div id="loader" class="overlay">
@@ -51,219 +27,180 @@
         </div>
     </div>
 
-    <div id="main-app">
-        <header class="pink-grad text-white px-6 py-6 sticky top-0 z-50 shadow-lg">
-            <div class="max-w-5xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="w-10 bg-white/20 p-1.5 rounded-xl border border-white/30 backdrop-blur-sm">
-                    <div>
-                        <h1 id="u-name" class="font-bold text-lg leading-none mb-1"></h1>
-                        <span id="display-utid" class="text-[9px] bg-black/20 px-2.5 py-1 rounded-md font-black uppercase tracking-widest border border-white/10"></span>
-                    </div>
-                </div>
-                <button onclick="logout()" class="bg-white/20 w-10 h-10 rounded-2xl flex items-center justify-center">🚪</button>
-            </div>
-        </header>
-
-        <nav class="bg-white border-b border-slate-200 sticky top-[92px] z-40">
-            <div class="max-w-5xl mx-auto flex px-2 text-center">
-                <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-[11px] font-black border-b-4 border-pink-600 text-pink-600 uppercase">Dashboard</button>
-                <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-[11px] font-black border-b-4 border-transparent text-slate-400 uppercase">My Jobs</button>
-                <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-[11px] font-black border-b-4 border-transparent text-slate-400 uppercase">SystemLink</button>
-            </div>
-        </nav>
-
-        <main class="max-w-5xl mx-auto p-4 space-y-6">
-            
-            <div id="tab1" class="tab-content active space-y-4">
-                <div class="grid grid-cols-5 gap-2">
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">New</p>
-                        <p id="count-wait" class="text-xl font-black text-blue-600">0</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Doing</p>
-                        <p id="count-doing" class="text-xl font-black text-orange-500">0</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Spare</p>
-                        <p id="count-spare" class="text-xl font-black text-yellow-500">0</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Done</p>
-                        <p id="count-done" class="text-xl font-black text-green-500">0</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Cancel</p>
-                        <p id="count-cancel" class="text-xl font-black text-slate-300">0</p>
-                    </div>
-                </div>
-                <div id="job-list-dashboard" class="space-y-4"></div>
-            </div>
-
-            <div id="tab2" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-white p-5 rounded-[2rem] border border-slate-200">
-                    <div>
-                        <h2 class="text-pink-600 font-black text-sm uppercase">My Active Tickets</h2>
-                        <p class="text-[11px] text-slate-400 font-bold italic">รายการงานที่คุณกำลังดำเนินการ</p>
-                    </div>
-                    <button onclick="openModal('modal-add-job')" class="bg-pink-600 text-white px-5 py-2.5 rounded-2xl text-[11px] font-black shadow-lg">➕ เพิ่มงานใหม่</button>
-                </div>
-                <div id="job-list-myjob" class="space-y-4"></div>
-            </div>
-
-            <div id="tab3" class="tab-content space-y-4">
-                <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
-                    <h2 class="text-slate-800 font-black text-lg flex items-center gap-3 mb-6 italic">🔗 SYSTEM GATEWAY</h2>
-                    <div id="external-link-list" class="grid grid-cols-1 gap-4"></div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="modal-detail" class="overlay">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl m-4 flex flex-col max-h-[92vh]">
-            <div class="pink-grad p-8 text-white flex justify-between items-center shrink-0">
+    <header class="pink-grad text-white px-6 py-5 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-5xl mx-auto space-y-4">
+            <div class="flex items-center gap-4 border-b border-white/10 pb-4">
+                <img src="./โรงพยาบาลอุดรธานี .png" class="w-14 h-14 bg-white rounded-2xl p-1 shadow-inner" alt="Logo">
                 <div>
-                    <h3 class="font-black text-2xl tracking-tighter italic" id="md-job-id"></h3>
-                    <p class="text-[10px] font-bold text-white/80 uppercase tracking-widest">แจ้งปัญหาการใช้งาน</p>
-                </div>
-                <button onclick="closeModal('modal-detail')" class="bg-white/20 w-10 h-10 rounded-2xl flex items-center justify-center font-bold">✕</button>
-            </div>
-            <div class="p-8 space-y-6 overflow-y-auto">
-                <div class="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
-                    <p class="font-black text-blue-500 text-[10px] uppercase mb-3">ข้อมูลครุภัณฑ์</p>
-                    <p class="text-slate-700 font-bold text-sm">AssetID: <span id="md-asset-id" class="text-blue-900"></span></p>
-                    <p class="text-slate-800 font-black text-base mt-1" id="md-asset-name"></p>
-                    <p id="md-asset-detail" class="text-blue-600/60 text-[11px] mt-1 italic font-bold"></p>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[10px] text-slate-400 font-black uppercase">หน่วยงานที่แจ้ง</label>
-                        <p id="md-dept" class="font-bold text-slate-800 text-base mt-1"></p>
-                    </div>
-                    <div class="border-t border-dashed pt-4">
-                        <label class="text-[10px] text-pink-500 font-black uppercase italic">ปัญหา/อาการ</label>
-                        <div id="md-problem" class="bg-slate-50 p-5 rounded-3xl text-slate-600 text-sm border border-slate-100 italic mt-2"></div>
-                    </div>
+                    <h1 class="font-bold text-xl leading-tight tracking-tight">โรงพยาบาลอุดรธานี</h1>
+                    <p class="text-[11px] text-white/90 font-light italic">ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
+                    <p class="text-[10px] bg-white/20 inline-block px-2 py-0.5 rounded mt-1 font-medium">กลุ่มงาน: เทคโนโลยีสารสนเทศคอมพิวเตอร์</p>
                 </div>
             </div>
-            <div id="md-actions" class="p-8 bg-slate-50 border-t shrink-0"></div>
-        </div>
-    </div>
 
-    <div id="modal-add-job" class="overlay">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden m-4">
-            <div class="pink-grad p-7 text-white flex justify-between items-center">
-                <h3 class="font-black text-lg italic">เปิดงานใหม่</h3>
-                <button onclick="closeModal('modal-add-job')" class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center">✕</button>
-            </div>
-            <div class="p-8 space-y-5">
-                <textarea id="new-problem" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold h-32 outline-none" placeholder="ระบุอาการเสีย..."></textarea>
-                <button onclick="submitNewJob()" class="w-full pink-grad text-white py-5 rounded-[1.8rem] font-black shadow-xl">บันทึกข้อมูลงาน</button>
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img id="u-pic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+                             class="w-12 h-12 object-cover bg-white/20 p-0.5 rounded-xl border border-white/30 backdrop-blur-md">
+                        <span id="u-type-id" class="absolute -bottom-1 -right-1 bg-yellow-400 text-black text-[8px] font-black px-1 rounded shadow-sm border border-white">IT</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <h2 class="font-bold text-sm leading-none">
+                            <span id="u-fname"></span> <span id="u-sname"></span>
+                        </h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span id="u-type-name" class="text-[10px] text-white/80 font-medium"></span>
+                            <span class="text-white/40">|</span>
+                            <span class="text-[9px] font-mono text-white/70 tracking-tighter">ID: <span id="u-id"></span></span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="bg-white/10 hover:bg-red-500/40 transition-all w-10 h-10 rounded-xl flex items-center justify-center border border-white/10">🚪</button>
             </div>
         </div>
-    </div>
+    </header>
 
-   <script src="./js/main.js"></script>
-<script>
-    // 1. ตรวจสอบความปลอดภัยก่อนเริ่มทำงาน
-    Auth.checkAuth(); 
+    <nav class="bg-white border-b border-slate-200 sticky top-[154px] z-40 shadow-sm">
+        <div class="max-w-5xl mx-auto flex px-2 text-center font-bold">
+            <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-[11px] border-b-4 border-pink-600 text-pink-600 uppercase">Dashboard</button>
+            <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-[11px] border-b-4 border-transparent text-slate-400 uppercase">My Jobs</button>
+            <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-[11px] border-b-4 border-transparent text-slate-400 uppercase">SystemLink</button>
+        </div>
+    </nav>
 
-    // 2. ดึงข้อมูล User จาก LocalStorage ที่เก็บไว้ตอน Login
-  // ... โค้ดด้านบนที่มี Auth.checkAuth() ...
+    <main class="max-w-5xl mx-auto p-4 space-y-6">
+        <div id="tab1" class="tab-content active space-y-4">
+            <div class="grid grid-cols-5 gap-2">
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <p class="text-[9px] text-slate-400 font-black uppercase mb-1">New</p>
+                    <p id="count-wait" class="text-xl font-black text-blue-600">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Doing</p>
+                    <p id="count-doing" class="text-xl font-black text-orange-500">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Spare</p>
+                    <p id="count-spare" class="text-xl font-black text-yellow-500">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Done</p>
+                    <p id="count-done" class="text-xl font-black text-green-500">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Cancel</p>
+                    <p id="count-cancel" class="text-xl font-black text-slate-300">0</p>
+                </div>
+            </div>
+            <div id="job-list-dashboard" class="space-y-4"></div>
+        </div>
 
-// ... โค้ดด้านบนที่มี Auth.checkAuth() ...
+        <div id="tab2" class="tab-content space-y-4">
+            <div class="flex justify-between items-center bg-white p-5 rounded-[2rem] border border-slate-200">
+                <div>
+                    <h2 class="text-pink-600 font-black text-sm uppercase">My Active Tickets</h2>
+                    <p class="text-[11px] text-slate-400 font-bold italic">งานที่คุณรับผิดชอบ</p>
+                </div>
+                <button onclick="openModal('modal-add-job')" class="bg-pink-600 text-white px-5 py-2.5 rounded-2xl text-[11px] font-black shadow-lg">➕ เพิ่มงานใหม่</button>
+            </div>
+            <div id="job-list-myjob" class="space-y-4"></div>
+        </div>
 
-const currentUser = Auth.getUser() || { UserName: "Guest", UserTypeID: "N/A" };
-let store = { AllJobs: [], BackupData: [], SystemLink: [] };
+        <div id="tab3" class="tab-content space-y-4">
+            <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
+                <h2 class="text-slate-800 font-black text-lg mb-6 italic">🔗 SYSTEM GATEWAY</h2>
+                <div id="external-link-list" class="grid grid-cols-1 gap-4"></div>
+            </div>
+        </div>
+    </main>
 
-// --- วางฟังก์ชัน initApp ไว้ตรงนี้ ---
-async function initApp() {
-    // 1. แสดงข้อมูลผู้ใช้งานที่ดึงมาจาก Session/LocalStorage เข้าสู่ Header
-    if (currentUser) {
-        document.getElementById('u-id').innerText = currentUser.USERID || '-';
-        document.getElementById('u-fname').innerText = currentUser.UserName || '';
-        document.getElementById('u-sname').innerText = currentUser.UserSname || '';
-        document.getElementById('u-type-id').innerText = currentUser.UserTypeID || 'IT';
-        document.getElementById('u-type-name').innerText = currentUser.UserTypeName || 'เจ้าหน้าที่';
+    <script src="./js/main.js"></script>
+    <script>
+        // เรียกใช้ API URL ที่คุณตั้งไว้
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
         
-        if (currentUser.UserPic && currentUser.UserPic !== "") {
-            document.getElementById('u-pic').src = currentUser.UserPic;
+        // 1. ตรวจสอบความปลอดภัย
+        Auth.checkAuth(); 
+
+        const currentUser = Auth.getUser();
+        let store = { AllJobs: [], BackupData: [], SystemLink: [] };
+
+        function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+
+        // 2. ฟังก์ชันเริ่มต้นโหลดข้อมูล
+        async function initApp() {
+            if (currentUser) {
+                document.getElementById('u-id').innerText = currentUser.USERID || '-';
+                document.getElementById('u-fname').innerText = currentUser.UserName || '';
+                document.getElementById('u-sname').innerText = currentUser.UserSname || '';
+                document.getElementById('u-type-id').innerText = currentUser.UserTypeID || 'IT';
+                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || 'เจ้าหน้าที่';
+                if (currentUser.UserPic) document.getElementById('u-pic').src = currentUser.UserPic;
+            }
+
+            showLoading(true);
+            try {
+                const response = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName } }) 
+                });
+                const result = await response.json();
+                if (result.success) {
+                    store.AllJobs = result.AllJobs || [];
+                    store.BackupData = result.BackupData || [];
+                    store.SystemLink = result.SystemLink || [];
+                    
+                    renderDashboard();
+                    renderMyJobs();
+                    renderSystemLinks();
+                }
+            } catch (e) { console.error(e); } finally { showLoading(false); }
         }
-    }
 
-    showLoading(true);
-    try {
-        // 2. ดึงข้อมูลงานและระบบอื่นๆ จาก Google Sheets
-        const response = await fetch(API_URL, { 
-            method: 'POST', 
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'getInitialData', 
-                data: { userName: currentUser.UserName } 
-            }) 
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            store.AllJobs = result.AllJobs || [];
-            store.BackupData = result.BackupData || [];
-            store.SystemLink = result.SystemLink || [];
+        // ฟังก์ชัน Render ต่างๆ (Dashboard, MyJob, SystemLink)
+        function renderDashboard() {
+            const jobs = store.AllJobs;
+            document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
+            document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+            // ... (ใส่ตัวนับที่เหลือ) ...
             
-            // 3. สั่งวาดหน้าจอ (Render)
-            renderDashboard();
-            renderMyJobs();
-            renderSystemLinks();
+            document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => `
+                <div class="card-pro p-6 border-l-[8px] ${j.Status === 'รอรับงาน' ? 'border-blue-500 status-pulse' : 'border-slate-200'}">
+                    <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
+                    <h3 class="font-bold text-slate-700">${j.Problem}</h3>
+                    <div class="flex justify-between mt-4">
+                        <span class="text-[10px] uppercase font-bold text-slate-400">🏢 ${j.Department}</span>
+                        <span class="text-[10px] font-black px-2 py-1 rounded bg-slate-100">${j.Status}</span>
+                    </div>
+                </div>
+            `).join('');
         }
-    } catch (e) { 
-        console.error("Init Error:", e);
-    } finally { 
-        showLoading(false); 
-    }
-}
-// ------------------------------------
 
-// ... ฟังก์ชัน renderDashboard และอื่นๆ ด้านล่าง ...
-
-// --- วางฟังก์ชัน initApp ไว้ตรงนี้ ---
-
-
-    showLoading(true);
-    try {
-        // 2. ดึงข้อมูลงานและระบบอื่นๆ จาก Google Sheets
-        const response = await fetch(API_URL, { 
-            method: 'POST', 
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'getInitialData', 
-                data: { userName: currentUser.UserName } 
-            }) 
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            store.AllJobs = result.AllJobs || [];
-            store.BackupData = result.BackupData || [];
-            store.SystemLink = result.SystemLink || [];
-            
-            // 3. สั่งวาดหน้าจอ (Render)
-            renderDashboard();
-            renderMyJobs();
-            renderSystemLinks();
+        function renderSystemLinks() {
+            document.getElementById('external-link-list').innerHTML = store.SystemLink.map(link => `
+                <a href="${link.URL}" target="_blank" class="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center hover:bg-pink-50 hover:border-pink-200">
+                    <span class="font-bold text-slate-700">${link.SystemName}</span>
+                    <span class="text-pink-500">➜</span>
+                </a>
+            `).join('');
         }
-    } catch (e) { 
-        console.error("Init Error:", e);
-    } finally { 
-        showLoading(false); 
-    }
-}
-// ------------------------------------
 
-// ... ฟังก์ชัน renderDashboard และอื่นๆ ด้านล่าง ...
+        function switchTab(n) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab' + n).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('text-pink-600', 'border-pink-600');
+                b.classList.add('text-slate-400', 'border-transparent');
+            });
+            document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
+        }
 
-</script>
+        function logout() { if(confirm("ต้องการออกจากระบบ?")) Auth.logout(); }
+
+        window.onload = initApp;
+    </script>
 </body>
 </html>
