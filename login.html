@@ -21,17 +21,12 @@
 </head>
 <body class="pb-10">
 
-    <div id="loader" class="overlay">
-        <div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center">
-            <div class="animate-spin rounded-full h-10 w-10 border-4 border-pink-600 border-t-transparent mb-3"></div>
-            <p class="text-pink-600 font-bold text-xs">กำลังประมวลผล...</p>
-        </div>
-    </div>
+    <div id="loader" class="overlay"><div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center"><div class="animate-spin rounded-full h-10 w-10 border-4 border-pink-600 border-t-transparent mb-3"></div><p class="text-pink-600 font-bold text-xs">กำลังประมวลผล...</p></div></div>
 
     <header class="pink-grad text-white px-6 py-6 sticky top-0 z-50 shadow-lg">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <img src="./โรงพยาบาลอุดรธานี .png" class="w-12 h-12 bg-white rounded-full p-1" alt="Logo">
+                <img src="./โรงพยาบาลอุดรธานี .png" class="w-12 h-12 bg-white rounded-full p-1" alt="Udon Hospital Logo">
                 <div>
                     <h1 class="font-bold text-lg leading-tight">รพ.อุดรธานี (ITSM)</h1>
                     <p class="text-[10px] opacity-80">ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
@@ -42,7 +37,7 @@
                     <p id="u-fname" class="text-xs font-bold leading-none"></p>
                     <p id="u-type-name" class="text-[9px] opacity-70"></p>
                 </div>
-                <button onclick="logout()" class="bg-white/20 p-2 rounded-xl hover:bg-white/40 transition-all">🚪</button>
+                <button onclick="logout()" class="bg-white/20 p-2 rounded-xl">🚪</button>
             </div>
         </div>
     </header>
@@ -68,9 +63,9 @@
         </div>
 
         <div id="tab2" class="tab-content space-y-4">
-            <div class="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-pink-50">
+            <div class="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm">
                 <h2 class="text-pink-600 font-bold">งานที่คุณรับผิดชอบ</h2>
-                <button onclick="alert('ฟังก์ชันบันทึกกิจกรรมกำลังถูกเรียก')" class="bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-pink-700">+ บันทึกกิจกรรม</button>
+                <button onclick="openModal('modal-it-ticket')" class="bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md">+ บันทึกกิจกรรม</button>
             </div>
             <div id="job-list-myjob" class="space-y-3"></div>
         </div>
@@ -79,21 +74,13 @@
     </main>
 
     <div id="modal-transfer" class="overlay">
-        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm mx-4 shadow-2xl border border-pink-100">
-            <h3 class="font-bold text-pink-600 mb-4 flex items-center gap-2 text-lg">
-                <span>🔄</span> โอนงาน/มอบหมายงาน
-            </h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 ml-2">เลือกเจ้าหน้าที่</label>
-                    <select id="select-staff" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-100 outline-pink-500 text-sm appearance-none"></select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 ml-2">ระบุเหตุผล</label>
-                    <textarea id="transfer-reason" placeholder="เหตุผลการโอนหรือมอบหมาย..." class="w-full p-3 bg-slate-50 rounded-xl border border-slate-100 outline-pink-500 text-sm h-24 resize-none"></textarea>
-                </div>
-                <button id="btn-confirm-transfer" class="w-full py-3 pink-grad text-white rounded-xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all">ยืนยันการโอน</button>
-                <button onclick="closeModal('modal-transfer')" class="w-full py-2 text-slate-400 font-bold text-xs hover:text-pink-600 transition-colors">ยกเลิก</button>
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm mx-4">
+            <h3 class="font-bold text-pink-600 mb-4">🔄 โอนงาน/มอบหมายงาน</h3>
+            <div class="space-y-3">
+                <select id="select-staff" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-pink-500 text-sm"></select>
+                <textarea id="transfer-reason" placeholder="ระบุเหตุผลการโอนงาน..." class="w-full p-3 bg-slate-50 rounded-xl border-none outline-pink-500 text-sm h-24"></textarea>
+                <button id="btn-confirm-transfer" class="w-full py-3 pink-grad text-white rounded-xl font-bold shadow-lg">ยืนยันการโอน</button>
+                <button onclick="closeModal('modal-transfer')" class="w-full py-3 text-slate-400 font-bold text-xs">ยกเลิก</button>
             </div>
         </div>
     </div>
@@ -103,7 +90,6 @@
         let store = { AllJobs: [], StaffList: [], SystemLink: [] };
         let currentUser = null;
 
-        // ระบบตรวจสอบ Session เดิมที่คุณทำไว้
         const Auth = {
             check: () => {
                 const s = localStorage.getItem("it_session");
@@ -135,14 +121,12 @@
                     renderMyJobs();
                     renderSystemLinks();
                 }
-            } catch (e) { console.error("Error Loading Data:", e); }
+            } catch (e) { console.error("Error!"); }
             showLoading(false);
         }
 
         function renderDashboard() {
             const jobs = store.AllJobs || [];
-            
-            // อัปเดตตัวเลขตามสถานะจริงใน Sheet
             document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
             document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
             document.getElementById('count-spare').innerText = jobs.filter(j => j.Status === 'รออะไหล่').length;
@@ -151,28 +135,26 @@
 
             const listContainer = document.getElementById('job-list-dashboard');
             listContainer.innerHTML = jobs.map(j => {
-                // สีสถานะให้สัมพันธ์กัน
-                let statusColor = "text-slate-500 bg-slate-50 border-slate-100";
-                if (j.Status === 'รอรับงาน') statusColor = "text-pink-600 bg-pink-50 border-pink-100";
-                if (j.Status === 'กำลังดำเนินการ') statusColor = "text-blue-500 bg-blue-50 border-blue-100";
-                if (j.Status === 'เสร็จสิ้น') statusColor = "text-green-500 bg-green-50 border-green-100";
-
-                const isIT = (currentUser.UserTypeID === 'IT' || currentUser.UserTypeID === 'Admin');
+                // สีสถานะให้ตรงตามเงื่อนไข (เด่นชัดขึ้น)
+                let sColor = "text-slate-500 bg-slate-100";
+                if (j.Status === 'รอรับงาน') sColor = "text-pink-600 bg-pink-100 border border-pink-200";
+                if (j.Status === 'กำลังดำเนินการ') sColor = "text-blue-500 bg-blue-100 border border-blue-200";
+                if (j.Status === 'เสร็จสิ้น') sColor = "text-green-500 bg-green-100 border border-green-200";
 
                 return `
-                    <div class="card-pro p-5 border-l-8 ${j.Status === 'รอรับงาน' ? 'border-pink-500 status-pulse' : 'border-slate-300'}">
+                    <div class="card-pro p-5 border-l-8 ${j.Status === 'รอรับงาน' ? 'border-pink-500 status-pulse' : 'border-slate-200'} mb-3">
                         <div class="flex justify-between items-start">
                             <div class="flex-1">
-                                <p class="text-[10px] text-slate-400 font-bold">${j.JobID} | ${j.Priority || 'ปกติ'}</p>
+                                <p class="text-[10px] text-slate-400 font-bold">${j.JobID} | ${j.Priority}</p>
                                 <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
-                                <p class="text-[10px] text-pink-600 mt-1 flex items-center gap-1">🏢 ${j.Department}</p>
+                                <p class="text-[10px] text-pink-600 mt-1">🏢 ${j.Department}</p>
                             </div>
                             <div class="text-right flex flex-col items-end gap-2">
-                                <span class="text-[10px] font-black uppercase px-2 py-1 rounded border ${statusColor}">
+                                <span class="text-[10px] font-black uppercase px-2 py-1 rounded ${sColor}">
                                     ${j.Status}
                                 </span>
-                                ${(j.Status === 'รอรับงาน' && isIT) 
-                                    ? `<button onclick="handleJob('${j.JobID}', 'accept')" class="bg-pink-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm hover:bg-pink-700 transition-all">รับงาน</button>` 
+                                ${(j.Status === 'รอรับงาน' && (currentUser.UserTypeID === 'IT' || currentUser.UserTypeID === 'Admin')) 
+                                    ? `<button onclick="handleJob('${j.JobID}', 'accept')" class="bg-pink-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-md">รับงาน</button>` 
                                     : ''}
                             </div>
                         </div>
@@ -183,37 +165,30 @@
 
         function renderMyJobs() {
             const myJobs = store.AllJobs.filter(j => j.Owner === currentUser.UserName);
-            document.getElementById('job-list-myjob').innerHTML = myJobs.length === 0 
-                ? '<div class="text-center py-10"><p class="text-slate-400 text-xs italic">ยังไม่มีงานในความรับผิดชอบ</p></div>' 
-                : myJobs.map(j => `
-                    <div class="card-pro p-5 border-l-8 border-blue-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold">${j.JobID}</p>
-                                <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
-                                <p class="text-[10px] text-blue-500 mt-1">🕒 สถานะ: ${j.Status}</p>
-                            </div>
-                            <button onclick="openTransfer('${j.JobID}')" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-slate-200">โอนงาน</button>
+            document.getElementById('job-list-myjob').innerHTML = myJobs.length === 0 ? '<p class="text-center text-slate-400 text-xs py-10 italic">ยังไม่มีงานในความรับผิดชอบ</p>' : myJobs.map(j => `
+                <div class="card-pro p-5 border-l-8 border-blue-500 mb-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold">${j.JobID}</p>
+                            <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
                         </div>
+                        <button onclick="openTransfer('${j.JobID}')" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-[10px] font-bold">โอนงาน</button>
                     </div>
-                `).join('');
+                </div>
+            `).join('');
         }
 
         async function handleJob(jobId, type, extra = {}) {
-            if (type === 'accept' && !confirm(`ยืนยันการรับงาน ${jobId}?`)) return;
             showLoading(true);
             const data = { JobID: jobId, type: type, Owner: currentUser.UserName, ...extra };
             try {
-                const res = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'updateJobStatus', data: data }) 
-                });
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJobStatus', data: data }) });
                 const result = await res.json();
                 if (result.success) { 
                     closeModal('modal-transfer');
                     await loadData(); 
                 }
-            } catch (e) { alert("เกิดข้อผิดพลาดในการส่งข้อมูล"); }
+            } catch (e) { alert("Error!"); }
             showLoading(false);
         }
 
@@ -221,19 +196,17 @@
             const modal = document.getElementById('modal-transfer');
             const select = document.getElementById('select-staff');
             
-            // ดึงรายชื่อจาก StaffList มาใส่ใน Select
+            // เติมข้อมูลใน Modal (แก้ปัญหาข้อมูลไม่แสดง)
             if (store.StaffList && store.StaffList.length > 0) {
                 select.innerHTML = store.StaffList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-            } else {
-                select.innerHTML = '<option value="">ไม่พบรายชื่อเจ้าหน้าที่</option>';
             }
-
+            
             modal.style.display = 'flex';
 
             document.getElementById('btn-confirm-transfer').onclick = () => {
-                const reason = document.getElementById('transfer-reason').value.trim();
+                const reason = document.getElementById('transfer-reason').value;
                 const newOwner = select.value;
-                if (!reason) return alert("กรุณาระบุเหตุผลการโอนงาน");
+                if (!reason) return alert("กรุณาระบุเหตุผล");
                 handleJob(jobId, 'transfer', { NewOwner: newOwner, Reason: reason, By: currentUser.UserName });
             };
         }
@@ -241,7 +214,7 @@
         function renderSystemLinks() {
             const container = document.getElementById('tab3');
             container.innerHTML = store.SystemLink.map(l => `
-                <a href="${l.URL}" target="_blank" class="bg-white p-4 rounded-2xl flex items-center gap-3 shadow-sm border border-pink-50 hover:bg-pink-50 transition-all">
+                <a href="${l.URL}" target="_blank" class="bg-white p-4 rounded-2xl flex items-center gap-3 shadow-sm border border-pink-50 hover:bg-pink-50">
                     <span class="text-2xl">${l.Linkicon || '🔗'}</span>
                     <span class="font-bold text-slate-700 text-sm">${l.SystemName || l.Name}</span>
                 </a>
@@ -251,22 +224,13 @@
         function switchTab(n) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('tab' + n).classList.add('active');
-            document.querySelectorAll('nav button').forEach(b => { 
-                b.classList.remove('text-pink-600', 'border-pink-600'); 
-                b.classList.add('text-slate-400', 'border-transparent'); 
-            });
+            document.querySelectorAll('nav button').forEach(b => { b.classList.remove('text-pink-600', 'border-pink-600'); b.classList.add('text-slate-400', 'border-transparent'); });
             document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
         }
 
         function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        function logout() {
-            if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-                localStorage.clear();
-                window.location.href = "login.html";
-            }
-        }
+        function logout() { localStorage.clear(); window.location.href = "login.html"; }
 
         window.onload = initApp;
     </script>
