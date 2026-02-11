@@ -2,99 +2,72 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Login | IT Maintenance</title>
+  <title>เข้าสู่ระบบ - IT Maintenance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./css/style.css">
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
-<body>
+
+<body class="login-page">
+
+<!-- ================= LOADER ================= -->
+<div id="loader" class="loader-overlay" style="display:none;">
+  <div class="spinner"></div>
+</div>
+
+<!-- ================= POPUP ================= -->
+<div id="popup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <h3 id="popup-title">แจ้งเตือน</h3>
+    <p id="popup-message"></p>
+    <button onclick="closePopup()" class="btn-login">ตกลง</button>
+  </div>
+</div>
 
 <div class="login-wrapper">
 
-  <!-- HEADER -->
+  <!-- ================= HEADER ================= -->
   <div class="login-header">
-    <div class="logo-box">
-      <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" class="header-logo">
-      <div class="logo-text">
-        <h2>โรงพยาบาลอุดรธานี</h2>
-        <span>ระบบบริหารงานซ่อมบำรุงและบริการ</span>
-        <span>หน่วยงาน: เทคโนโลยีสารสนเทศคอมพิวเตอร์</span>
-      </div>
-    </div>
+    <img src="./โรงพยาบาลอุดรธานี.png" class="header-logo">
+    <h1>โรงพยาบาลอุดรธานี</h1>
+    <p>ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
   </div>
 
-  <!-- CARD -->
+  <!-- ================= LOGIN CARD ================= -->
   <div class="login-card">
 
     <div class="form-group">
-      <input id="email" placeholder="Email">
+      <label>👤 Email / Username</label>
+      <input type="text" id="username" autocomplete="username">
     </div>
 
     <div class="form-group">
-      <input id="password" type="password" placeholder="Password">
+      <label>🔒 Password</label>
+      <input type="password" id="password" autocomplete="current-password">
     </div>
 
-    <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
+    <button class="btn-login" onclick="handleLogin()">
+      🛡️ Login
+    </button>
 
-    <div class="register-link">
-      <a href="forgot.html">ลืมรหัสผ่าน?</a><br>
+    <div class="card-footer" style="text-align:center; margin-top:15px;">
       ยังไม่มีบัญชี? <a href="register.html">ลงทะเบียน</a>
     </div>
 
   </div>
 </div>
 
-<!-- OVERLAY -->
-<div id="overlay" class="overlay hidden">
-  <div class="overlay-card">
-    <div class="spinner"></div>
-    <p>กำลังเข้าสู่ระบบ...</p>
-  </div>
-</div>
-
-<!-- POPUP -->
-<div id="popup" class="popup hidden">
-  <div class="popup-card">
-    <h3 id="popupTitle"></h3>
-    <p id="popupMsg"></p>
-    <button class="btn-login" onclick="closePopup()">ตกลง</button>
-  </div>
-</div>
-
-<script src="./js/core.js"></script>
+<!-- ================= SCRIPT ================= -->
+<script src="./js/api.js"></script>
+<script src="./js/main.js"></script>
 
 <script>
-/* auto redirect if session exists */
-if(sessionStorage.getItem('user')){
-  location.href = "index.html";
-}
-
-function login(){
-  if(!email.value || !password.value){
-    showPopup("แจ้งเตือน","กรุณากรอก Email และ Password");
-    return;
+  // ===== auto login ถ้ามี session =====
+  const session = localStorage.getItem("it_session");
+  if (session) {
+    location.href = "./index.html";
   }
-
-  showOverlay();
-
-  callAPI('login',{
-    email: email.value,
-    password: password.value
-  })
-  .then(res=>{
-    hideOverlay();
-
-    if(res.ok){
-      sessionStorage.setItem('user', JSON.stringify(res.user));
-      location.href = "index.html";
-    }else{
-      showPopup("ผิดพลาด", res.message);
-    }
-  })
-  .catch(()=>{
-    hideOverlay();
-    showPopup("ผิดพลาด","ไม่สามารถเชื่อมต่อระบบได้");
-  });
-}
 </script>
 
 </body>
