@@ -5,23 +5,43 @@
   Auth.checkAuth(); // ตรวจสอบทันทีที่โหลดหน้า
   // ... โค้ดอื่นๆ ...
 </script>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Service Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
-        .pink-grad { background: linear-gradient(135deg, #be185d 0%, #db2777 100%); }
-        .overlay { display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(8px); z-index:9999; justify-content:center; align-items:center; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .card-pro { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .status-pulse { animation: pulse-blue 2s infinite; }
-        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
-    </style>
-</head>
+<header class="pink-grad text-white px-6 py-5 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto space-y-4">
+        <div class="flex items-center gap-4 border-b border-white/10 pb-4">
+            <img src="./โรงพยาบาลอุดรธานี .png" class="w-14 h-14 bg-white rounded-2xl p-1 shadow-inner" alt="Logo">
+            <div>
+                <h1 class="font-bold text-xl leading-tight tracking-tight">โรงพยาบาลอุดรธานี</h1>
+                <p class="text-[11px] text-white/90 font-light italic">ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
+                <p class="text-[10px] bg-white/20 inline-block px-2 py-0.5 rounded mt-1 font-medium">กลุ่มงาน: เทคโนโลยีสารสนเทศคอมพิวเตอร์</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <img id="u-pic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+                         class="w-12 h-12 object-cover bg-white/20 p-0.5 rounded-xl border border-white/30 backdrop-blur-md">
+                    <span id="u-type-id" class="absolute -bottom-1 -right-1 bg-yellow-400 text-black text-[8px] font-black px-1 rounded shadow-sm border border-white">IT</span>
+                </div>
+                
+                <div class="flex flex-col">
+                    <h2 class="font-bold text-sm leading-none">
+                        <span id="u-fname"></span> <span id="u-sname"></span>
+                    </h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span id="u-type-name" class="text-[10px] text-white/80 font-medium"></span>
+                        <span class="text-white/40">|</span>
+                        <span class="text-[9px] font-mono text-white/70 tracking-tighter">ID: <span id="u-id"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="logout()" class="bg-white/10 hover:bg-red-500/40 transition-all w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 active:scale-90">
+                🚪
+            </button>
+        </div>
+    </div>
+</header>
 <body>
 
     <div id="loader" class="overlay">
