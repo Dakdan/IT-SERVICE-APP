@@ -6,9 +6,10 @@ const ApiService = {
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        mode: 'no-cors', // ลองเพิ่มโหมดนี้หากยังโดน Block (แต่จะอ่าน JSON ลำบากหน่อย)
-        // หรือใช้โหมดมาตรฐานแต่ส่งเป็น text/plain แทน
+        // ห้ามใช้ no-cors เพราะจะอ่าน JSON กลับมาไม่ได้
+        mode: 'cors', 
         headers: {
+          // ใช้ text/plain เพื่อหลีกเลี่ยงปัญหา Preflight CORS กับ Google Script
           'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify({
@@ -16,13 +17,38 @@ const ApiService = {
           data: { user: username, pass: password }
         })
       });
-      
-      // กรณีใช้ Google Script บางครั้งต้องรอการ Redirect
+
+      // ตรวจสอบสถานะการตอบกลับ
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
       const result = await response.json();
       return result;
+
     } catch (error) {
       console.error("Fetch Error:", error);
-      throw error;
+      // ส่ง Object กลับไปเพื่อให้หน้า Login แสดง Modal Error ได้ถูกต้อง
+      return { success: false, message: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้" };
+    }
+  },
+
+  // เพิ่มฟังก์ชันสำหรับดึงข้อมูล (เผื่อเรียกใช้ในหน้า Dashboard)
+  async getInitialData(userName) {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'getInitialData',
+          data: { userName: userName }
+        })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Fetch Data Error:", error);
+      return { success: false, message: "โหลดข้อมูลล้มเหลว" };
     }
   }
 };
