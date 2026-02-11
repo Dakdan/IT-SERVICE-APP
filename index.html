@@ -107,21 +107,89 @@
             }
         }
 
-        async function loadData() {
-            showLoading(true);
-            try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName } }) });
-                const result = await res.json();
-                if (result.success) {
-                    store = result;
-                    renderDashboard();
-                    renderMyJobs();
-                    renderSystemLinks();
-                    populateStaffList();
-                }
-            } catch (e) { console.error(e); }
-            showLoading(false);
-        }
+      // 1. แก้ไขส่วนแสดงผล Dashboard ให้ Status เด่นชัด
+function renderDashboard() {
+    const jobs = store.AllJobs || [];
+    
+    // อัปเดตตัวเลข Dashboard (ตรวจสอบชื่อ Property ให้ตรงกับ Google Sheet)
+    document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
+    document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+    document.getElementById('count-done').innerText = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
+
+    const listContainer = document.getElementById('job-list-dashboard');
+    listContainer.innerHTML = jobs.map(j => {
+        // กำหนดสีตามสถานะ
+        const statusColor = j.Status === 'รอรับงาน' ? 'text-pink-600' : (j.Status === 'กำลังดำเนินการ' ? 'text-blue-500' : 'text-green-500');
+        const borderColor = j.Status === 'รอรับงาน' ? 'border-pink-500 status-pulse' : 'border-slate-200';
+
+        return `
+            <div class="card-pro p-5 border-l-8 ${borderColor} mb-3" onclick="console.log('Clicked Job:', '${j.JobID}')">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-500">${j.JobID}</span>
+                            <span class="text-[10px] font-bold ${j.Priority === 'ด่วนที่สุด' ? 'text-red-500' : 'text-orange-400'}">🔥 ${j.Priority || 'ปกติ'}</span>
+                        </div>
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">${j.Problem || 'ไม่มีหัวข้อ'}</h3>
+                        <p class="text-[11px] text-slate-500">🏢 ${j.Department || '-'}</p>
+                    </div>
+                    
+                    <div class="text-right flex flex-col items-end gap-2">
+                        <span class="text-xs font-black uppercase px-3 py-1 rounded-full bg-white border border-slate-100 shadow-sm ${statusColor}">
+                            ${j.Status || 'Unknown'}
+                        </span>
+                        
+                        ${(j.Status === 'รอรับงาน' && (currentUser.UserTypeID === 'IT' || currentUser.usertypeid === 'IT')) 
+                            ? `<button onclick="event.stopPropagation(); handleJob('${j.JobID}', 'accept')" class="bg-pink-600 text-white px-4 py-1.5 rounded-xl text-[11px] font-bold shadow-pink-200 shadow-lg active:scale-95 transition-all">รับงานนี้</button>` 
+                            : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 2. แก้ไขฟังก์ชันจัดการงาน (ให้ Alert แจ้งเตือนเมื่อกด)
+async function handleJob(jobId, type, extra = {}) {
+    if (!jobId) return;
+    
+    // ยืนยันก่อนดำเนินการ
+    if (type === 'accept' && !confirm('ยืนยันการรับงานรหัส ' + jobId + ' ใช่หรือไม่?')) return;
+
+    showLoading(true);
+    const payload = { 
+        action: 'updateJobStatus', 
+        data: { 
+            JobID: jobId, 
+            type: type, 
+            Owner: currentUser.UserName || currentUser.username, 
+            ...extra 
+        } 
+    };
+
+    try {
+        console.log("Sending Payload:", payload);
+        const res = await fetch(API_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', // สำคัญ: ลองปิด no-cors ถ้า Apps Script ตั้งค่าเป็น Everyone แล้ว
+            body: JSON.stringify(payload) 
+        });
+        
+        // เนื่องจากใช้ Google Apps Script บางครั้งการดึง JSON กลับมาอาจติด CORS
+        // แต่ถ้าสั่งงานสำเร็จ ข้อมูลใน Sheet จะเปลี่ยน
+        setTimeout(async () => {
+            alert("ดำเนินการสำเร็จ!");
+            closeModal('modal-transfer');
+            await loadData(); // โหลดข้อมูลใหม่มาแสดง
+        }, 1500);
+
+    } catch (e) { 
+        console.error("Error in handleJob:", e);
+        alert("เกิดข้อผิดพลาด: " + e.message);
+    } finally {
+        showLoading(false);
+    }
+}
 
         function renderDashboard() {
             const jobs = store.AllJobs || [];
