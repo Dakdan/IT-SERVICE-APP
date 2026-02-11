@@ -117,6 +117,39 @@
   document.getElementById('password').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
   });
+  async function handleLogin() {
+    console.log("Button Clicked!"); // <-- เพิ่มบรรทัดนี้เพื่อเช็คใน Console
+
+    const userEl = document.getElementById('username');
+    const passEl = document.getElementById('password');
+    const username = userEl.value.trim();
+    const password = passEl.value.trim();
+
+    if (!username || !password) {
+      alert("กรุณากรอกข้อมูล");
+      return;
+    }
+
+    if (window.Loader) Loader.show();
+
+    try {
+      console.log("Calling API...");
+      const result = await ApiService.login(username, password);
+      console.log("API Result:", result);
+
+      if (result.success) {
+        Auth.setSession(result.user);
+        location.href = "./index.html";
+      } else {
+        showPopup("ล้มเหลว", result.message);
+      }
+    } catch (e) {
+      console.error(e);
+      showPopup("Error", "เชื่อมต่อไม่ได้");
+    } finally {
+      if (window.Loader) Loader.hide();
+    }
+}
 </script>
 
 </body>
