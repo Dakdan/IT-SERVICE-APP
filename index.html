@@ -138,6 +138,21 @@
 
     // 1. ฟังก์ชันเริ่มต้นแอป (ย้ายทุกอย่างมาทำงานที่นี่)
     async function initApp() {
+        async function initApp() {
+    // --- โค้ดทดสอบ: บังคับใส่ข้อมูลจำลอง (ลบออกได้ภายหลัง) ---
+    if (!localStorage.getItem("it_session")) {
+        const dummy = { 
+            username: "เจ้าหน้าที่", 
+            usersname: "ทดสอบ", 
+            userid: "IT-001", 
+            usertypename: "Admin" 
+        };
+        localStorage.setItem("it_session", JSON.stringify(dummy));
+    }
+    // --------------------------------------------------
+
+    // ... ส่วนที่เหลือของ initApp ...
+}
         try {
             // ตรวจสอบว่า Auth ถูกโหลดมาหรือยัง
             if (typeof Auth === 'undefined') {
