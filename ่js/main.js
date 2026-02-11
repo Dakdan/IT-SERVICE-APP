@@ -24,26 +24,27 @@ function showModal(title, message, type = 'success') {
   const popup = document.getElementById('popup');
   const pTitle = document.getElementById('popup-title');
   const pMsg = document.getElementById('popup-message');
-  const pBox = document.querySelector('.popup-box');
+  const pBox = document.querySelector('.popup-box'); // ตัวนี้สำคัญมาก
 
-  if (popup && pTitle && pMsg && pBox) {
-    // ล้าง class สถานะเดิมและเพิ่มอันใหม่ (เพื่อให้ CSS เปลี่ยนสี)
-    pBox.classList.remove('success', 'error', 'warning');
-    pBox.classList.add(type);
+  // เช็คก่อนว่า Element ครบไหม
+  if (popup && pTitle && pMsg) {
+    
+    // ถ้ามี pBox ให้เปลี่ยนสีตาม Type (ถ้าไม่มีให้ข้ามส่วนสีไปก่อน)
+    if (pBox) {
+      pBox.classList.remove('success', 'error', 'warning');
+      pBox.classList.add(type);
+    }
 
-    // เลือก Icon ตามประเภท
     let icon = "🔔";
     if (type === 'success') icon = "✅";
     if (type === 'error') icon = "❌";
     if (type === 'warning') icon = "⚠️";
 
-    // ใส่เนื้อหา
     pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">${icon}</span>${title}`;
     pMsg.innerText = message;
     
     popup.style.display = 'flex';
   } else {
-    // กรณีหา Element ในหน้าจอไม่เจอให้ใช้ alert พื้นฐาน
     alert(`${title}: ${message}`);
   }
 }
