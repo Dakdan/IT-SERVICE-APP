@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
+ <script>
+    const session = localStorage.getItem("it_session");
+    if (!session) {
+      location.href = "./login.html";
+    }
+  </script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
