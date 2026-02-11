@@ -132,12 +132,13 @@
 
         // 2. ฟังก์ชันเริ่มต้นโหลดข้อมูล
         async function initApp() {
+            console.log("Current User Data:",
             if (currentUser) {
                 document.getElementById('u-id').innerText = currentUser.USERID || '-';
                 document.getElementById('u-fname').innerText = currentUser.UserName || '';
                 document.getElementById('u-sname').innerText = currentUser.UserSname || '';
-                document.getElementById('u-type-id').innerText = currentUser.UserTypeID || 'IT';
-                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || 'เจ้าหน้าที่';
+                document.getElementById('u-type-id').innerText = currentUser.UserTypeID || '';
+                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || '';
                 if (currentUser.UserPic) document.getElementById('u-pic').src = currentUser.UserPic;
             }
 
