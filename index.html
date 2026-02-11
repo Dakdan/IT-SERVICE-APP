@@ -203,28 +203,34 @@
     }
 
     // 4. ฟังก์ชัน Logout (แก้ไขให้กด "ตกลง" แล้วออกทันที)
-    function logout() {
-        const popup = document.getElementById('popup');
-        const pTitle = document.getElementById('popup-title');
-        const pMsg = document.getElementById('popup-message');
-        const pBtn = popup.querySelector('button'); // ปุ่มใน Modal
+   function logout() {
+    const popup = document.getElementById('popup');
+    const pTitle = document.getElementById('popup-title');
+    const pMsg = document.getElementById('popup-message');
+    const pBtn = popup.querySelector('button'); 
+    
+    if (popup && pTitle && pMsg) {
+        pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
+        pMsg.innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
         
-        if (popup && pTitle && pMsg) {
-            pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
-            pMsg.innerText = "คุณต้องการออกจากระบบใช่หรือไม่?";
+        pBtn.innerText = "ยืนยันออกจากระบบ";
+        pBtn.onclick = function() {
+            pBtn.innerText = "กำลังออก...";
             
-            // เปลี่ยนปุ่ม "ตกลง" ให้สั่ง Auth.logout()
-            pBtn.innerText = "ยืนยันออกจากระบบ";
-            pBtn.onclick = function() {
-                pBtn.innerText = "กำลังออก...";
-                Auth.logout();
-            };
+            // ล้างข้อมูลในเครื่อง
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // บังคับเปลี่ยนหน้าไป login.html ทันที (ไม่ผ่าน Auth.logout)
+            window.location.href = "login.html";
+        };
 
-            popup.style.display = 'flex';
-        } else {
-            Auth.logout();
-        }
+        popup.style.display = 'flex';
+    } else {
+        localStorage.clear();
+        window.location.href = "login.html";
     }
+}
 
     // --- ฟังก์ชันช่วยเหลืออื่นๆ ---
     function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
