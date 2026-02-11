@@ -223,7 +223,16 @@
             document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
         }
 
-        function logout() { if(confirm("ต้องการออกจากระบบ?")) Auth.logout(); }
+      // แก้ไขฟังก์ชัน logout เดิม
+function logout() {
+    // แทนที่จะใช้ confirm ธรรมดา เราจะใช้ Modal แจ้งเตือนก่อนไป
+    showModal("ออกจากระบบ", "กำลังพาท่านกลับไปยังหน้า Login...", "warning");
+    
+    // หน่วงเวลา 1.5 วินาทีเพื่อให้ User เห็น Modal ก่อนแล้วค่อยเปลี่ยนหน้า
+    setTimeout(() => {
+        Auth.logout();
+    }, 1500);
+}
 
         window.onload = initApp;
     </script>
