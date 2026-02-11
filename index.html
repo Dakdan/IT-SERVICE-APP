@@ -131,35 +131,59 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 
         // 2. ฟังก์ชันเริ่มต้นโหลดข้อมูล
-        async function initApp() {
-            console.log("Current User Data:",
-            if (currentUser) {
-                document.getElementById('u-id').innerText = currentUser.USERID || '-';
-                document.getElementById('u-fname').innerText = currentUser.UserName || '';
-                document.getElementById('u-sname').innerText = currentUser.UserSname || '';
-                document.getElementById('u-type-id').innerText = currentUser.UserTypeID || '';
-                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || '';
-                if (currentUser.UserPic) document.getElementById('u-pic').src = currentUser.UserPic;
-            }
+       async function initApp() {
+    // 1. ดึงข้อมูลจาก Auth.getUser() ที่ใช้ key "it_session"
+    const user = Auth.getUser(); 
+    console.log("Data from Session:", user); // ดูค่าใน Console (F12) เพื่อตรวจสอบชื่อตัวแปร
 
-            showLoading(true);
-            try {
-                const response = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName } }) 
-                });
-                const result = await response.json();
-                if (result.success) {
-                    store.AllJobs = result.AllJobs || [];
-                    store.BackupData = result.BackupData || [];
-                    store.SystemLink = result.SystemLink || [];
-                    
-                    renderDashboard();
-                    renderMyJobs();
-                    renderSystemLinks();
-                }
-            } catch (e) { console.error(e); } finally { showLoading(false); }
+    if (user) {
+        // ใช้ || เพื่อรองรับทั้ง USERID (ตัวใหญ่) และ userid (ตัวเล็ก)
+        document.getElementById('u-id').innerText = user.USERID || user.userid || '-';
+        document.getElementById('u-fname').innerText = user.UserName || user.username || '';
+        document.getElementById('u-sname').innerText = user.UserSname || user.usersname || '';
+        document.getElementById('u-type-id').innerText = user.UserTypeID || user.usertypeid || 'IT';
+        document.getElementById('u-type-name').innerText = user.UserTypeName || user.usertypename || 'เจ้าหน้าที่';
+        
+        // จัดการรูปภาพ
+        const userImg = user.UserPic || user.userpic;
+        if (userImg && userImg !== "") {
+            document.getElementById('u-pic').src = userImg;
         }
+    } else {
+        // ถ้าไม่มีข้อมูล ให้เด้งกลับหน้า Login
+        Auth.logout();
+    }
+
+    // 2. โหลดข้อมูลงานต่อ
+    showLoading(true);
+    try {
+        // ส่งชื่อผู้ใช้ไปที่ API (ใช้ชื่อฟิลด์ที่ตรงกับในฐานข้อมูลของคุณ)
+        const activeName = user.UserName || user.username; 
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            mode: 'cors',
+            body: JSON.stringify({ 
+                action: 'getInitialData', 
+                data: { userName: activeName } 
+            }) 
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            store.AllJobs = result.AllJobs || [];
+            store.BackupData = result.BackupData || [];
+            store.SystemLink = result.SystemLink || [];
+            
+            renderDashboard();
+            renderMyJobs();
+            renderSystemLinks();
+        }
+    } catch (e) { 
+        console.error("Fetch Error:", e);
+    } finally { 
+        showLoading(false); 
+    }
+}
 
         // ฟังก์ชัน Render ต่างๆ (Dashboard, MyJob, SystemLink)
         function renderDashboard() {
