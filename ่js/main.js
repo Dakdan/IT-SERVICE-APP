@@ -83,3 +83,18 @@ const Auth = {
 function showPopup(title, message) {
     showModal(title, message, 'warning');
 }
+/* ตัวอย่างสีสำหรับ Popup ตามประเภท */
+.popup-box.success { border-top: 5px solid #28a745; }
+.popup-box.error { border-top: 5px solid #dc3545; }
+.popup-box.warning { border-top: 5px solid #ffc107; }
+
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex; /* ถูกควบคุมโดย JS ให้เป็น none/flex */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
