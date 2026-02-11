@@ -150,6 +150,33 @@
       if (window.Loader) Loader.hide();
     }
 }
+  async function handleLogin() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+
+    if (!user || !pass) {
+        showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน", "warning");
+        return;
+    }
+
+    Loader.show();
+
+    try {
+        const result = await ApiService.login(user, pass);
+        
+        if (result.success) {
+            showModal("สำเร็จ!", "ยินดีต้อนรับเข้าสู่ระบบ", "success");
+            Auth.setSession(result.user);
+            setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        } else {
+            showModal("เข้าสู่ระบบไม่สำเร็จ", result.message || "รหัสผ่านไม่ถูกต้อง", "error");
+        }
+    } catch (error) {
+        showModal("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้", "error");
+    } finally {
+        Loader.hide();
+    }
+}
 </script>
 
 </body>
