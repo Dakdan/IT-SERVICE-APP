@@ -13,9 +13,14 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .card-pro { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
-        .card-pro:hover { transform: translateY(-2px); shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .card-pro:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .status-pulse { animation: pulse-blue 2s infinite; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
+        
+        /* Modal Border Colors */
+        .popup-box.success { border-top: 8px solid #22c55e; }
+        .popup-box.error { border-top: 8px solid #ef4444; }
+        .popup-box.warning { border-top: 8px solid #f59e0b; }
     </style>
 </head>
 <body>
@@ -56,7 +61,7 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-white/10 hover:bg-red-500/40 transition-all w-10 h-10 rounded-xl flex items-center justify-center border border-white/10">🚪</button>
+                <button onclick="logout()" class="bg-white/10 hover:bg-red-500/40 transition-all w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 active:scale-90">🚪</button>
             </div>
         </div>
     </header>
@@ -113,91 +118,74 @@
                 <div id="external-link-list" class="grid grid-cols-1 gap-4"></div>
             </div>
         </div>
-        <div id="popup" class="overlay">
-    <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center max-w-xs w-full m-4 text-center popup-box">
-        <div id="popup-title" class="font-black text-xl text-slate-800 mb-2"></div>
-        <p id="popup-message" class="text-slate-500 text-sm font-bold mb-6"></p>
-        <button onclick="closePopup()" class="w-full py-4 pink-grad text-white rounded-2xl font-black shadow-lg">ตกลง</button>
-    </div>
-</div>
     </main>
+
+    <div id="popup" class="overlay">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center max-w-xs w-full m-4 text-center popup-box">
+            <div id="popup-title" class="font-black text-xl text-slate-800 mb-2"></div>
+            <p id="popup-message" class="text-slate-500 text-sm font-bold mb-6"></p>
+            <button onclick="closePopup()" class="w-full py-4 pink-grad text-white rounded-2xl font-black shadow-lg">ตกลง</button>
+        </div>
+    </div>
 
     <script src="./js/main.js"></script>
     <script>
-        // เรียกใช้ API URL ที่คุณตั้งไว้
         const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
         
         // 1. ตรวจสอบความปลอดภัย
         Auth.checkAuth(); 
 
         const currentUser = Auth.getUser();
-        let store = { AllJobs: [], BackupData: [], SystemLink: [] };
+        let store = { AllJobs: [], SystemLink: [] };
 
         function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closePopup() { document.getElementById('popup').style.display = 'none'; }
 
-        // 2. ฟังก์ชันเริ่มต้นโหลดข้อมูล
-       async function initApp() {
-    // 1. ดึงข้อมูลจาก Auth.getUser() ที่ใช้ key "it_session"
-    const user = Auth.getUser(); 
-    console.log("Data from Session:", user); // ดูค่าใน Console (F12) เพื่อตรวจสอบชื่อตัวแปร
+        // 2. เริ่มต้นโหลดข้อมูล
+        async function initApp() {
+            // แสดงข้อมูล User จาก Session ทันที
+            if (currentUser) {
+                document.getElementById('u-id').innerText = currentUser.USERID || currentUser.userid || '-';
+                document.getElementById('u-fname').innerText = currentUser.UserName || currentUser.username || '';
+                document.getElementById('u-sname').innerText = currentUser.UserSname || currentUser.usersname || '';
+                document.getElementById('u-type-id').innerText = currentUser.UserTypeID || currentUser.usertypeid || 'IT';
+                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || currentUser.usertypename || 'เจ้าหน้าที่';
+                
+                const userImg = currentUser.UserPic || currentUser.userpic;
+                if (userImg) document.getElementById('u-pic').src = userImg;
+            }
 
-    if (user) {
-        // ใช้ || เพื่อรองรับทั้ง USERID (ตัวใหญ่) และ userid (ตัวเล็ก)
-        document.getElementById('u-id').innerText = user.USERID || user.userid || '-';
-        document.getElementById('u-fname').innerText = user.UserName || user.username || '';
-        document.getElementById('u-sname').innerText = user.UserSname || user.usersname || '';
-        document.getElementById('u-type-id').innerText = user.UserTypeID || user.usertypeid || 'IT';
-        document.getElementById('u-type-name').innerText = user.UserTypeName || user.usertypename || 'เจ้าหน้าที่';
-        
-        // จัดการรูปภาพ
-        const userImg = user.UserPic || user.userpic;
-        if (userImg && userImg !== "") {
-            document.getElementById('u-pic').src = userImg;
+            showLoading(true);
+            try {
+                const response = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName || currentUser.username } }) 
+                });
+                const result = await response.json();
+                if (result.success) {
+                    store.AllJobs = result.AllJobs || [];
+                    store.SystemLink = result.SystemLink || [];
+                    
+                    renderDashboard();
+                    renderMyJobs();
+                    renderSystemLinks();
+                }
+            } catch (e) { 
+                console.error("Init Error:", e);
+            } finally { 
+                showLoading(false); 
+            }
         }
-    } else {
-        // ถ้าไม่มีข้อมูล ให้เด้งกลับหน้า Login
-        Auth.logout();
-    }
 
-    // 2. โหลดข้อมูลงานต่อ
-    showLoading(true);
-    try {
-        // ส่งชื่อผู้ใช้ไปที่ API (ใช้ชื่อฟิลด์ที่ตรงกับในฐานข้อมูลของคุณ)
-        const activeName = user.UserName || user.username; 
-        const response = await fetch(API_URL, { 
-            method: 'POST', 
-            mode: 'cors',
-            body: JSON.stringify({ 
-                action: 'getInitialData', 
-                data: { userName: activeName } 
-            }) 
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            store.AllJobs = result.AllJobs || [];
-            store.BackupData = result.BackupData || [];
-            store.SystemLink = result.SystemLink || [];
-            
-            renderDashboard();
-            renderMyJobs();
-            renderSystemLinks();
-        }
-    } catch (e) { 
-        console.error("Fetch Error:", e);
-    } finally { 
-        showLoading(false); 
-    }
-}
+        // --- ฟังก์ชันการแสดงผลต่างๆ ---
 
-        // ฟังก์ชัน Render ต่างๆ (Dashboard, MyJob, SystemLink)
         function renderDashboard() {
             const jobs = store.AllJobs;
             document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
             document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
-            // ... (ใส่ตัวนับที่เหลือ) ...
+            document.getElementById('count-spare').innerText = jobs.filter(j => j.Status === 'รออะไหล่').length;
+            document.getElementById('count-done').innerText = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
+            document.getElementById('count-cancel').innerText = jobs.filter(j => j.Status === 'ยกเลิก').length;
             
             document.getElementById('job-list-dashboard').innerHTML = jobs.map(j => `
                 <div class="card-pro p-6 border-l-[8px] ${j.Status === 'รอรับงาน' ? 'border-blue-500 status-pulse' : 'border-slate-200'}">
@@ -206,6 +194,28 @@
                     <div class="flex justify-between mt-4">
                         <span class="text-[10px] uppercase font-bold text-slate-400">🏢 ${j.Department}</span>
                         <span class="text-[10px] font-black px-2 py-1 rounded bg-slate-100">${j.Status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMyJobs() {
+            const uName = currentUser.UserName || currentUser.username;
+            const myJobs = store.AllJobs.filter(j => j.StaffName === uName);
+            const container = document.getElementById('job-list-myjob');
+            
+            if (myJobs.length === 0) {
+                container.innerHTML = `<div class="text-center p-10 text-slate-400 italic text-sm">ยังไม่มีงานที่คุณรับผิดชอบ</div>`;
+                return;
+            }
+
+            container.innerHTML = myJobs.map(j => `
+                <div class="card-pro p-6 border-l-[8px] border-pink-500">
+                    <p class="text-xs font-bold text-slate-400">${j.JobID}</p>
+                    <h3 class="font-bold text-slate-700 mt-1">${j.Problem}</h3>
+                    <div class="flex justify-between mt-4">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">${j.Department}</span>
+                        <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg font-black">${j.Status}</span>
                     </div>
                 </div>
             `).join('');
@@ -230,16 +240,13 @@
             document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
         }
 
-      // แก้ไขฟังก์ชัน logout เดิม
-function logout() {
-    // แทนที่จะใช้ confirm ธรรมดา เราจะใช้ Modal แจ้งเตือนก่อนไป
-    showModal("ออกจากระบบ", "กำลังพาท่านกลับไปยังหน้า Login...", "warning");
-    
-    // หน่วงเวลา 1.5 วินาทีเพื่อให้ User เห็น Modal ก่อนแล้วค่อยเปลี่ยนหน้า
-    setTimeout(() => {
-        Auth.logout();
-    }, 1500);
-}
+        function logout() {
+            // เรียกใช้ Modal ที่เราสร้างไว้ใน main.js/html
+            showModal("ออกจากระบบ", "กำลังพาท่านกลับไปยังหน้า Login...", "warning");
+            setTimeout(() => {
+                Auth.logout();
+            }, 1500);
+        }
 
         window.onload = initApp;
     </script>
