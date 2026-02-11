@@ -1,124 +1,274 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>เข้าสู่ระบบ - IT Maintenance</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Service Management - รพ.อุดรธานี</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: #fdf2f8; position: relative; min-height: 100vh; }
+        body::before { content: "IT UDON HOSP"; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; color: rgba(0,0,0,0.03); font-weight: 900; pointer-events: none; z-index: -1; }
+        .pink-grad { background: linear-gradient(135deg, #be185d 0%, #db2777 100%); }
+        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-pro { background: white; border-radius: 1.2rem; border: 1px solid #fce7f3; transition: 0.3s; cursor: pointer; }
+        .card-pro:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(190, 24, 93, 0.1); }
+        .status-pulse { animation: pulse-pink 2s infinite; }
+        @keyframes pulse-pink { 0% { box-shadow: 0 0 0 0 rgba(219, 39, 119, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(219, 39, 119, 0); } 100% { box-shadow: 0 0 0 0 rgba(219, 39, 119, 0); } }
+    </style>
 </head>
+<body class="pb-10">
 
-<body class="login-page">
-
-<div id="loader" class="loader-overlay" style="display:none;">
-  <div class="spinner"></div>
-</div>
-
-<div id="popup" class="popup-overlay" style="display:none;">
-    <div class="popup-box"> 
-        <h3 id="popup-title">แจ้งเตือน</h3>
-        <p id="popup-message"></p>
-        <button onclick="closePopup()" class="btn-login" style="margin-top: 20px; padding: 10px;">ตกลง</button>
-    </div>
-</div>
-
-<div class="login-wrapper">
-  <header class="login-header">
-    <img src="./โรงพยาบาลอุดรธานี .png" class="header-logo" alt="Udon Hospital Logo">
-    <h1>โรงพยาบาลอุดรธานี</h1>
-    <p>ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
-  </header>
-
-  <main class="login-card">
-    <div class="form-group">
-      <label for="username">👤 Email / Username</label>
-      <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้งาน หรืออีเมล">
+    <div id="loader" class="overlay">
+        <div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-4 border-pink-600 border-t-transparent mb-3"></div>
+            <p class="text-pink-600 font-bold text-xs">กำลังประมวลผล...</p>
+        </div>
     </div>
 
-    <div class="form-group">
-      <label for="password">🔒 Password</label>
-      <input type="password" id="password" placeholder="กรอกรหัสผ่าน">
+    <header class="pink-grad text-white px-6 py-6 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="./โรงพยาบาลอุดรธานี .png" class="w-12 h-12 bg-white rounded-full p-1" alt="Logo">
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">รพ.อุดรธานี (ITSM)</h1>
+                    <p class="text-[10px] opacity-80">ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p id="u-fname" class="text-xs font-bold leading-none"></p>
+                    <p id="u-type-name" class="text-[9px] opacity-70"></p>
+                </div>
+                <button onclick="logout()" class="bg-white/20 p-2 rounded-xl hover:bg-white/40 transition-all">🚪</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white/80 backdrop-blur-md sticky top-[88px] z-40 border-b border-pink-100">
+        <div class="max-w-4xl mx-auto flex">
+            <button onclick="switchTab(1)" id="t1" class="flex-1 py-4 text-xs font-bold border-b-4 border-pink-600 text-pink-600">DASHBOARD</button>
+            <button onclick="switchTab(2)" id="t2" class="flex-1 py-4 text-xs font-bold border-b-4 border-transparent text-slate-400">MY JOBS</button>
+            <button onclick="switchTab(3)" id="t3" class="flex-1 py-4 text-xs font-bold border-b-4 border-transparent text-slate-400">SYSTEMLINK</button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 mt-4 space-y-6">
+        <div id="tab1" class="tab-content active space-y-4">
+            <div class="grid grid-cols-5 gap-2">
+                <div class="bg-white p-3 rounded-2xl text-center shadow-sm"><p class="text-[9px] text-slate-400 font-bold uppercase">New</p><p id="count-wait" class="text-lg font-black text-pink-600">0</p></div>
+                <div class="bg-white p-3 rounded-2xl text-center shadow-sm"><p class="text-[9px] text-slate-400 font-bold uppercase">Doing</p><p id="count-doing" class="text-lg font-black text-blue-500">0</p></div>
+                <div class="bg-white p-3 rounded-2xl text-center shadow-sm"><p class="text-[9px] text-slate-400 font-bold uppercase">Spare</p><p id="count-spare" class="text-lg font-black text-orange-400">0</p></div>
+                <div class="bg-white p-3 rounded-2xl text-center shadow-sm"><p class="text-[9px] text-slate-400 font-bold uppercase">Done</p><p id="count-done" class="text-lg font-black text-green-500">0</p></div>
+                <div class="bg-white p-3 rounded-2xl text-center shadow-sm"><p class="text-[9px] text-slate-400 font-bold uppercase">Cancel</p><p id="count-cancel" class="text-lg font-black text-slate-300">0</p></div>
+            </div>
+            <div id="job-list-dashboard" class="space-y-3"></div>
+        </div>
+
+        <div id="tab2" class="tab-content space-y-4">
+            <div class="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-pink-50">
+                <h2 class="text-pink-600 font-bold">งานที่คุณรับผิดชอบ</h2>
+                <button onclick="alert('ฟังก์ชันบันทึกกิจกรรมกำลังถูกเรียก')" class="bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-pink-700">+ บันทึกกิจกรรม</button>
+            </div>
+            <div id="job-list-myjob" class="space-y-3"></div>
+        </div>
+
+        <div id="tab3" class="tab-content grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </main>
+
+    <div id="modal-transfer" class="overlay">
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm mx-4 shadow-2xl border border-pink-100">
+            <h3 class="font-bold text-pink-600 mb-4 flex items-center gap-2 text-lg">
+                <span>🔄</span> โอนงาน/มอบหมายงาน
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 ml-2">เลือกเจ้าหน้าที่</label>
+                    <select id="select-staff" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-100 outline-pink-500 text-sm appearance-none"></select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 ml-2">ระบุเหตุผล</label>
+                    <textarea id="transfer-reason" placeholder="เหตุผลการโอนหรือมอบหมาย..." class="w-full p-3 bg-slate-50 rounded-xl border border-slate-100 outline-pink-500 text-sm h-24 resize-none"></textarea>
+                </div>
+                <button id="btn-confirm-transfer" class="w-full py-3 pink-grad text-white rounded-xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all">ยืนยันการโอน</button>
+                <button onclick="closeModal('modal-transfer')" class="w-full py-2 text-slate-400 font-bold text-xs hover:text-pink-600 transition-colors">ยกเลิก</button>
+            </div>
+        </div>
     </div>
 
-    <button class="btn-login" id="loginBtn" onclick="handleLogin()">
-      🛡️ เข้าสู่ระบบ
-    </button>
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
+        let store = { AllJobs: [], StaffList: [], SystemLink: [] };
+        let currentUser = null;
 
-    <div class="card-footer" style="text-align:center; margin-top:20px; font-size: 0.9rem; color: #666;">
-      ยังไม่มีบัญชีผู้ใช้งาน? <a href="register.html" style="font-weight: 600;">ลงทะเบียนที่นี่</a>
-    </div>
-  </main>
-</div>
+        // ระบบตรวจสอบ Session เดิมที่คุณทำไว้
+        const Auth = {
+            check: () => {
+                const s = localStorage.getItem("it_session");
+                if (!s) window.location.href = "login.html";
+                return JSON.parse(s);
+            }
+        };
 
-<script src="./js/main.js"></script>
-<script src="./js/api.js"></script>
+        async function initApp() {
+            currentUser = Auth.check();
+            if (currentUser) {
+                document.getElementById('u-fname').innerText = currentUser.UserName + " " + (currentUser.UserSname || "");
+                document.getElementById('u-type-name').innerText = currentUser.UserTypeName || "Staff";
+                await loadData();
+            }
+        }
 
-<script>
-  // --- คัดลอกเนื้อหาจาก main.js มาวางตรงนี้ ---
-  const Loader = {
-    show: () => { const el = document.getElementById('loader'); if(el) el.style.display = 'flex'; },
-    hide: () => { const el = document.getElementById('loader'); if(el) el.style.display = 'none'; }
-  };
+        async function loadData() {
+            showLoading(true);
+            try {
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName } }) 
+                });
+                const result = await res.json();
+                if (result.success) {
+                    store = result;
+                    renderDashboard();
+                    renderMyJobs();
+                    renderSystemLinks();
+                }
+            } catch (e) { console.error("Error Loading Data:", e); }
+            showLoading(false);
+        }
 
-  function showModal(title, message, type = 'success') {
-    const popup = document.getElementById('popup');
-    const pTitle = document.getElementById('popup-title');
-    const pMsg = document.getElementById('popup-message');
-    const pBox = document.querySelector('.popup-box');
-    if (popup && pTitle && pMsg && pBox) {
-      pBox.classList.remove('success', 'error', 'warning');
-      pBox.classList.add(type);
-      let icon = type === 'success' ? "✅" : (type === 'error' ? "❌" : "⚠️");
-      pTitle.innerHTML = `<span style="font-size:2.5rem;display:block;margin-bottom:10px;">${icon}</span>${title}`;
-      pMsg.innerText = message;
-      popup.style.display = 'flex';
-    } else { alert(title + ": " + message); }
-  }
+        function renderDashboard() {
+            const jobs = store.AllJobs || [];
+            
+            // อัปเดตตัวเลขตามสถานะจริงใน Sheet
+            document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
+            document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+            document.getElementById('count-spare').innerText = jobs.filter(j => j.Status === 'รออะไหล่').length;
+            document.getElementById('count-done').innerText = jobs.filter(j => j.Status === 'เสร็จสิ้น').length;
+            document.getElementById('count-cancel').innerText = jobs.filter(j => j.Status === 'ยกเลิก').length;
 
-  function closePopup() { document.getElementById('popup').style.display = 'none'; }
+            const listContainer = document.getElementById('job-list-dashboard');
+            listContainer.innerHTML = jobs.map(j => {
+                // สีสถานะให้สัมพันธ์กัน
+                let statusColor = "text-slate-500 bg-slate-50 border-slate-100";
+                if (j.Status === 'รอรับงาน') statusColor = "text-pink-600 bg-pink-50 border-pink-100";
+                if (j.Status === 'กำลังดำเนินการ') statusColor = "text-blue-500 bg-blue-50 border-blue-100";
+                if (j.Status === 'เสร็จสิ้น') statusColor = "text-green-500 bg-green-50 border-green-100";
 
-  const Auth = {
-    setSession: (userData) => localStorage.setItem("it_session", JSON.stringify(userData))
-  };
+                const isIT = (currentUser.UserTypeID === 'IT' || currentUser.UserTypeID === 'Admin');
 
-  // --- คัดลอกเนื้อหาจาก api.js มาวางตรงนี้ ---
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
-  const ApiService = {
-    async login(username, password) {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'checkLogin', data: { user: username, pass: password } })
-      });
-      return await response.json();
-    }
-  };
+                return `
+                    <div class="card-pro p-5 border-l-8 ${j.Status === 'รอรับงาน' ? 'border-pink-500 status-pulse' : 'border-slate-300'}">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <p class="text-[10px] text-slate-400 font-bold">${j.JobID} | ${j.Priority || 'ปกติ'}</p>
+                                <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
+                                <p class="text-[10px] text-pink-600 mt-1 flex items-center gap-1">🏢 ${j.Department}</p>
+                            </div>
+                            <div class="text-right flex flex-col items-end gap-2">
+                                <span class="text-[10px] font-black uppercase px-2 py-1 rounded border ${statusColor}">
+                                    ${j.Status}
+                                </span>
+                                ${(j.Status === 'รอรับงาน' && isIT) 
+                                    ? `<button onclick="handleJob('${j.JobID}', 'accept')" class="bg-pink-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm hover:bg-pink-700 transition-all">รับงาน</button>` 
+                                    : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-  // --- ฟังก์ชัน handleLogin เดิมของคุณ ---
-  async function handleLogin() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value.trim();
-    if (!user || !pass) {
-      showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน", "warning");
-      return;
-    }
-    Loader.show();
-    try {
-      const result = await ApiService.login(user, pass);
-      if (result.success) {
-        showModal("สำเร็จ!", "ยินดีต้อนรับเข้าสู่ระบบ", "success");
-        Auth.setSession(result.user);
-        setTimeout(() => { window.location.href = "index.html"; }, 1500);
-      } else {
-        Loader.hide();
-        showModal("เข้าสู่ระบบไม่สำเร็จ", result.message || "ข้อมูลไม่ถูกต้อง", "error");
-      }
-    } catch (error) {
-      Loader.hide();
-      showModal("เกิดข้อผิดพลาด", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้", "error");
-    }
-  }
-</script>
+        function renderMyJobs() {
+            const myJobs = store.AllJobs.filter(j => j.Owner === currentUser.UserName);
+            document.getElementById('job-list-myjob').innerHTML = myJobs.length === 0 
+                ? '<div class="text-center py-10"><p class="text-slate-400 text-xs italic">ยังไม่มีงานในความรับผิดชอบ</p></div>' 
+                : myJobs.map(j => `
+                    <div class="card-pro p-5 border-l-8 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold">${j.JobID}</p>
+                                <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
+                                <p class="text-[10px] text-blue-500 mt-1">🕒 สถานะ: ${j.Status}</p>
+                            </div>
+                            <button onclick="openTransfer('${j.JobID}')" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-slate-200">โอนงาน</button>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        async function handleJob(jobId, type, extra = {}) {
+            if (type === 'accept' && !confirm(`ยืนยันการรับงาน ${jobId}?`)) return;
+            showLoading(true);
+            const data = { JobID: jobId, type: type, Owner: currentUser.UserName, ...extra };
+            try {
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'updateJobStatus', data: data }) 
+                });
+                const result = await res.json();
+                if (result.success) { 
+                    closeModal('modal-transfer');
+                    await loadData(); 
+                }
+            } catch (e) { alert("เกิดข้อผิดพลาดในการส่งข้อมูล"); }
+            showLoading(false);
+        }
+
+        function openTransfer(jobId) {
+            const modal = document.getElementById('modal-transfer');
+            const select = document.getElementById('select-staff');
+            
+            // ดึงรายชื่อจาก StaffList มาใส่ใน Select
+            if (store.StaffList && store.StaffList.length > 0) {
+                select.innerHTML = store.StaffList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            } else {
+                select.innerHTML = '<option value="">ไม่พบรายชื่อเจ้าหน้าที่</option>';
+            }
+
+            modal.style.display = 'flex';
+
+            document.getElementById('btn-confirm-transfer').onclick = () => {
+                const reason = document.getElementById('transfer-reason').value.trim();
+                const newOwner = select.value;
+                if (!reason) return alert("กรุณาระบุเหตุผลการโอนงาน");
+                handleJob(jobId, 'transfer', { NewOwner: newOwner, Reason: reason, By: currentUser.UserName });
+            };
+        }
+
+        function renderSystemLinks() {
+            const container = document.getElementById('tab3');
+            container.innerHTML = store.SystemLink.map(l => `
+                <a href="${l.URL}" target="_blank" class="bg-white p-4 rounded-2xl flex items-center gap-3 shadow-sm border border-pink-50 hover:bg-pink-50 transition-all">
+                    <span class="text-2xl">${l.Linkicon || '🔗'}</span>
+                    <span class="font-bold text-slate-700 text-sm">${l.SystemName || l.Name}</span>
+                </a>
+            `).join('');
+        }
+
+        function switchTab(n) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab' + n).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => { 
+                b.classList.remove('text-pink-600', 'border-pink-600'); 
+                b.classList.add('text-slate-400', 'border-transparent'); 
+            });
+            document.getElementById('t' + n).classList.add('text-pink-600', 'border-pink-600');
+        }
+
+        function showLoading(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function logout() {
+            if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+                localStorage.clear();
+                window.location.href = "login.html";
+            }
+        }
+
+        window.onload = initApp;
+    </script>
 </body>
 </html>
