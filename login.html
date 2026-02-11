@@ -20,8 +20,8 @@
         <p id="popup-message"></p>
         <button onclick="closePopup()" class="btn-login" style="margin-top: 20px; padding: 10px;">ตกลง</button>
     </div>
-
 </div>
+
 <div class="login-wrapper">
   <header class="login-header">
     <img src="./โรงพยาบาลอุดรธานี.png" class="header-logo" alt="Udon Hospital Logo">
@@ -32,12 +32,12 @@
   <main class="login-card">
     <div class="form-group">
       <label for="username">👤 Email / Username</label>
-      <input type="text" id="username" autocomplete="username" placeholder="กรอกชื่อผู้ใช้งาน หรืออีเมล">
+      <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้งาน หรืออีเมล">
     </div>
 
     <div class="form-group">
       <label for="password">🔒 Password</label>
-      <input type="password" id="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน">
+      <input type="password" id="password" placeholder="กรอกรหัสผ่าน">
     </div>
 
     <button class="btn-login" id="loginBtn" onclick="handleLogin()">
@@ -50,71 +50,53 @@
   </main>
 </div>
 
-<script src="./js/api.js"></script>
 <script src="./js/main.js"></script>
+<script src="./js/api.js"></script>
 
 <script>
-  // 1. ตรวจสอบ Session (Auto Login)
+  // เช็ค Auto Login
   window.addEventListener('DOMContentLoaded', () => {
-    const session = localStorage.getItem("it_session");
-    if (session) {
-      location.href = "./index.html";
+    if (localStorage.getItem("it_session")) {
+      window.location.href = "./index.html";
     }
   });
 
-  // 2. ฟังก์ชันหลักสำหรับ Login
   async function handleLogin() {
-    const userEl = document.getElementById('username');
-    const passEl = document.getElementById('password');
-    const user = userEl.value.trim();
-    const pass = passEl.value.trim();
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
 
-    // เช็คข้อมูลว่าง (ใช้ Modal แจ้งเตือน)
+    // เช็คข้อมูลว่าง
     if (!user || !pass) {
         if (typeof showModal === "function") {
             showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน", "warning");
         } else {
-            alert("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
+            alert("กรุณากรอกข้อมูลให้ครบ");
         }
         return;
     }
 
-    // แสดง Loader
     if (window.Loader) Loader.show();
 
     try {
-        console.log("กำลังเข้าสู่ระบบ...");
         const result = await ApiService.login(user, pass);
         
         if (result.success) {
-            // กรณีสำเร็จ: แสดง Modal สีเขียว
             showModal("สำเร็จ!", "ยินดีต้อนรับเข้าสู่ระบบ", "success");
-            
-            // บันทึก Session
-            if (window.Auth) {
-                Auth.setSession(result.user);
-            } else {
-                localStorage.setItem("it_session", JSON.stringify(result.user));
-            }
-            
-            // หน่วงเวลาให้ดู Modal 1.5 วินาทีก่อนย้ายหน้า
+            Auth.setSession(result.user);
             setTimeout(() => { 
                 window.location.href = "index.html"; 
             }, 1500);
-
         } else {
-            // กรณีรหัสผิด: ปิด Loader แล้วโชว์ Modal สีแดง
             if (window.Loader) Loader.hide();
             showModal("เข้าสู่ระบบไม่สำเร็จ", result.message || "ข้อมูลไม่ถูกต้อง", "error");
         }
     } catch (error) {
         if (window.Loader) Loader.hide();
         console.error("Login Error:", error);
-        showModal("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้", "error");
+        showModal("เกิดข้อผิดพลาด", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้", "error");
     }
   }
 
-  // 3. กด Enter เพื่อ Login
   document.getElementById('password').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
   });
