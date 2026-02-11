@@ -75,19 +75,61 @@
         </div>
     </div>
 
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
-        let store = { AllJobs: [], StaffList: [], SystemLink: [] };
-        let currentUser = JSON.parse(localStorage.getItem("it_session"));
+   <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
+    let store = { AllJobs: [], StaffList: [], SystemLink: [] };
+    
+    // 1. ตรวจ Session แบบชั้นเดียว (ป้องกันการเด้งไปมา)
+    const session = localStorage.getItem("it_session");
+    if (!session) { window.location.href = "login.html"; }
+    const currentUser = JSON.parse(session);
 
-        if (!currentUser) window.location.href = "login.html";
+    // 2. โหลดข้อมูลแค่ครั้งเดียวตอนเปิดหน้า
+    window.onload = async () => {
+        document.getElementById('u-fname').innerText = currentUser.UserName || "User";
+        document.getElementById('u-type-name').innerText = currentUser.UserTypeName || "";
+        await loadData();
+    };
 
-        window.onload = () => {
-            document.getElementById('u-fname').innerText = currentUser.UserName || "";
-            document.getElementById('u-type-name').innerText = currentUser.UserTypeName || "Staff";
-            loadData();
-        };
+    async function loadData() {
+        document.getElementById('loader').style.display = 'flex';
+        try {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'getInitialData', data: { userName: currentUser.UserName } }) 
+            });
+            const result = await res.json();
+            if (result.success) {
+                store = result;
+                renderDashboard(); // เรียกแสดงผลแค่ครั้งเดียวตรงนี้
+            }
+        } catch (e) { console.error("Fetch Error"); }
+        document.getElementById('loader').style.display = 'none';
+    }
 
+    function renderDashboard() {
+        const jobs = store.AllJobs || [];
+        // อัปเดตตัวเลข
+        document.getElementById('count-wait').innerText = jobs.filter(j => j.Status === 'รอรับงาน').length;
+        document.getElementById('count-doing').innerText = jobs.filter(j => j.Status === 'กำลังดำเนินการ').length;
+        
+        // แสดงรายการงาน (ห้ามเรียก loadData ในนี้เด็ดขาด)
+        const list = document.getElementById('job-list-dashboard');
+        list.innerHTML = jobs.map(j => `
+            <div class="card-pro p-4 mb-3 border-l-4 ${j.Status === 'รอรับงาน' ? 'border-pink-500' : 'border-slate-300'}">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-sm">${j.Problem}</h3>
+                        <p class="text-[10px] text-pink-600">${j.Department}</p>
+                    </div>
+                    <span class="text-[10px] font-bold p-1 bg-slate-100 rounded">${j.Status}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // อื่นๆ (openTransfer, switchTab) ให้คงเดิมไว้ครับ
+</script>
         async function loadData() {
             showLoading(true);
             try {
