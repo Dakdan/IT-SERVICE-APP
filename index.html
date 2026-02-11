@@ -243,20 +243,24 @@
      // ฟังก์ชัน Logout แบบใหม่ที่ทำงานร่วมกับ Modal ในหน้าเว็บ
 function logout() {
     const popup = document.getElementById('popup');
-    // ... โค้ดแสดง Modal ...
+    const pTitle = document.getElementById('popup-title');
+    const pMsg = document.getElementById('popup-message');
     
-    if (popup) {
+    if (popup && pTitle && pMsg) {
+        // กำหนดข้อความให้ Modal แสดงผล
+        pTitle.innerHTML = `<span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">⚠️</span> ออกจากระบบ`;
+        pMsg.innerText = "กำลังพาท่านกลับไปยังหน้า Login...";
         popup.style.display = 'flex';
-        // มั่นใจว่าเรียก Auth.logout() หลังจากโชว์ Modal
+
+        // หน่วงเวลาเพื่อให้ User เห็นข้อความก่อนเปลี่ยนหน้า
         setTimeout(() => {
             Auth.logout(); 
         }, 1500);
     } else {
-        // ถ้า Modal มีปัญหา ให้สั่ง logout ทันที
+        // Fallback กรณีหา Modal ไม่เจอ
         Auth.logout();
     }
 }
-
 // ฟังก์ชันปิด Popup (กรณีต้องการปิดเอง)
 function closePopup() {
     const popup = document.getElementById('popup');
