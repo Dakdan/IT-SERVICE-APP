@@ -60,105 +60,168 @@
         </div>
     </div>
 
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
-        let store = { AllJobs: [], StaffList: [], SystemLink: [] };
-        
-        // ตรวจสอบ Login รอบเดียว
-        const session = localStorage.getItem("it_session");
-        if (!session) { window.location.href = "login.html"; }
-        const user = JSON.parse(session);
+   <script>
+    // ประกาศค่าคงที่ไว้บนสุด
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzala43clqUn9Z9ky9BlAhcTq6Ang40koFQDi59q33spvLNQpcEFqc2_PJ-xT5NHx4/exec';
+    let store = { AllJobs: [], StaffList: [], SystemLink: [] };
+    
+    // 1. ตรวจสอบสิทธิ์ทันที (ห้ามรอ Onload)
+    const session = localStorage.getItem("it_session");
+    if (!session) { 
+        window.location.href = "login.html"; 
+    }
+    const currentUser = JSON.parse(session);
 
-        // ฟังก์ชันโหลดข้อมูลหลัก (เรียกครั้งเดียว)
-        async function fetchData() {
-            document.getElementById('loader').style.display = 'flex';
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getInitialData', data: { userName: user.UserName } })
-                });
-                store = await response.json();
-                renderUI();
-            } catch (e) { alert('โหลดข้อมูลไม่สำเร็จ'); }
-            document.getElementById('loader').style.display = 'none';
+    // 2. ฟังก์ชันแสดง Loader แบบปลอดภัย
+    const toggleLoader = (show) => {
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = show ? 'flex' : 'none';
+    };
+
+    // 3. ฟังก์ชันดึงข้อมูล (เรียกใช้เมื่อต้องการ Refresh ข้อมูลจริงๆ เท่านั้น)
+    async function loadInitialData() {
+        toggleLoader(true);
+        try {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'getInitialData', 
+                    data: { userName: currentUser.UserName } 
+                }) 
+            });
+            const result = await res.json();
+            if (result.success) {
+                store = result;
+                // อัปเดต UI ทั้งหมดจากข้อมูลที่ได้
+                renderDashboard();
+                renderMyJobs();
+                renderLinks();
+            }
+        } catch (e) {
+            console.error("Data loading failed", e);
+        } finally {
+            toggleLoader(false);
         }
+    }
 
-        function renderUI() {
-            // Dashboard
-            const dashboardHTML = store.AllJobs.map(j => `
-                <div class="card-pro border-l-4 ${j.Status === 'รอรับงาน' ? 'border-pink-500' : 'border-slate-300'}">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-[10px] text-slate-400">${j.JobID}</p>
-                            <h3 class="font-bold text-sm text-slate-700">${j.Problem}</h3>
-                            <p class="text-[10px] text-pink-600">${j.Department}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[9px] px-2 py-1 bg-slate-100 rounded block mb-2">${j.Status}</span>
-                            ${j.Status === 'รอรับงาน' ? `<button onclick="updateStatus('${j.JobID}', 'accept')" class="bg-pink-600 text-white text-[10px] px-3 py-1 rounded-lg">รับงาน</button>` : ''}
-                        </div>
+    // 4. ฟังก์ชัน Render (แยกส่วนชัดเจน ไม่เรียกซ้อนกัน)
+    function renderDashboard() {
+        const jobs = store.AllJobs || [];
+        // อัปเดตตัวเลข Counts (ใส่ดักเผื่อ ID หาย)
+        const updateCount = (id, status) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = jobs.filter(j => j.Status === status).length;
+        };
+        updateCount('count-wait', 'รอรับงาน');
+        updateCount('count-doing', 'กำลังดำเนินการ');
+        updateCount('count-spare', 'รออะไหล่');
+        updateCount('count-done', 'เสร็จสิ้น');
+
+        const list = document.getElementById('job-list-dashboard');
+        if (!list) return;
+
+        list.innerHTML = jobs.map(j => `
+            <div class="card-pro p-4 border-l-4 ${j.Status === 'รอรับงาน' ? 'border-pink-500' : 'border-slate-200'} mb-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold">${j.JobID}</p>
+                        <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
+                        <p class="text-[10px] text-pink-600 mt-1">🏢 ${j.Department}</p>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-2">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-600 border">${j.Status}</span>
+                        ${j.Status === 'รอรับงาน' && (currentUser.UserTypeID === 'IT' || currentUser.UserTypeID === 'Admin') ? 
+                            `<button onclick="handleAction('${j.JobID}', 'accept')" class="bg-pink-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold">รับงาน</button>` : ''}
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('job-list-dashboard').innerHTML = dashboardHTML;
+            </div>
+        `).join('');
+    }
 
-            // My Jobs
-            const myJobs = store.AllJobs.filter(j => j.Owner === user.UserName);
-            document.getElementById('job-list-myjob').innerHTML = myJobs.map(j => `
-                <div class="card-pro border-l-4 border-blue-500">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-sm">${j.Problem}</h3>
-                        <button onclick="openTransfer('${j.JobID}')" class="text-xs bg-slate-100 p-2 rounded-lg">โอนงาน</button>
+    function renderMyJobs() {
+        const myJobs = (store.AllJobs || []).filter(j => j.Owner === currentUser.UserName);
+        const list = document.getElementById('job-list-myjob');
+        if (!list) return;
+
+        list.innerHTML = myJobs.length ? myJobs.map(j => `
+            <div class="card-pro p-4 border-l-4 border-blue-500 mb-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold">${j.JobID}</p>
+                        <h3 class="font-bold text-slate-700 text-sm">${j.Problem}</h3>
                     </div>
+                    <button onclick="openTransferModal('${j.JobID}')" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-[10px] font-bold">โอนงาน</button>
                 </div>
-            `).join('') || '<p class="text-center text-xs text-slate-400 py-10">ไม่มีงานค้าง</p>';
+            </div>
+        `).join('') : '<p class="text-center text-xs text-slate-400 py-10 italic">ไม่มีงานในความรับผิดชอบ</p>';
+    }
 
-            // Links
-            document.getElementById('tab3').innerHTML = (store.SystemLink || []).map(l => `
-                <a href="${l.URL}" target="_blank" class="bg-white p-4 rounded-xl shadow-sm text-center border border-pink-50">
-                    <div class="text-xl mb-1">${l.Linkicon || '🔗'}</div>
-                    <div class="text-[10px] font-bold text-slate-700">${l.SystemName || l.Name}</div>
-                </a>
-            `).join('');
-        }
+    function renderLinks() {
+        const list = document.getElementById('tab3');
+        if (!list) return;
+        list.innerHTML = (store.SystemLink || []).map(l => `
+            <a href="${l.URL}" target="_blank" class="bg-white p-4 rounded-xl flex items-center gap-3 shadow-sm border border-pink-50">
+                <span class="text-2xl">${l.Linkicon || '🔗'}</span>
+                <span class="font-bold text-slate-700 text-sm">${l.SystemName || l.Name}</span>
+            </a>
+        `).join('');
+    }
 
-        async function updateStatus(jobId, type, extra = {}) {
-            document.getElementById('loader').style.display = 'flex';
-            await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'updateJobStatus', data: { JobID: jobId, type: type, Owner: user.UserName, ...extra } })
+    // 5. จัดการปุ่มกดต่างๆ
+    async function handleAction(jobId, type, extra = {}) {
+        toggleLoader(true);
+        try {
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'updateJobStatus', 
+                    data: { JobID: jobId, type: type, Owner: currentUser.UserName, ...extra } 
+                }) 
             });
-            await fetchData(); // โหลดใหม่หลังอัปเดต
+            const result = await res.json();
+            if (result.success) {
+                closeModal('modal-transfer');
+                await loadInitialData(); // โหลดใหม่หลังอัปเดตสำเร็จ
+            }
+        } catch (e) { alert("ดำเนินการไม่สำเร็จ"); }
+        toggleLoader(false);
+    }
+
+    function openTransferModal(jobId) {
+        const select = document.getElementById('select-staff');
+        if (select && store.StaffList) {
+            select.innerHTML = store.StaffList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
         }
+        document.getElementById('modal-transfer').style.display = 'flex';
+        document.getElementById('btn-confirm-transfer').onclick = () => {
+            const reason = document.getElementById('transfer-reason').value;
+            if (!reason) return alert("กรุณาใส่เหตุผล");
+            handleAction(jobId, 'transfer', { NewOwner: select.value, Reason: reason, By: currentUser.UserName });
+        };
+    }
 
-        function openTransfer(jobId) {
-            const sel = document.getElementById('select-staff');
-            sel.innerHTML = store.StaffList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-            document.getElementById('modal-transfer').style.display = 'flex';
-            document.getElementById('btn-confirm').onclick = () => {
-                const reason = document.getElementById('transfer-reason').value;
-                if(!reason) return alert('ใส่เหตุผลด้วยครับ');
-                updateStatus(jobId, 'transfer', { NewOwner: sel.value, Reason: reason });
-                closeModal();
-            };
-        }
+    // ฟังก์ชันช่วยเสริม
+    function switchTab(n) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab' + n).classList.add('active');
+        document.querySelectorAll('nav button').forEach((b, i) => {
+            const isActive = (i + 1 === n);
+            b.classList.toggle('text-pink-600', isActive);
+            b.classList.toggle('border-pink-600', isActive);
+            b.classList.toggle('text-slate-400', !isActive);
+            b.classList.toggle('border-transparent', !isActive);
+        });
+    }
 
-        function switchTab(n) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab' + n).classList.add('active');
-            document.querySelectorAll('nav button').forEach((b, i) => {
-                b.classList.toggle('text-pink-600', i + 1 === n);
-                b.classList.toggle('border-pink-600', i + 1 === n);
-                b.classList.toggle('text-slate-400', i + 1 !== n);
-                b.classList.toggle('border-transparent', i + 1 !== n);
-            });
-        }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function logout() { localStorage.removeItem("it_session"); window.location.href = "login.html"; }
 
-        function closeModal() { document.getElementById('modal-transfer').style.display = 'none'; }
-        function logout() { localStorage.clear(); window.location.href = "login.html"; }
-
-        // รันครั้งเดียวเมื่อโหลดหน้า
-        fetchData();
-    </script>
+    // เริ่มการทำงานเพียงครั้งเดียว
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('u-fname').innerText = currentUser.UserName || "";
+        document.getElementById('u-type-name').innerText = currentUser.UserTypeName || "";
+        loadInitialData();
+    });
+</script>
 </body>
 </html>
