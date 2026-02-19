@@ -107,4 +107,263 @@ input,select,textarea{
 <div id="mainSection" style="display:none;">
 
 <header>
-  <div style="display:flex;align-items:cent
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png">
+    <div>
+      <b>โรงพยาบาลอุดรธานี</b><br>
+      กลุ่มงาน:เทคโนโลยีสารสนเทศ<br>
+      ระบบจัดการงานบริการและซ่อมอุปกรณ์คอมพิวเตอร์
+    </div>
+  </div>
+  <div>
+    <span id="userInfo"></span>
+    <button class="btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button onclick="openTab(1)">Dashboard</button>
+  <button onclick="openTab(2)">My Job</button>
+  <button onclick="openTab(3)">LinkID</button>
+</div>
+
+<div id="tab1" class="tabcontent activeTab">
+  <table id="jobTable"></table>
+</div>
+
+<div id="tab2" class="tabcontent">
+  <button class="btn" onclick="openITForm()">เพิ่มงานอื่นๆ</button>
+  <table id="myJobTable"></table>
+</div>
+
+<div id="tab3" class="tabcontent">
+  <div id="linkBox"></div>
+</div>
+
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+
+let sessionUser=null;
+
+/* ===== SESSION ===== */
+window.onload=function(){
+  const s=sessionStorage.getItem("user");
+  if(s){
+    sessionUser=JSON.parse(s);
+    startSystem();
+  }
+};
+
+function startSystem(){
+  document.getElementById("loginSection").style.display="none";
+  document.getElementById("mainSection").style.display="block";
+  document.getElementById("userInfo").innerText=sessionUser[4]+" ("+sessionUser[2]+")";
+  loadJobs();
+  loadMyJobs();
+  loadLinks();
+}
+
+/* ===== LOGIN ===== */
+function doLogin(){
+  const u=document.getElementById("loginUser").value;
+  const p=document.getElementById("loginPass").value;
+
+  google.script.run.withSuccessHandler(res=>{
+    if(res.status){
+      sessionStorage.setItem("user",JSON.stringify(res.user));
+      sessionUser=res.user;
+      startSystem();
+    }else{
+      alert("Login fail");
+    }
+  }).login(u,p);
+}
+
+function doReset(){
+  const email=document.getElementById("resetEmail").value;
+  google.script.run.withSuccessHandler(res=>{
+    alert(res.status?"Reset Code Sent":"Email not found");
+  }).requestReset(email);
+}
+
+function logout(){
+  sessionStorage.clear();
+  location.reload();
+}
+
+/* ===== TAB ===== */
+function openTab(n){
+  document.querySelectorAll(".tabcontent").forEach(t=>t.classList.remove("activeTab"));
+  document.getElementById("tab"+n).classList.add("activeTab");
+}
+
+/* ===== JOB ===== */
+function loadJobs(){
+  google.script.run.withSuccessHandler(data=>{
+    renderJobTable(data,"jobTable");
+  }).getJobTickets();
+}
+
+function loadMyJobs(){
+  google.script.run.withSuccessHandler(data=>{
+    const header=data[0];
+    const colOwner=header.indexOf("Owner");
+    const my=[header];
+    for(let i=1;i<data.length;i++){
+      if(data[i][colOwner]==sessionUser[3]) my.push(data[i]);
+    }
+    renderJobTable(my,"myJobTable");
+  }).getJobTickets();
+}
+
+function renderJobTable(data,id){
+  let html="<tr>";
+  data[0].forEach(h=>html+="<th>"+h+"</th>");
+  html+="<th>Action</th></tr>";
+
+  const header=data[0];
+  const colJob=header.indexOf("JobID");
+  const colStatus=header.indexOf("Status");
+  const colOwner=header.indexOf("Owner");
+
+  for(let i=1;i<data.length;i++){
+    html+="<tr>";
+    data[i].forEach(c=>html+="<td>"+c+"</td>");
+
+    let action="";
+    if(sessionUser[2]=="IT" && data[i][colStatus]=="รอรับงาน"){
+      action=`<button class='btn' onclick="updateJob('${data[i][colJob]}','กำลังดำเนินการ')">รับงาน</button>`;
+    }
+    if(sessionUser[2]=="Boss"){
+      action=`<button class='btn' onclick="assignJob('${data[i][colJob]}')">มอบหมาย</button>`;
+    }
+    if(data[i][colOwner]==sessionUser[3] && data[i][colStatus]=="กำลังดำเนินการ"){
+      action=`<button class='btn' onclick="updateJob('${data[i][colJob]}','เสร็จสิ้น')">ปิดงาน</button>`;
+    }
+
+    html+="<td>"+action+"</td></tr>";
+  }
+
+  document.getElementById(id).innerHTML=html;
+}
+
+function updateJob(id,status){
+  google.script.run.withSuccessHandler(()=>{
+    loadJobs();
+    loadMyJobs();
+  }).updateJob(id,status,sessionUser[3]);
+}
+
+function assignJob(id){
+  const owner=prompt("ระบุ UserPN ผู้รับงาน");
+  if(!owner)return;
+  google.script.run.withSuccessHandler(()=>{
+    loadJobs();
+  }).updateJob(id,"กำลังดำเนินการ",owner);
+}
+
+/* ===== IT TICKET ===== */
+function openITForm(){
+
+  google.script.run.withSuccessHandler(types=>{
+    google.script.run.withSuccessHandler(depts=>{
+      const html=`
+      <h3>เพิ่มงานอื่นๆ</h3>
+      <label>JobType</label>
+      <select id="jobType"></select>
+      <label>SubType</label>
+      <select id="subType"></select>
+      <label>Department</label>
+      <select id="dept"></select>
+      <label>ค้น Asset เลขท้าย</label>
+      <input id="assetSearch" onkeyup="searchAsset()">
+      <select id="assetSelect"></select>
+      <label>Problem</label>
+      <textarea id="problem"></textarea>
+      <button class="btn" onclick="saveIT()">บันทึก</button>
+      <button class="btn" onclick="closeModal()">ปิด</button>
+      `;
+      showModal(html);
+
+      const jt=document.getElementById("jobType");
+      types.slice(1).forEach(r=>{
+        jt.innerHTML+=`<option>${r[0]}</option>`;
+      });
+
+      const dp=document.getElementById("dept");
+      depts.forEach(d=>dp.innerHTML+=`<option>${d}</option>`);
+
+      jt.onchange=loadSubType;
+      loadSubType();
+
+    }).getDepartments();
+  }).getJobType();
+}
+
+function loadSubType(){
+  const jt=document.getElementById("jobType").value;
+  google.script.run.withSuccessHandler(data=>{
+    const st=document.getElementById("subType");
+    st.innerHTML="";
+    data.slice(1).forEach(r=>{
+      st.innerHTML+=`<option>${r[1]}</option>`;
+    });
+  }).getSubType(jt);
+}
+
+function searchAsset(){
+  const v=document.getElementById("assetSearch").value;
+  google.script.run.withSuccessHandler(data=>{
+    const sel=document.getElementById("assetSelect");
+    sel.innerHTML="";
+    data.forEach(r=>{
+      sel.innerHTML+=`<option>${r[0]}</option>`;
+    });
+  }).searchAsset(v);
+}
+
+function saveIT(){
+  const obj={
+    JobTypeName:document.getElementById("jobType").value,
+    SubTypeName:document.getElementById("subType").value,
+    Department:document.getElementById("dept").value,
+    AssetCode:document.getElementById("assetSelect").value,
+    Problem:document.getElementById("problem").value
+  };
+
+  google.script.run.withSuccessHandler(()=>{
+    closeModal();
+  }).addITTicket(obj);
+}
+
+/* ===== LINK ===== */
+function loadLinks(){
+  google.script.run.withSuccessHandler(data=>{
+    let html="";
+    data.forEach(r=>{
+      html+=`<div><img src="${r[5]}" width="40"><br>
+      <a href="${r[2]}" target="_blank">${r[1]}</a></div><hr>`;
+    });
+    document.getElementById("linkBox").innerHTML=html;
+  }).getSystemLinks(sessionUser[2]);
+}
+
+/* ===== MODAL ===== */
+function showModal(html){
+  document.getElementById("modalBox").innerHTML=html;
+  document.getElementById("overlay").style.display="flex";
+}
+function closeModal(){
+  document.getElementById("overlay").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
